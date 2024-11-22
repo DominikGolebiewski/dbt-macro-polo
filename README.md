@@ -102,39 +102,6 @@ The warehouse name is dynamically constructed using:
 - Environment prefix (from `warehouse_config`)
 - Warehouse size (based on run type)
 
-#### How It Works
-
-1. **Configuration Validation**:
-   - Verifies warehouse_config presence in dbt_project.yml
-   - Validates warehouse sizes against allowed options
-   - Ensures proper environment mappings exist
-
-2. **Size Selection Logic**:
-   - Incremental runs: Utilises specified `incremental_size`
-   - Full refreshes: Prioritises `full_refresh_size` if provided
-   - Normalises size formatting (e.g., 'XL' → 'xl')
-   - Validates against configured size options
-
-3. **Environment Handling**:
-   - Identifies current dbt target
-   - Maps target to environment settings
-   - Extracts corresponding warehouse prefix
-   - Example: target 'dev' → prefix 'dev_wh'
-
-4. **Warehouse Name Construction**:
-   - Combines environment prefix with chosen size
-   - Format: `{environment_prefix}_{size}`
-   - Examples:
-     - Development: `dev_wh_s`
-     - Production: `prod_etl_xl`
-
-#### Benefits
-- Standardised warehouse naming across environments
-- Automated size optimisation based on operation type
-- Environment-aware configuration
-- Cost optimisation through appropriate sizing
-- Centralised warehouse management
-
 ## Contributing 🤝
 
 ### Prerequisites
