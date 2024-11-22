@@ -57,7 +57,7 @@ Check out the [integration tests](integration_tests/dbt_project.yml) for example
 
 ```sql
 {{ config(
-        warehouse=dbt_macro_polo.get_warehouse(
+        snowflake_warehouse=dbt_macro_polo.get_warehouse(
         incremental_size='s', {# Size for incremental runs #}
         full_refresh_size='xl' {# Size for full-refresh runs (optional) #}
     )

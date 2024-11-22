@@ -25,7 +25,12 @@
     {% set sizes = dbt_macro_polo.validate_input_parameters(incremental_size, fullrefresh_size) %}
     
     {# Select appropriate size based on run type #}
-    {% set size = sizes.fullrefresh if flags.FULL_REFRESH else sizes.incremental %}
+    {% if flags.FULL_REFRESH and fullrefresh_size is not none %}
+        {% set size = sizes.fullrefresh %}
+    {% else %}
+        {% set size = sizes.incremental %}
+    {% endif %}
+    
     {% set validated_size = dbt_macro_polo.validate_warehouse_size(size, available_sizes) %}
     
     {# Get warehouse prefix for environment #}
