@@ -29,7 +29,18 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 ### Warehouse Management
 | Macro | Description | Source |
 |-------|-------------|--------|
-| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs.<br><br>**Usage:**<br>```sql<br>{{ config(<br>    warehouse=get_warehouse(<br>        incremental_size='s',<br>        full_refresh_size='xl'<br>    )<br>) }}<br>```<br><br>**Parameters:**<br>- `incremental_size`: Size for incremental runs (xs, s, m, l, xl, 2xl)<br>- `full_refresh_size`: Optional. Size for full refresh runs. Falls back to incremental_size if not specified. | [Source](macros/get_warehouse/get_warehouse.sql) |
+| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs.
+
+**Usage:**
+
+```sql
+{{ config(
+    warehouse=get_warehouse(
+        incremental_size='s',
+        full_refresh_size='xl'
+    )
+) }}
+```
 
 ## Usage Examples 🚀
 
