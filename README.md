@@ -134,6 +134,11 @@ vars:
    - Copy `.env.template` to `.env`
    - Update with your warehouse credentials
 
+6. **Run the tests**
+   ```bash
+   ./run.sh
+   ```
+
 ## Resources
 - [dbt Documentation](https://docs.getdbt.com/)
 - [dbt Discourse](https://discourse.getdbt.com/)
