@@ -16,7 +16,7 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
    ```yaml
    packages:
      - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-       revision: x.x.x  # Specify the git release version you want to use
+       revision: 0.0.1  # Specify the git release version you want to use
    ```
 
 2. **Install the package**
