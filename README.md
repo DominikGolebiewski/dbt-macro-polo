@@ -57,10 +57,10 @@ Check out the [integration tests](integration_tests/dbt_project.yml) for example
 
 ```sql
 {{ config(
-warehouse=get_warehouse(
-incremental_size='s', # Size for incremental runs
-full_refresh_size='xl' # Size for full-refresh runs (optional)
-)
+        warehouse=dbt_macro_polo.get_warehouse(
+        incremental_size='s', {# Size for incremental runs #}
+        full_refresh_size='xl' {# Size for full-refresh runs (optional) #}
+    )
 ) }}
 ```
 

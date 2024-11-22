@@ -33,5 +33,10 @@
     {% set warehouse_name = warehouse_prefix ~ "_" ~ validated_size %}
     
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has discovered the perfect warehouse", warehouse_name) }}
-    {{ return(warehouse_name) }}
+    {% if execute %}
+        {% do return(warehouse_name) %}
+    {% else %}
+        {{ return('') }}
+    {% endif %}
+  
 {% endmacro %}
