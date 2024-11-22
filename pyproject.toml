@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dbt-macro-polo"
-version = "0.1.0"
-description = ""
+version = "0.0.1"
+description = "A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system."
 authors = ["Dominik Golebiewski <dominik.golebiewski@atheon.co.uk>"]
 license = "MIT"
 readme = "README.md"
