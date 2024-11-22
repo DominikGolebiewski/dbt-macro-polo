@@ -50,6 +50,7 @@ vars:
                 warehouse_name_prefix: dev_wh
 ```
 
+Check out the [integration tests](integration_tests/dbt_project.yml) for example.
 
 #### Usage Example
 
