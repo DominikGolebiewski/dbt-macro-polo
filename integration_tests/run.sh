@@ -27,25 +27,20 @@ else
     exit 1
 fi
 
-cd integration_tests || {
-    echo -e "${RED}Failed to change to integration_tests directory${NC}"
-    exit 1
-}
-
 # Install dependencies
 echo -e "${BLUE}Installing dbt dependencies...${NC}"
 poetry run dbt deps
 
 # Run incremental tests
 echo -e "${BLUE}Running incremental tests...${NC}"
-poetry run dbt build --select tag:incremental_test --fail-fast --exclude tag:target_test
-
-# Run target tests
-echo -e "${BLUE}Running target tests...${NC}"
-poetry run dbt build --select tag:target_test --fail-fast --exclude tag:incremental_test
+poetry run dbt build --select tag:incremental --fail-fast
 
 # Run full refresh tests
 echo -e "${BLUE}Running full refresh tests...${NC}"
-poetry run dbt build --select tag:full_refresh_test --full-refresh --fail-fast
+poetry run dbt build --select tag:full_refresh --full-refresh --fail-fast
+
+# Run target ci_b tests
+echo -e "${BLUE}Running target prod_etl tests...${NC}"
+poetry run dbt build --select tag:ci_b --fail-fast --target ci_b
 
 echo -e "${GREEN}All tests completed successfully!${NC}"

@@ -1,29 +1,29 @@
 version: 2
 
 models:
-  - name: test_get_warehouse_full_refresh
-    description: "Tests the get_warehouse macro functionality for full refresh scenarios"
-    config:
-        materialized: view
-        tags: [ 'full_refresh_test' ]
-    columns:
-      - name: warehouse_size_incremental_and_full_refresh_fallback
-        description: "Tests get_warehouse with only incremental size provided (should always return xs)"
-        tests:
-          - not_null
-          - accepted_values:
-                values: [ 'ci_xs' ]
+- name: test_get_warehouse_full_refresh
+  description: "Tests the get_warehouse macro functionality for full refresh scenarios"
+  config:
+    materialized: view
+    tags: [ 'full_refresh' ]
+  columns:
+  - name: warehouse_size_incremental_and_full_refresh_fallback
+    description: "Tests get_warehouse with only incremental size provided (should always return xs)"
+    tests:
+    - not_null
+    - accepted_values:
+        values: [ 'ci_a_xs' ]
 
-      - name: warehouse_size_incremental_and_full_refresh
-        description: "Tests get_warehouse with both incremental (s) and full refresh (l) sizes"
-        tests:
-          - not_null
-          - accepted_values:
-                values: [ 'ci_l' ]
+  - name: warehouse_size_incremental_and_full_refresh
+    description: "Tests get_warehouse with both incremental (s) and full refresh (l) sizes"
+    tests:
+    - not_null
+    - accepted_values:
+        values: [ 'ci_a_l' ]
 
-      - name: warehouse_size_full_refresh
-        description: "Tests get_warehouse with incremental (s) and full refresh (xl) sizes"
-        tests:
-          - not_null
-          - accepted_values:
-                values: [ 'ci_xl' ]
+  - name: warehouse_size_full_refresh
+    description: "Tests get_warehouse with incremental (s) and full refresh (xl) sizes"
+    tests:
+    - not_null
+    - accepted_values:
+        values: [ 'ci_a_xl' ]

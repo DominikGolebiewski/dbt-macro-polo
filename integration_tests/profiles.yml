@@ -14,16 +14,12 @@ config:
     authenticator: username_password_mfa
 
 integration_tests:
-  target: ci
+  target: ci_a
   outputs:
-    ci:
+    ci_a:
       <<: *snowflake_base
-      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci"
+      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci_a"
     
-    dev:
+    ci_b:
       <<: *snowflake_base
-      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_dev"
-    
-    prod_etl:
-      <<: *snowflake_base
-      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_prod_etl"
+      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci_b"
