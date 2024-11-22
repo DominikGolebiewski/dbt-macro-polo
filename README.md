@@ -43,25 +43,64 @@ vars:
         environments:
             production:
                 target_name: prod # Matches your profiles.yml target
-                warehouse_name_prefix: production # Used in final warehouse name
+                warehouse_name_prefix: production_warehouse
             development:
                 target_name: dev
-                warehouse_name_prefix: development
+                warehouse_name_prefix: development_warehouse
 ```
 
 Check out the [integration tests](integration_tests/dbt_project.yml) for example.
 
 #### Usage Example
 
+1. **Configure in your model**
+
 ```sql
 {{ config(
-    warehouse=get_warehouse(
-        incremental_size='s',
-        full_refresh_size='xl'
-    )
+warehouse=get_warehouse(
+incremental_size='s', # Size for incremental runs
+full_refresh_size='xl' # Size for full-refresh runs (optional)
+)
 ) }}
 ```
 
+2. **Run your model**
+
+Incremental run:
+
+```bash
+dbt run --select my_model
+```
+
+Full refresh run:
+
+```bash
+dbt run --select my_model --full-refresh
+```
+
+3. **Resolution Examples**
+
+For incremental runs:
+
+```sql
+-- Development environment (target: dev)
+use warehouse development_warehouse_s;
+-- Production environment (target: prod)
+use warehouse production_warehouse_s;
+```
+
+For full refresh runs:
+
+```sql
+-- Development environment (target: dev)
+use warehouse development_warehouse_xl;
+-- Production environment (target: prod)
+use warehouse production_warehouse_xl;
+```
+
+The warehouse name is dynamically constructed using:
+- Environment prefix (from `warehouse_config`)
+- Warehouse size (based on run type)
 
 #### How It Works
 
