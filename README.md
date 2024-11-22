@@ -42,18 +42,6 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 ) }}
 ```
 
-## Usage Examples 🚀
-
-### Warehouse Management
-```sql
-{{ config(
-    warehouse=get_warehouse(
-        incremental_size='s',
-        full_refresh_size='xl'
-    )
-) }}
-```
-
 ## Contributing 🤝
 
 We welcome contributions! Here are some areas we're particularly interested in:
@@ -67,9 +55,10 @@ Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - Poetry (Python package manager)
-- dbt-core
+- dbt-core 1.8+
+- dbt-snowflake 1.8+
 - Access to a data warehouse (Snowflake)
 
 ## Installation
@@ -92,14 +81,13 @@ Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 4. **Make the run script executable**
    ```bash
+   cd integration_tests
    chmod +x run.sh
    ```
 
 5. **Configure your data warehouse**
-   - Copy `profiles.yml.example` to `~/.dbt/profiles.yml`
+   - Copy `.env.template` to `.env`
    - Update with your warehouse credentials
-
-
 
 ## Resources
 - [dbt Documentation](https://docs.getdbt.com/)
