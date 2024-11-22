@@ -1,0 +1,44 @@
+name: 'dbt_macro_polo_integration_tests'
+version: '1.0'
+
+profile: 'integration_tests'
+
+# require-dbt-version: inherit this from dbt-utils
+
+config-version: 2
+
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["data"]
+seed-paths: ["data"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+require-dbt-version: [">=1.3.0", "<2.0.0"]
+
+dispatch:
+  - macro_namespace: 'dbt_macro_polo'
+    search_order: ['dbt_macro_polo_integration_tests', 'dbt_macro_polo']
+
+vars:
+  # DBT compatibility with legacy surrogate_key macro
+  surrogate_key_treat_nulls_as_empty_strings: True
+
+  global_debug_mode: true
+
+  # Macro Polo Warehouse Configuration
+  warehouse_config:
+    warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
+    environments:
+      production:
+        target_name: prod
+        warehouse_name_prefix: prod_etl
+      development:
+        target_name: local_prod
+        warehouse_name_prefix: dev
+      integration_tests:
+        target_name: ci
+        warehouse_name_prefix: ci
+

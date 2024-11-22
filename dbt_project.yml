@@ -1,0 +1,15 @@
+name: 'dbt_macro_polo'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dbt_macro_polo'
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+macro-paths: ["macros"]
+log-path: "logs"
+
+require-dbt-version: [">=1.8.6", "<2.0.0"]
+
+
+
