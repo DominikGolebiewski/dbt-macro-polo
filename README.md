@@ -29,7 +29,7 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 ### Warehouse Management
 | Macro | Description | Source |
 |-------|-------------|--------|
-| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs.
+| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
 
 **Usage:**
 
