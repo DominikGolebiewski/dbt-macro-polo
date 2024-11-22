@@ -29,9 +29,29 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 ### Warehouse Management
 | Macro | Description | Source |
 |-------|-------------|--------|
-| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
+| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental and full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
 
-**Usage:**
+#### Configuration Requirements
+
+1. **Configure warehouse settings in dbt_project.yml**
+
+```yaml
+vars:
+    warehouse_config:
+        # Define available warehouse sizes for validation
+        warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl']
+        # Map your dbt targets to warehouse configurations
+        environments:
+            production:
+                target_name: prod_etl # Matches your profiles.yml target
+                warehouse_name_prefix: prod_etl # Used in final warehouse name
+            development:
+                target_name: dev
+                warehouse_name_prefix: dev_wh
+```
+
+
+#### Usage Example
 
 ```sql
 {{ config(
@@ -41,6 +61,40 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
     )
 ) }}
 ```
+
+
+#### How It Works
+
+1. **Configuration Validation**:
+   - Verifies warehouse_config presence in dbt_project.yml
+   - Validates warehouse sizes against allowed options
+   - Ensures proper environment mappings exist
+
+2. **Size Selection Logic**:
+   - Incremental runs: Utilises specified `incremental_size`
+   - Full refreshes: Prioritises `full_refresh_size` if provided
+   - Normalises size formatting (e.g., 'XL' → 'xl')
+   - Validates against configured size options
+
+3. **Environment Handling**:
+   - Identifies current dbt target
+   - Maps target to environment settings
+   - Extracts corresponding warehouse prefix
+   - Example: target 'dev' → prefix 'dev_wh'
+
+4. **Warehouse Name Construction**:
+   - Combines environment prefix with chosen size
+   - Format: `{environment_prefix}_{size}`
+   - Examples:
+     - Development: `dev_wh_s`
+     - Production: `prod_etl_xl`
+
+#### Benefits
+- Standardised warehouse naming across environments
+- Automated size optimisation based on operation type
+- Environment-aware configuration
+- Cost optimisation through appropriate sizing
+- Centralised warehouse management
 
 ## Contributing 🤝
 
