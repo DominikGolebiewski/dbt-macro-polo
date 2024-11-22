@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: test_get_warehouse_target_prod_etl
+    description: Tests the get_warehouse macro's behaviour when target is set to 'prod'. Ensures warehouse names are correctly resolved for production environment, including fallback scenarios and size variations.
+    config:
+        materialized: view
+        tags: [ 'incremental_test', 'target_test' ]
+    columns:
+      - name: warehouse_size_incremental_and_full_refresh_fallback
+        description: Tests get_warehouse with only incremental size (xs) provided.   In prod environment, should return 'prod_xs' as no full refresh size is specified.
+        tests:
+          - not_null
+          - accepted_values:
+                values: [ 'prod_xs' ]
+
+      - name: warehouse_size_incremental_and_full_refresh
+        description: Tests get_warehouse with both incremental (s) and full refresh (l) sizes.  In prod environment, should return 'prod_s' for incremental runs and 'prod_l'  for full refresh runs.
+        tests:
+          - not_null
+          - accepted_values:
+                values: [ 'prod_s' ]
+
+      - name: warehouse_size_full_refresh
+        description: Tests get_warehouse with incremental (s) and full refresh (xl) sizes.  In prod environment, should return 'prod_s' for incremental runs and 'prod_xl'  for full refresh runs.
+        tests:
+          - not_null
+          - accepted_values:
+                values: [ 'prod_s' ]

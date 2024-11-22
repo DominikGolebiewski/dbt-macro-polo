@@ -18,7 +18,7 @@ The `get_warehouse` macro specifically addresses the common need to dynamically 
 ### Warehouse Management
 | Macro | Description | Source |
 |-------|-------------|--------|
-| [`get_warehouse`](macros/get_warehouse/get_warehouse.sql) | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
+| **get_warehouse** | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
 
 
 ## Prerequisites
@@ -26,7 +26,7 @@ The `get_warehouse` macro specifically addresses the common need to dynamically 
 - Python 3.8+
 - Poetry (Python package manager)
 - dbt-core
-- Access to a data warehouse (Snowflake recommended)
+- Access to a data warehouse (Snowflake)
 
 ## Installation
 

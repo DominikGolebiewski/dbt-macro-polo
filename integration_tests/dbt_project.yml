@@ -33,12 +33,13 @@ vars:
     warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
     environments:
       production:
-        target_name: prod
+        target_name: prod_etl
         warehouse_name_prefix: prod_etl
       development:
-        target_name: local_prod
+        target_name: dev
         warehouse_name_prefix: dev
       integration_tests:
         target_name: ci
         warehouse_name_prefix: ci
+
 
