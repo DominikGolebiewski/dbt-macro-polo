@@ -23,7 +23,7 @@
     
     {% set result = {
         "incremental": incremental_size | trim | lower,
-        "fullrefresh": fullrefresh_size | trim | lower if fullrefresh_size is not none else incremental_size | trim | lower
+        "fullrefresh": fullrefresh_size | trim | lower if fullrefresh_size is not none else none
     } %}
     
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo confirms the parameters are valid", result) }}

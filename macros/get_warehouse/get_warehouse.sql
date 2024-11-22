@@ -25,7 +25,7 @@
     {% set sizes = dbt_macro_polo.validate_input_parameters(incremental_size, fullrefresh_size) %}
     
     {# Select appropriate size based on run type #}
-    {% if flags.FULL_REFRESH and fullrefresh_size is not none %}
+    {% if flags.FULL_REFRESH and sizes.fullrefresh is not none %}
         {% set size = sizes.fullrefresh %}
     {% else %}
         {% set size = sizes.incremental %}
