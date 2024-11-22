@@ -20,7 +20,7 @@
 --------------------------------------------------------------------------------
 
 {# Main Warehouse Selection Macro #}
-{% macro snowflake__get_warehouse(incremental_size, fullrefresh_size=none) %}
+{% macro default__get_warehouse(incremental_size, fullrefresh_size=none) %}
     {# Macro Polo coordinates the warehouse selection journey #}
     {% set macro_name = 'POLO_GETS_WAREHOUSE' %}
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo begins his warehouse exploration", {
