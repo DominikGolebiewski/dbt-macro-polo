@@ -98,16 +98,7 @@ vars:
 
 ## Contributing 🤝
 
-We welcome contributions! Here are some areas we're particularly interested in:
-- New macro ideas for common dbt challenges
-- Performance improvements to existing macros
-- Additional test coverage
-- Documentation improvements
-- Real-world use cases and examples
-
-Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## Prerequisites
+### Prerequisites
 
 - Python 3.11+
 - Poetry (Python package manager)
@@ -115,7 +106,7 @@ Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - dbt-snowflake 1.8+
 - Access to a data warehouse (Snowflake)
 
-## Installation
+### Installation
 
 1. **Clone the repository**
    ```bash
