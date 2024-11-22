@@ -42,11 +42,11 @@ vars:
         # Map your dbt targets to warehouse configurations
         environments:
             production:
-                target_name: prod_etl # Matches your profiles.yml target
-                warehouse_name_prefix: prod_etl # Used in final warehouse name
+                target_name: prod # Matches your profiles.yml target
+                warehouse_name_prefix: production # Used in final warehouse name
             development:
                 target_name: dev
-                warehouse_name_prefix: dev_wh
+                warehouse_name_prefix: development
 ```
 
 Check out the [integration tests](integration_tests/dbt_project.yml) for example.
