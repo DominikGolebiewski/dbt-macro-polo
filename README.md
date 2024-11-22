@@ -1,35 +1,59 @@
 # DBT Macro Polo 🎯
 
-[previous sections remain the same...]
+A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system. This project demonstrates advanced warehouse configuration management through dynamic macro execution.
+
+## Why This Project Exists
+
+As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophisticated warehouse management solutions. This project was born from the desire to:
+
+- Explore the full potential of dbt macros
+- Create dynamic warehouse sizing based on operation context
+- Implement robust testing patterns for macro behaviour
+- Share novel solutions with the dbt community
+
+The `get_warehouse` macro specifically addresses the common need to dynamically adjust warehouse sizes based on whether an operation is running incrementally or as a full refresh, something not commonly found in existing dbt resources.
 
 ## Macro Collection 📚
 
 ### Warehouse Management
 | Macro | Description | Source |
 |-------|-------------|--------|
-| [`get_warehouse`](macros/warehouse/get_warehouse.sql) | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimizing compute costs. | [Source](macros/warehouse/get_warehouse.sql) |
+| [`get_warehouse`](macros/get_warehouse/get_warehouse.sql) | Dynamically sets warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs. | [Source](macros/get_warehouse/get_warehouse.sql) |
 
-### Performance Optimization
-| Macro | Description | Source |
-|-------|-------------|--------|
-| [`smart_clustering`](macros/performance/smart_clustering.sql) | Automatically determines optimal clustering keys based on query patterns and data distribution. | [Source](macros/performance/smart_clustering.sql) |
-| [`partition_handler`](macros/performance/partition_handler.sql) | Manages partition strategies for large tables with configurable retention policies. | [Source](macros/performance/partition_handler.sql) |
 
-### Testing & Validation
-| Macro | Description | Source |
-|-------|-------------|--------|
-| [`schema_evolution`](macros/testing/schema_evolution.sql) | Tracks and validates schema changes across model versions. | [Source](macros/testing/schema_evolution.sql) |
-| [`data_quality_suite`](macros/testing/data_quality_suite.sql) | Comprehensive data quality checks including null ratios, uniqueness, and referential integrity. | [Source](macros/testing/data_quality_suite.sql) |
+## Prerequisites
 
-### Documentation
-| Macro | Description | Source |
-|-------|-------------|--------|
-| [`auto_describe`](macros/docs/auto_describe.sql) | Automatically generates column descriptions based on naming conventions and data patterns. | [Source](macros/docs/auto_describe.sql) |
+- Python 3.8+
+- Poetry (Python package manager)
+- dbt-core
+- Access to a data warehouse (Snowflake recommended)
 
-### Cost Management
-| Macro | Description | Source |
-|-------|-------------|--------|
-| [`credit_monitor`](macros/cost/credit_monitor.sql) | Tracks and alerts on credit usage patterns across different warehouses and operations. | [Source](macros/cost/credit_monitor.sql) |
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/dbt-macro-polo.git
+   cd dbt-macro-polo
+   ```
+
+2. **Install Poetry** (if not already installed)
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
+
+3. **Install dependencies**
+   ```bash
+   poetry install
+   ```
+
+4. **Make the run script executable**
+   ```bash
+   chmod +x run.sh
+   ```
+
+5. **Configure your data warehouse**
+   - Copy `profiles.yml.example` to `~/.dbt/profiles.yml`
+   - Update with your warehouse credentials
 
 ## Usage Examples 🚀
 
@@ -43,7 +67,7 @@
 ) }}
 ```
 
-### Performance Optimization
+### Performance Optimisation
 ```sql
 {{ config(
     cluster_by=smart_clustering(this)
@@ -72,10 +96,17 @@ Please check our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## Roadmap 🗺️
 
 Upcoming macros and features:
-- [ ] Query optimization analyzer
-- [ ] Dynamic materialization selector
+- [ ] Query optimisation analyser
+- [ ] Dynamic materialisation selector
 - [ ] Advanced dependency tracker
 - [ ] Custom metric generator
 - [ ] Cross-database compatibility layer
 
-[rest of the README remains the same...]
+## Resources
+- [dbt Documentation](https://docs.getdbt.com/)
+- [dbt Discourse](https://discourse.getdbt.com/)
+- [dbt Slack Community](https://community.getdbt.com/)
+
+## License
+
+MIT
