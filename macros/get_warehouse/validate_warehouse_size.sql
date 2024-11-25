@@ -9,7 +9,7 @@
 {# Size Validation - Macro Polo validates the warehouse size #}
 {% macro snowflake__validate_warehouse_size(size, available_sizes) %}
     {# Macro Polo ensures the warehouse size is valid #}
-    {% set macro_name = 'POLO_VALIDATES_WAREHOUSE_SIZE' %}
+    {% set macro_name = 'MACRO_POLO_VALIDATES_WAREHOUSE_SIZE' %}
     {% set normalized_size = size | trim | lower %}
     
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo checks the warehouse size", {

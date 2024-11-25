@@ -1,25 +1,44 @@
-# Base config that other profiles inherit from
-config:
-  snowflake_base: &snowflake_base
-    type: snowflake
-    account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
-    user: "{{ env_var('DBT_SNOWFLAKE_USERNAME') }}"
-    password: "{{ env_var('DBT_SNOWFLAKE_PW') }}"
-    warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE') }}"
-    database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
-    role: "{{ env_var('DBT_SNOWFLAKE_ROLE') }}"
-    threads: 10
-    client_session_keep_alive: False
-    query_tag: "dbt_macro_polo_integration_tests"
-    authenticator: username_password_mfa
-
 integration_tests:
   target: ci_a
   outputs:
     ci_a:
-      <<: *snowflake_base
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USERNAME') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PW') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE') }}"
+      threads: 10
+      client_session_keep_alive: False
+      query_tag: "dbt_macro_polo_integration_tests"
+      authenticator: username_password_mfa
       schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci_a"
     
     ci_b:
-      <<: *snowflake_base
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USERNAME') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PW') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE') }}"
+      threads: 10
+      client_session_keep_alive: False
+      query_tag: "dbt_macro_polo_integration_tests"
+      authenticator: username_password_mfa
       schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci_b"
+
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USERNAME') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PW') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE') }}"
+      threads: 10
+      client_session_keep_alive: False
+      query_tag: "dbt_macro_polo_integration_tests"
+      authenticator: username_password_mfa
+      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}"

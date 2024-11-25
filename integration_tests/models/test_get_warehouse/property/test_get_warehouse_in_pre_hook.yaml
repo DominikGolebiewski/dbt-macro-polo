@@ -1,0 +1,13 @@
+version: 2
+
+models:
+- name: test_get_warehouse_in_pre_hook
+  description: Tests the get_warehouse macro's behaviour when materialisation is set in pre-hook. Ensures warehouse names are correctly resolved for table materialisation, including fallback scenarios and size variations.
+  config:
+    materialized: incremental
+    incremental_strategy: 'delete+insert'
+    unique_key: record_a
+    tags: [ 'full_refresh' ]
+    pre_hook: 'use warehouse {{ dbt_macro_polo.get_warehouse("xs", "m") }}'
+    enabled: false
+ 

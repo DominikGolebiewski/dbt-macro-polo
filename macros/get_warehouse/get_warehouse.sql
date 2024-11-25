@@ -9,7 +9,7 @@
 {# Main Warehouse Selection Macro #}
 {% macro snowflake__get_warehouse(incremental_size, fullrefresh_size=none) %}
     {# Macro Polo coordinates the warehouse selection journey #}
-    {% set macro_name = 'POLO_GETS_WAREHOUSE' %}
+    {% set macro_name = 'MACRO_POLO_GET_WAREHOUSE' %}
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo begins his warehouse exploration", {
         'incremental_size': incremental_size,
         'fullrefresh_size': fullrefresh_size,
@@ -23,12 +23,28 @@
     
     {# Validate input parameters #}
     {% set sizes = dbt_macro_polo.validate_input_parameters(incremental_size, fullrefresh_size) %}
+
+    {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has validated the input parameters", sizes) }}
     
-    {# Select appropriate size based on run type #}
-    {% if flags.FULL_REFRESH and sizes.fullrefresh is not none %}
-        {% set size = sizes.fullrefresh %}
-    {% else %}
+    {# Get materialization type #}
+    {% set materialization = model.config.get('materialized') %}
+
+    {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has retrieved the materialization type", materialization) }}
+
+    {# For views, use incremental size as they dont store data #}
+    {% if materialization == 'view' %}
+        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the incremental size for views", sizes.incremental) }}
         {% set size = sizes.incremental %}
+    {# For tables and incremental models, check if full refresh or first run #}
+    {% elif (flags.FULL_REFRESH or not adapter.get_relation(this.database, this.schema, this.table)) %}
+        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the full refresh size for tables and incremental models", sizes.fullrefresh) }}
+        {% set size = sizes.fullrefresh %}
+    {% elif materialization in ['table', 'incremental'] %}
+        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the incremental size for tables and incremental models", sizes.incremental) }}
+        {% set size = sizes.incremental %}
+    {% else %}
+        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the target warehouse size", target.warehouse) }}
+        {% set size = target.warehouse %}
     {% endif %}
     
     {% set validated_size = dbt_macro_polo.validate_warehouse_size(size, available_sizes) %}
