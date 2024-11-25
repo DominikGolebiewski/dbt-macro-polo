@@ -31,13 +31,13 @@ fi
 echo -e "${BLUE}Installing dbt dependencies...${NC}"
 poetry run dbt deps
 
-# Run incremental tests
-echo -e "${BLUE}Running incremental tests...${NC}"
-poetry run dbt build --select tag:incremental --fail-fast
-
 # Run full refresh tests
 echo -e "${BLUE}Running full refresh tests...${NC}"
 poetry run dbt build --select tag:full_refresh --full-refresh --fail-fast
+
+# Run incremental tests
+echo -e "${BLUE}Running incremental tests...${NC}"
+poetry run dbt build --select tag:incremental --fail-fast
 
 # Run target ci_b tests
 echo -e "${BLUE}Running target prod_etl tests...${NC}"

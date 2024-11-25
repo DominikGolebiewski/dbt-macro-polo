@@ -38,6 +38,9 @@ vars:
       integration_tests_ci_b:
         target_name: ci_b
         warehouse_name_prefix: ci_b
+      developer:
+        target_name: dev
+        warehouse_name_prefix: developer
 
 
 

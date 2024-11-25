@@ -4,8 +4,10 @@ models:
 - name: test_get_warehouse_incremental
   description: "Tests the get_warehouse macro functionality for incremental models"
   config:
-    materialized: view
-    tags: [ 'incremental' ]
+    materialized: incremental
+    incremental_strategy: 'delete+insert'
+    unique_key: id
+    tags: [ 'incremental', 'full_refresh' ]
   columns:
   - name: warehouse_size_incremental_and_full_refresh_fallback
     description: "Tests get_warehouse with only incremental size provided"
@@ -19,11 +21,11 @@ models:
     tests:
     - not_null
     - accepted_values:
-        values: [ 'ci_a_s' ]
+        values: [ 'ci_a_s', 'ci_a_l' ]
 
   - name: warehouse_size_full_refresh
     description: "Tests get_warehouse with different sizes for incremental vs full refresh"
     tests:
     - not_null
     - accepted_values:
-        values: [ 'ci_a_m' ]
+        values: [ 'ci_a_m', 'ci_a_xl' ]

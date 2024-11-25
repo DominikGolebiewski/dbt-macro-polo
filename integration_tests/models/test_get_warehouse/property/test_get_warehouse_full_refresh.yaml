@@ -4,7 +4,7 @@ models:
 - name: test_get_warehouse_full_refresh
   description: "Tests the get_warehouse macro functionality for full refresh scenarios"
   config:
-    materialized: view
+    materialized: table
     tags: [ 'full_refresh' ]
   columns:
   - name: warehouse_size_incremental_and_full_refresh_fallback

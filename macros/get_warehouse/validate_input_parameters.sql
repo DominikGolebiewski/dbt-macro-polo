@@ -9,7 +9,7 @@
 {# Input Validation - Macro Polo validates the input parameters #}
 {% macro snowflake__validate_input_parameters(incremental_size, fullrefresh_size) %}
     {# Macro Polo checks if the warehouse sizes are provided correctly #}
-    {% set macro_name = 'POLO_VALIDATES_INPUT_PARAMETERS' %}
+    {% set macro_name = 'MACRO_POLO_VALIDATES_INPUT_PARAMETERS' %}
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo examines the input parameters", {
         'incremental_size': incremental_size,
         'fullrefresh_size': fullrefresh_size
@@ -23,7 +23,7 @@
     
     {% set result = {
         "incremental": incremental_size | trim | lower,
-        "fullrefresh": fullrefresh_size | trim | lower if fullrefresh_size is not none else none
+        "fullrefresh": fullrefresh_size | trim | lower if fullrefresh_size is not none else incremental_size | trim | lower
     } %}
     
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo confirms the parameters are valid", result) }}
