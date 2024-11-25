@@ -13,7 +13,7 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 
 **IMPORTANT**
 
-Ensure you thoroughly test these macros in your environment prior to using them in production. These are largely experimental features intended as a starting point or interim solution, requiring further assessment and comprehensive testing.
+Please make sure to test these macros thoroughly in your own environment before deploying them to production. These are primarily experimental features that I have tested locally and within my development environment. As they are further evaluated and refined, I will provide individual updates. If you encounter any issues, feel free to report them directly to me or via the dbt Slack channel. Thanks!
 
 ## Enable in Your Project 🔌
 
