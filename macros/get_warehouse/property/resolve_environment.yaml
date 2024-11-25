@@ -1,0 +1,13 @@
+version: 2
+
+macros:
+- name: resolve_environment
+  description: >
+    Maps the target name to the correct environment and returns the appropriate warehouse prefix. Used to determine the correct warehouse naming convention for different environments.
+  arguments:
+  - name: target_name
+    type: string
+    description: The current target name (e.g., 'dev', 'prod_etl')
+  - name: config
+    type: dictionary
+    description: Configuration dictionary containing environment mappings

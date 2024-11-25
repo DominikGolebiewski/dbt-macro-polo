@@ -1,0 +1,13 @@
+version: 2
+
+macros:
+- name: validate_warehouse_size
+  description: >
+    Validates that the requested warehouse size is available in the list of allowed sizes. Normalises the size to lowercase and checks against available options.
+  arguments:
+  - name: size
+    type: string
+    description: The warehouse size to validate
+  - name: available_sizes
+    type: list
+    description: List of valid warehouse sizes

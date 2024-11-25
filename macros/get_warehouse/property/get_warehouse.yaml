@@ -1,0 +1,13 @@
+version: 2
+
+macros:
+- name: get_warehouse
+  description: >
+    Dynamically selects warehouse size based on operation context (incremental vs full-refresh). Perfect for optimising compute costs by allowing different warehouse sizes for different operations.
+  arguments:
+  - name: incremental_size
+    type: string
+    description: Size to use for incremental runs (xs, s, m, l, xl, 2xl)
+  - name: fullrefresh_size
+    type: string
+    description: Optional. Size to use for full refresh runs. Falls back to incremental_size if not specified.

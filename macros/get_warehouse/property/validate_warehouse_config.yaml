@@ -1,0 +1,11 @@
+version: 2
+
+macros:
+- name: validate_warehouse_config
+  description: >
+    Validates the warehouse configuration structure ensuring all required keys are present and properly formatted.
+  arguments:
+  - name: config
+    type: dictionary
+    description: >
+      Configuration dictionary containing warehouse settings. Must include 'environments' and 'warehouse_size' keys.
