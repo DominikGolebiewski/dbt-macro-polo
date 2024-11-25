@@ -10,6 +10,10 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 - Experiment with novel solutions
 - Share novel solutions with the dbt community
 
+
+**Important**
+Ensure you thoroughly test these macros in your environment prior to using them in production. These are largely experimental features intended as a starting point or interim solution, requiring further assessment and comprehensive testing.
+
 ## Enable in Your Project 🔌
 
 1. **Add to packages.yml**
