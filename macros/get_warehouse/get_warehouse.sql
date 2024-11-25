@@ -31,17 +31,12 @@
 
     {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has retrieved the materialization type", materialization) }}
 
-    {# For views and ephemeral, use incremental size as they dont store data #}
-    {% if materialization in ['view', 'ephemeral'] %}
-        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the incremental size for views and ephemeral", sizes.incremental) }}
-        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to check if full refresh or first run", {
-            'flags.FULL_REFRESH': flags.FULL_REFRESH,
-            'adapter.get_relation(this.database, this.schema, this.table)': adapter.get_relation(this.database, this.schema, this.table)
-        }) }}
+    {# For views, use incremental size as they dont store data #}
+    {% if materialization == 'view' %}
+        {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the incremental size for views", sizes.incremental) }}
         {% set size = sizes.incremental %}
     {# For tables and incremental models, check if full refresh or first run #}
     {% elif (flags.FULL_REFRESH or not adapter.get_relation(this.database, this.schema, this.table)) %}
-
         {{ dbt_macro_polo.log_debug(macro_name, "Macro Polo has determined to use the full refresh size for tables and incremental models", sizes.fullrefresh) }}
         {% set size = sizes.fullrefresh %}
     {% elif materialization in ['table', 'incremental'] %}

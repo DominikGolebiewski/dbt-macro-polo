@@ -4,7 +4,7 @@ A sophisticated exploration of dbt macro capabilities, pushing the boundaries of
 
 ## Why This Project Exists
 
-As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophisticated warehouse management solutions. This project was born from the desire to:
+As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophisticated solutions. This project was born from the desire to:
 
 - Explore the full potential of dbt macros
 - Experiment with novel solutions
@@ -16,7 +16,7 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
    ```yaml
    packages:
      - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-       revision: 0.0.1  # Specify the git release version you want to use
+       revision: 0.0.2  # Specify the git release version you want to use
    ```
 
 2. **Install the package**
@@ -28,6 +28,7 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 
 ### [get_warehouse](macros/get_warehouse/get_warehouse.sql)
 
+** Snowflake Only **
 Dynamically sets warehouse size based on operation context (incremental and full-refresh). Perfect for optimising compute costs.
 
 #### Configuration Requirements
@@ -57,9 +58,9 @@ Check out the [integration tests](integration_tests/dbt_project.yml) for example
 
 ```sql
 {{ config(
-        snowflake_warehouse=dbt_macro_polo.get_warehouse(
-        incremental_size='s', {# Size for incremental runs #}
-        full_refresh_size='xl' {# Size for full-refresh runs (optional) #}
+        pre_hook=[
+            'use warehouse {{ dbt_macro_polo.get_warehouse(incremental_size="s", full_refresh_size="xl") }}'
+        ]
     )
 ) }}
 ```
@@ -79,6 +80,15 @@ dbt run --select my_model --full-refresh
 ```
 
 3. **Resolution Examples**
+
+For initial run:
+
+```sql
+-- Development environment (target: dev)
+use warehouse development_warehouse_xl;
+-- Production environment (target: prod)
+use warehouse production_warehouse_xl;
+```
 
 For incremental runs:
 
@@ -101,6 +111,10 @@ use warehouse production_warehouse_xl;
 The warehouse name is dynamically constructed using:
 - Environment prefix (from `warehouse_config`)
 - Warehouse size (based on run type)
+
+If full refresh size is not provided, the warehouse size will be the same as the incremental size.
+View materialisation will always use the incremental size even if full refresh size is provided.
+Any other materialisation type other then `view`, `table` or `incremental` will use the target warehouse size.
 
 ## Contributing 🤝
 
