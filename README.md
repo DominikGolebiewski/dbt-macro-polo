@@ -1,4 +1,5 @@
-# DBT Macro Polo 🎯
+
+![macro_polo_logo](https://github.com/user-attachments/assets/797407eb-73bf-449f-8de2-01a2a533ab06)
 
 A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system.
 
@@ -11,9 +12,11 @@ As a passionate dbt practitioner, I noticed a gap in the ecosystem for sophistic
 - Share novel solutions with the dbt community
 
 
-**IMPORTANT**
+**IMPORTANT!**
 
-Please make sure to test these macros thoroughly in your own environment before deploying them to production. These are primarily experimental features that I have tested locally and within my development environment. As they are further evaluated and refined, I will provide individual updates. If you encounter any issues, feel free to report them directly to me or via the dbt Slack channel. Thanks!
+Please note that this repository is very much a work in progress. The content previewed in the posts is expected to make its grand debut in the codebase either shortly before or just after New Year’s Eve—fingers crossed! The macros are still being lovingly polished and put through their paces with rigorous testing before they're unleashed upon a wider audience. Stay tuned, and rest assured, once all the local tweaks are ready to take their bow, I’ll be sharing an update. Cheers!
+
+Also please make sure to test these macros thoroughly in your own environment before deploying them to production. These are primarily experimental features that I have tested locally and within my development environment. As they are further evaluated and refined, I will provide individual updates. If you encounter any issues, feel free to report them directly to me or via the dbt Slack channel. Thanks!
 
 ## Enable in Your Project 🔌
 
