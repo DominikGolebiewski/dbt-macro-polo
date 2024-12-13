@@ -31,12 +31,10 @@ vars:
   # Macro Polo Warehouse Configuration
   warehouse_config:
     warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
-    environments:
-      integration_tests_ci_a:
-        target_name: ci_a
+    environment:
+      ci_a:
         warehouse_name_prefix: ci_a
-      integration_tests_ci_b:
-        target_name: ci_b
+      ci_b:
         warehouse_name_prefix: ci_b
 
 

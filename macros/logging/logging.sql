@@ -1,5 +1,8 @@
-{# General debug logging macro with log levels #}
 {% macro logging(macro_name=none, message=none, level='INFO', model_id=none, status=none) %}
+    {{ return(adapter.dispatch('logging', 'dbt_macro_polo')(macro_name, message, level, model_id, status)) }}
+{% endmacro %}
+
+{% macro default__logging(macro_name=none, message=none, level='INFO', model_id=none, status=none) %}
     {% if execute and (var('global_debug_mode', false)) %}
 
         {% set git_link = "Visit https://github.com/DominikGolebiewski/dbt-macro-polo?tab=readme-ov-file for more information" %}
