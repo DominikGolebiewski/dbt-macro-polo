@@ -9,8 +9,8 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-dbt-snowflake = "^1.8.4"
-dbt-core = "^1.8.9"
+dbt-snowflake = "^1.8"
+dbt-core = "^1.8"
 
 
 [build-system]
