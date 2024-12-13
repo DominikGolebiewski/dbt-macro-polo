@@ -1,0 +1,23 @@
+version: 2
+
+macros:
+- name: logging
+  description: >
+    A general-purpose logging macro that provides different log levels and formatting options for debugging and monitoring dbt processes.
+  arguments:
+  - name: macro_name
+    type: string
+    description: The name of the macro that is calling the logging function
+  - name: message
+    type: string
+    description: The message to be logged
+  - name: level
+    type: string
+    description: >
+      The logging level to be used. Available options are 'DEBUG', 'INFO', 'WARN', 'ERROR'. Defaults to 'INFO'
+  - name: model_id
+    type: string
+    description: The identifier of the model being processed
+  - name: status
+    type: string
+    description: Custom status message to override default status based on level

@@ -1,7 +1,0 @@
-version: 2
-
-macros:
-- name: get_default_warehouse_sizes
-  description: >
-    Returns the default list of available warehouse sizes. Used as a fallback when warehouse_size is not specified in the configuration.
-  arguments: []

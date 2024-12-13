@@ -1,0 +1,22 @@
+version: 2
+
+macros:
+- name: get_max_timestamp
+  description: >
+    A macro that retrieves the maximum timestamp from a specified column in a model, with built-in caching and warehouse management capabilities.
+  arguments:
+  - name: timestamp_column
+    type: string
+    description: The column name containing timestamps to evaluate
+    default: 'loaded_timestamp'
+  - name: predicate
+    type: string
+    description: Optional WHERE clause to filter the records
+  - name: warehouse_size
+    type: string
+    description: Size of the warehouse to use for the query (xs, s, m, l, xl)
+    default: 'xs'
+  - name: model_name
+    type: string
+    description: Name of the model to query. Defaults to the current model
+    default: this.name
