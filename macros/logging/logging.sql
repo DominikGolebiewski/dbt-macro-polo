@@ -3,12 +3,13 @@
 {% endmacro %}
 
 {% macro default__logging(macro_name=none, message=none, level='INFO', model_id=none, status=none) %}
-    {% if execute and (var('global_debug_mode', false)) %}
+    {% set macro_polo = var('macro_polo', {}) %}
+    {% if execute %}
 
         {% set git_link = "Visit https://github.com/DominikGolebiewski/dbt-macro-polo?tab=readme-ov-file for more information" %}
 
         {% set level = level | upper %}
-        {% set global_level = var('logging_level', 'INFO') | upper %}
+        {% set global_level = macro_polo.get('logging_level', 'INFO') | upper %}
         
         {% set level_hierarchy = {
             'DEBUG': 0,
@@ -33,7 +34,7 @@
             {% set color_codes = {
                 'DEBUG': '\033[90m',       
                 'INFO': '\033[96m',     
-                'WARN': '\033[33m',    
+                'WARNING': '\033[33m',    
                 'ERROR': '\033[31m'        
             } %}
             
