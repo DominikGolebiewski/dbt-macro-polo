@@ -1,0 +1,98 @@
+version: 2
+
+macros:
+  - name: warehouse_optimiser
+    description: '{{ doc("warehouse_optimiser") }}'
+    arguments:
+      - name: query_operation
+        type: string
+        description: Type of operation being performed ('ctas', 'insert', 'delete')
+    
+  - name: get_upstream_row_count
+    description: >
+      Retrieves the total row count from upstream dependencies, supporting both incremental
+      and full table scans.
+    arguments:
+      - name: model_id
+        type: string
+        description: Unique identifier for the model
+      - name: upstream_dependency
+        type: Union[string, List[string]]
+        description: Single or list of upstream model/source references
+      - name: timestamp_column
+        type: string
+        description: Column used for incremental filtering
+
+  - name: handle_monitoring
+    description: >
+      Manages warehouse size selection based on row count thresholds and monitoring configuration.
+    arguments:
+      - name: schedule
+        type: dict
+        description: Schedule configuration containing monitoring settings
+      - name: row_count
+        type: int
+        description: Number of rows being processed
+      - name: thresholds
+        type: List[dict]
+        description: List of threshold configurations with row counts and warehouse sizes
+      - name: default_warehouse_size
+        type: string
+        description: Fallback warehouse size if no thresholds match
+
+  - name: handle_operation
+    description: >
+      Processes operation-specific configurations and determines appropriate warehouse size.
+    arguments:
+      - name: model_id
+        type: string
+        description: Unique identifier for the model
+      - name: query_operation
+        type: string
+        description: Type of operation being performed
+      - name: active_config
+        type: dict
+        description: Active configuration for the current operation
+      - name: has_on_dry_run_config
+        type: boolean
+        description: Whether dry run configuration exists
+      - name: row_count
+        type: int
+        description: Number of rows being processed
+
+  - name: handle_scheduling
+    description: >
+      Manages time-based warehouse sizing based on configured schedules and monitoring.
+    arguments:
+      - name: operation_config
+        type: dict
+        description: Operation-specific configuration
+      - name: row_count
+        type: int
+        description: Number of rows being processed
+      - name: has_on_dry_run_config
+        type: boolean
+        description: Whether dry run configuration exists
+      - name: current_time
+        type: datetime
+        description: Current timestamp for schedule evaluation
+      - name: default_warehouse_size
+        type: string
+        description: Default warehouse size if no schedule matches
+
+  - name: is_within_time_range
+    description: >
+      Helper macro to determine if current time falls within a scheduled time range.
+    arguments:
+      - name: schedule_name
+        type: string
+        description: Name of the schedule being evaluated
+      - name: current_time
+        type: datetime
+        description: Current timestamp
+      - name: start_time
+        type: string
+        description: Schedule start time in HH:MM format
+      - name: end_time
+        type: string
+        description: Schedule end time in HH:MM format

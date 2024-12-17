@@ -2,8 +2,7 @@ version: 2
 
 macros:
 - name: get_max_timestamp
-  description: >
-    A macro that retrieves the maximum timestamp from a specified column in a model, with built-in caching and warehouse management capabilities.
+  description: '{{ docs("get_max_timestamp") }}'
   arguments:
   - name: timestamp_column
     type: string

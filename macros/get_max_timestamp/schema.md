@@ -32,15 +32,18 @@ Comprehensive validation and error checking for:
 ## Usage Examples
 
 ```sql
-{% raw %}
+{% raw %} -- Raw block to prevent jinja rendering
+
 -- Basic usage
 {% set max_ts = dbt_macro_polo.get_max_timestamp() %}
+
 -- With custom timestamp column and predicate
 {% set max_ts = dbt_macro_polo.get_max_timestamp(
 timestamp_column='created_at',
 predicate="status = 'active'",
 warehouse_size='s'
 ) %}
+
 -- With all parameters
 {% set max_ts = dbt_macro_polo.get_max_timestamp(
 timestamp_column='updated_at',
@@ -48,6 +51,7 @@ predicate='category = "sales"',
 warehouse_size='m',
 model_name='my_model'
 ) %}
+
 {% endraw %}
 ```
 

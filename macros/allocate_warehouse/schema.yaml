@@ -2,8 +2,7 @@ version: 2
 
 macros:
 - name: allocate_warehouse
-  description: >
-    Dynamically allocates a Snowflake warehouse based on the specified size parameters and environment configuration.
+  description: '{{ docs("allocate_warehouse") }}'
   arguments:
   - name: incremental_size
     type: string

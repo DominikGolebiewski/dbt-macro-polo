@@ -2,8 +2,7 @@ version: 2
 
 macros:
 - name: logging
-  description: >
-    A general-purpose logging macro that provides different log levels and formatting options for debugging and monitoring dbt processes.
+  description: '{{ docs("logging") }}'
   arguments:
   - name: macro_name
     type: string
