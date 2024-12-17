@@ -26,7 +26,7 @@
         {{ dbt_macro_polo.logging(message="Scheduling enabled", model_id=model_id, status=scheduling_enabled | string | upper) }}
         
         {% set schedules = scheduling_config.get('schedules', {}) %}
-        {% set current_time = modules.datetime.datetime.strptime(current_time, '%Y-%m-%d %H:%M:%S') if current_time else modules.datetime.datetime.now() %}
+        {% set current_time = current_time or modules.datetime.datetime.now() %}
         {% set current_day = current_time.strftime('%A').lower() %}
         {% set is_matched = namespace(value=false) %}
 

@@ -33,7 +33,8 @@
 
     {# Handle scheduling if configured #}
     {%- if operation_config and operation_config is mapping -%}
-        {{ return(dbt_macro_polo.handle_scheduling(operation_config, row_count, has_on_dry_run_config, default_warehouse_size)) }}
+        {% set current_time = current_time or modules.datetime.datetime.now() %}
+        {{ return(dbt_macro_polo.handle_scheduling(operation_config, row_count, has_on_dry_run_config, current_time, default_warehouse_size)) }}
     {%- endif -%}
 
     {# Return default size if no special handling needed #}
