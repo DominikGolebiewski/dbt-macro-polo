@@ -38,7 +38,7 @@ Comprehensive validation and error checking for:
 -- With custom timestamp column and predicate
 {% set max_ts = get_max_timestamp(
 timestamp_column='created_at',
-predicate='status = "active"',
+predicate="status = 'active'",
 warehouse_size='s'
 ) %}
 -- With all parameters
@@ -62,7 +62,7 @@ model_name='my_model'
 
 ## Configuration
 The macro utilises these configuration elements:
-- Cache management through the `_cache` variable
+- Cache management through the `cache` variable
 - Warehouse allocation through the warehouse management system
 - Debug logging through the logging macro
 

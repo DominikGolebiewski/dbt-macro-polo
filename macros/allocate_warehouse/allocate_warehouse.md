@@ -14,7 +14,6 @@ The macro determines the appropriate warehouse size based on whether the model i
 |----------|----------|-------------|
 | incremental_size | Yes | The warehouse size to use for incremental runs. Must be one of the configured available sizes (typically xs, s, m, l) |
 | fullrefresh_size | No | The warehouse size to use for full-refresh runs. If not specified, defaults to the incremental_size value |
-| calling_macro | No | Name of the calling macro for logging purposes |
 
 ## Returns
 
@@ -28,13 +27,13 @@ The macro expects the following configuration in your `dbt_project.yml`:
 ```yaml
 {%- raw -%}
 vars:
-warehouse_config:
+  warehouse_config:
     warehouse_size: ['xs', 's', 'm', 'l']
     environment:
         dev:
             warehouse_name_prefix: dev_wh
         prod:
-            warehouse_name_prefix: prod_wh
+            warehouse_name_prefix: prd_wh
 {%- endraw -%}
 ```
 
@@ -52,7 +51,7 @@ warehouse_config:
 
 ```jinja
 {%- raw -%}
-use warehouse {{ allocate_warehouse(incremental_size='xs', fullrefresh_size='m') }}
+use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size='xs', fullrefresh_size='m') }}
 {%- endraw -%}
 ```
 
