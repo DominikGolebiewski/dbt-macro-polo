@@ -17,7 +17,7 @@
   - [allocate_warehouse](#allocate_warehouse)
   - [get_max_timestamp](#get_max_timestamp)
   - [warehouse_optimiser](#warehouse_optimiser)
-- [Contributing](#contributing-)
+<!-- - [Contributing](#contributing-) -->
 - [Resources](#resources-)
 
 
@@ -186,7 +186,7 @@ config:
 [View Full Documentation →](/macros/warehouse_optimiser/schema.md)
 </details>
 
-#### Contributing 🤝
+<!-- #### Contributing 🤝
 
 We welcome contributions! Areas that need attention:
 
@@ -203,7 +203,7 @@ We welcome contributions! Areas that need attention:
 3. **Features**:
    - Enhanced monitoring
    - Advanced scheduling
-   - Custom warehouse parameters
+   - Custom warehouse parameters -->
 
 #### Resources 📚
 
