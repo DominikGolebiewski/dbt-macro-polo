@@ -2,27 +2,21 @@ version: 2
 
 macros:
   - name: create_macro_context
-    description: >
-      Creates a standardised context object for macro execution, containing information about the
-      current macro, model, and environment settings.
+    description: '{{ doc("create_macro_context") }}'
     arguments:
       - name: macro_name
         type: string
         description: Name of the macro being executed
 
   - name: get_cache_value
-    description: >
-      Retrieves a value from the macro_polo cache using a specified cache key.
-      Supports cross-model caching for optimisation purposes.
+    description: '{{ doc("get_cache_value") }}'
     arguments:
       - name: cache_key
         type: string
         description: Unique identifier for the cached value
 
   - name: get_delete_insert_merge_sql
-    description: >
-      Generates SQL for delete+insert merge operations with support for warehouse optimisation.
-      Specifically designed for incremental models using delete+insert strategy.
+    description: '{{ doc("get_delete_insert_merge_sql") }}'
     arguments:
       - name: target
         type: relation
@@ -41,6 +35,4 @@ macros:
         description: Additional predicates for incremental processing
 
   - name: should_full_refresh
-    description: >
-      Determines whether a model should perform a full refresh based on various conditions
-      including flags, relation existence, and materialisation type.
+    description: '{{ doc("should_full_refresh") }}'

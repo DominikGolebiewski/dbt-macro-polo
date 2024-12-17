@@ -2,7 +2,7 @@ version: 2
 
 macros:
 - name: logging
-  description: '{{ docs("logging") }}'
+  description: '{{ doc("logging") }}'
   arguments:
   - name: macro_name
     type: string

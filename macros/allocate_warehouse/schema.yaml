@@ -2,7 +2,7 @@ version: 2
 
 macros:
 - name: allocate_warehouse
-  description: '{{ docs("allocate_warehouse") }}'
+  description: '{{ doc("allocate_warehouse") }}'
   arguments:
   - name: incremental_size
     type: string

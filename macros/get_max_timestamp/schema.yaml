@@ -2,7 +2,7 @@ version: 2
 
 macros:
 - name: get_max_timestamp
-  description: '{{ docs("get_max_timestamp") }}'
+  description: '{{ doc("get_max_timestamp") }}'
   arguments:
   - name: timestamp_column
     type: string
