@@ -24,6 +24,10 @@
             {% set level_config = config[level] %}
             {% set status = status if status is not none else level_config['status'] %}
             
+            {# Ensure message and status are strings #}
+            {% set message = message | string if message is not none else '' %}
+            {% set status = status | string if status is not none else '' %}
+            
             {# Simplified message construction #}
             {% set prefix = "Macro Polo: " %}
             {% set parts = [

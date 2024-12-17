@@ -22,7 +22,7 @@
     {# Initialise row count #}
     {%- set row_count = namespace(value=0) -%}
 
-    {%- if upstream_dependency is string or (upstream_dependency is sequence) -%}
+    {%- if upstream_dependency is string or (upstream_dependency is sequence and upstream_dependency | length > 0) -%}
         {{ dbt_macro_polo.logging(macro_name, "Initialising row count", model_id=model_id, level='DEBUG') }}
         
         {# Determine if target exists #}
