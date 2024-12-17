@@ -1,5 +1,8 @@
 # DBT Macro Polo 🎯
 
+![macro_polo_logo](https://github.com/user-attachments/assets/797407eb-73bf-449f-8de2-01a2a533ab06)
+
+
 > A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system.
 
 [![dbt](https://img.shields.io/badge/dbt-1.8+-FF694B.svg)](https://github.com/dbt-labs/dbt-core)
