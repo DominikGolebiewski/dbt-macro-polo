@@ -28,7 +28,7 @@ This project aims to:
 - Experiment with novel solutions
 - Share sophisticated solutions with the dbt community
 
-> **⚠️ IMPORTANT**: This repository is actively being developed.
+> **⚠️ IMPORTANT**: This repository is actively being developed and some features, especially warehouse_optimiser, are not fully functional or may produce unexpected results.
 
 ## Installation
 
@@ -36,7 +36,7 @@ This project aims to:
 ```yaml
 packages:
   - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-    revision: 0.1.0  # Specify your desired version
+    revision: 0.1.0-beta.1
 ```
 
 2. **Install the package**
@@ -116,7 +116,7 @@ config:
     pre_hook: ['use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size="s", full_refresh_size="xl") }}']
 ```
 
-[View Full Documentation →](docs/allocate_warehouse.md)
+[View Full Documentation →](/macros/allocate_warehouse/schema.md)
 </details>
 
 ### get_max_timestamp
@@ -142,7 +142,7 @@ vars:
 ) %}
 ```
 
-[View Full Documentation →](docs/get_max_timestamp.md)
+[View Full Documentation →](/macros/get_max_timestamp/schema.md)
 </details>
 
 ### warehouse_optimiser 
@@ -183,7 +183,7 @@ config:
     pre_hook: ['{{ dbt_macro_polo.warehouse_optimiser() }}']
 ```
 
-[View Full Documentation →](docs/warehouse_optimiser.md)
+[View Full Documentation →](/macros/warehouse_optimiser/schema.md)
 </details>
 
 #### Contributing 🤝
