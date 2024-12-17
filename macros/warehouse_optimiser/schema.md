@@ -54,6 +54,7 @@ vars:
 
 3. **Required Model-Level Configuration**:
 ```yaml
+{% raw %}
 config:
     materialized: 'incremental'
     incremental_strategy: 'delete+insert'
@@ -90,6 +91,7 @@ config:
             upstream_dependency: # List of upstream models to monitor for row count
               - model1
               - model2
+{% endraw %}
 ```
 
 #### Core Features 🎯
@@ -120,6 +122,7 @@ config:
 
 1. **Basic Implementation**:
 ```sql
+{% raw %}
 {{ config(
     materialized='incremental',
     incremental_strategy='delete+insert',
@@ -131,6 +134,7 @@ config:
 ) }}
 
 select * from {{ ref('my_source_table') }}
+{% endraw %}
 ```
 
 2. **Advanced Configuration with Scheduling**:

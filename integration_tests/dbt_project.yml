@@ -19,8 +19,6 @@ clean-targets: ["target", "dbt_packages"]
 require-dbt-version: [">=1.8.6", "<2.0.0"]
 
 dispatch:
-  - macro_namespace: dbt_macro_polo
-    search_order: [ 'dbt_macro_polo_integration_tests','dbt_macro_polo' ]
   - macro_namespace: dbt
     search_order: [ 'dbt_macro_polo_integration_tests','dbt_macro_polo', 'dbt' ]
 
