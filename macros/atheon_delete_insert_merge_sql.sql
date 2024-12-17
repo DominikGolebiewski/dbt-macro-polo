@@ -25,9 +25,9 @@
             );
         {% else %}
             delete from {{ target }}
-            where (
-                {{ unique_key }}) in (
-                select ({{ unique_key }})
+            where 
+                {{ unique_key }} in (
+                select {{ unique_key }}
                 from {{ source }}
             )
             {%- if incremental_predicates %}

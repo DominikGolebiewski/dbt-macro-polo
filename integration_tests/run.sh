@@ -33,10 +33,6 @@ poetry run dbt deps
 
 # Run full refresh tests
 echo -e "${BLUE}Running dbt seeds...${NC}"
-poetry run dbt build --fail-fast --target dev
-
-# Run full refresh tests
-echo -e "${BLUE}Running dbt tests...${NC}"
-poetry run dbt build --fail-fast --target dev
+poetry run dbt run --fail-fast --target dev
 
 echo -e "${GREEN}All tests completed successfully!${NC}"

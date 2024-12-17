@@ -7,7 +7,7 @@
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('warehouse_optimiser') %}
     {% set model_id = macro_ctx.model_id %}
-    {% set timestamp_column = config.get('timestamp_column', 'loaded_timestamp') %}
+    {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     
     {# Validate query operation #}
@@ -44,7 +44,11 @@
     {% set has_on_dry_run_config = on_dry_run_config is mapping and on_dry_run_config | length > 0 %}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
 
+    {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh, model_id=model_id, level='DEBUG') }}
+
     {% set active_config = on_run_config if not is_full_refresh else on_full_refresh_config %}
+
+    {{ dbt_macro_polo.logging(message="Active config: " ~ active_config, model_id=model_id, level='DEBUG') }}
 
     {% if not on_run_config %}
         {% if query_operation == 'ctas' %}
@@ -66,7 +70,7 @@
     {% endif %}
 
     {# Get upstream dependency config - handle v1 and v2 compatibility #}
-    {% set upstream_dependency = on_dry_run_config.get('upstream_dependency', []) or on_dry_run_config.get('upstream_check', {}) %}
+    {% set upstream_dependency = on_dry_run_config.get('upstream_dependency', []) %}
 
     {{ dbt_macro_polo.logging(message="Macro Polo: Starting Warehouse Optimiser", model_id=model_id, status=query_operation | upper) }}
  
@@ -78,7 +82,7 @@
         {% endif %}
     
         {# Determine and allocate warehouse #}
-        {% set warehouse_size = dbt_macro_polo.handle_operation(macro_ctx.macro_name, model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
+        {% set warehouse_size = dbt_macro_polo.handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
         {% set warehouse = dbt_macro_polo.allocate_warehouse(warehouse_size) %}
 
         {{ dbt_macro_polo.logging(message="Final warehouse selection for " ~ query_operation | upper, model_id=model_id, status=warehouse | upper) }}

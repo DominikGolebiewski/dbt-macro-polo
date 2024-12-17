@@ -16,9 +16,9 @@
 
     {# Get operation configuration #}
     {% set operation_config = active_config.get(query_operation, {}) %}
-    {% set warehouse_size = operation_config.get('warehouse_size', default_warehouse_size) if not is_full_refresh else active_config.get('warehouse_size', default_warehouse_size) %}
+    {% set warehouse_size = active_config.get('warehouse_size', default_warehouse_size) %}
 
-    {{ dbt_macro_polo.logging(macro_name, "Processing operation: " ~ query_operation ~ " with config: " ~ operation_config, level='DEBUG') }}
+    {{ dbt_macro_polo.logging(macro_name, "Processing operation: " ~ query_operation ~ " with config: " ~ active_config, level='DEBUG') }}
 
     {% if is_full_refresh %}
         {{ dbt_macro_polo.logging(message="Full refresh detected, using warehouse size", model_id=model_id, status=warehouse_size | upper) }}
