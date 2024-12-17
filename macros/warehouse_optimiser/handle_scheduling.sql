@@ -1,8 +1,8 @@
-{% macro handle_scheduling(operation_config, row_count, has_on_dry_run_config, current_time=modules.datetime.datetime.now(), default_warehouse_size='xs') %}
+{% macro handle_scheduling(operation_config, row_count, has_on_dry_run_config, current_time=none, default_warehouse_size='xs') %}
     {{ return(adapter.dispatch('handle_scheduling', 'dbt_macro_polo')(operation_config, row_count, has_on_dry_run_config, current_time, default_warehouse_size)) }}
 {% endmacro %}
 
-{% macro default__handle_scheduling(operation_config, row_count, has_on_dry_run_config, current_time=modules.datetime.datetime.now(), default_warehouse_size='xs') %}
+{% macro default__handle_scheduling(operation_config, row_count, has_on_dry_run_config, current_time=none, default_warehouse_size='xs') %}
 
     {# Initialise macro context #}
     {% set macro_context = dbt_macro_polo.create_macro_context("handle_scheduling") %}
@@ -26,6 +26,7 @@
         {{ dbt_macro_polo.logging(message="Scheduling enabled", model_id=model_id, status=scheduling_enabled | string | upper) }}
         
         {% set schedules = scheduling_config.get('schedules', {}) %}
+        {% set current_time = modules.datetime.datetime.strptime(current_time, '%Y-%m-%d %H:%M:%S') if current_time else modules.datetime.datetime.now() %}
         {% set current_day = current_time.strftime('%A').lower() %}
         {% set is_matched = namespace(value=false) %}
 
