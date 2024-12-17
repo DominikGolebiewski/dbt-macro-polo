@@ -44,11 +44,11 @@
     {% set has_on_dry_run_config = on_dry_run_config is mapping and on_dry_run_config | length > 0 %}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
 
-    {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh, model_id=model_id, level='DEBUG') }}
+    {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh | string, model_id=model_id, level='DEBUG') }}
 
     {% set active_config = on_run_config if not is_full_refresh else on_full_refresh_config %}
 
-    {{ dbt_macro_polo.logging(message="Active config: " ~ active_config, model_id=model_id, level='DEBUG') }}
+    {{ dbt_macro_polo.logging(message="Active config: " ~ active_config | tojson | string, model_id=model_id, level='DEBUG') }}
 
     {% if not on_run_config %}
         {% if query_operation == 'ctas' %}
@@ -72,7 +72,7 @@
     {# Get upstream dependency config - handle v1 and v2 compatibility #}
     {% set upstream_dependency = on_dry_run_config.get('upstream_dependency', []) %}
 
-    {{ dbt_macro_polo.logging(message="Macro Polo: Starting Warehouse Optimiser", model_id=model_id, status=query_operation | upper) }}
+    {{ dbt_macro_polo.logging(message="Macro Polo: Starting Warehouse Optimiser", model_id=model_id, status=query_operation | string | upper) }}
  
     {% if execute %}
         {# Get row count for CTAS operations #}
@@ -82,10 +82,10 @@
         {% endif %}
     
         {# Determine and allocate warehouse #}
-        {% set warehouse_size = dbt_macro_polo.handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
+        {% set warehouse_size = dbt_macro_polo.handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count | int) %}
         {% set warehouse = dbt_macro_polo.allocate_warehouse(warehouse_size) %}
 
-        {{ dbt_macro_polo.logging(message="Final warehouse selection for " ~ query_operation | upper, model_id=model_id, status=warehouse | upper) }}
+        {{ dbt_macro_polo.logging(message="Final warehouse selection for " ~ query_operation | string | upper, model_id=model_id, status=warehouse | string | upper) }}
         {{ return('use warehouse ' ~ warehouse) }}
     {% endif %}
 
