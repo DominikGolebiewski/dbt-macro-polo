@@ -24,10 +24,6 @@
             {% set level_config = config[level] %}
             {% set status = status if status is not none else level_config['status'] %}
             
-            {# Ensure message and status are strings #}
-            {% set message = message | string if message is not none else '' %}
-            {% set status = status | string if status is not none else '' %}
-            
             {# Simplified message construction #}
             {% set prefix = "Macro Polo: " %}
             {% set parts = [
@@ -42,7 +38,6 @@
             {# Add status indicator for INFO and WARN levels #}
             {% if level in ['INFO', 'WARN'] %}
                 {% set message_length = (base_message | replace('\033[90m', '') | replace('\033[34m', '') | replace('\033[38;5;214m', '') | replace('\033[31m', '') | replace('\033[0m', '') | length) %}
-                {% set status_length = status | length + 3 %}  {# +3 for brackets and spaces #}
                 {% set dots = "." * (80 - message_length) %}
                 {% set base_message = base_message ~ dots ~ " [" ~ level_config['color'] ~ status ~ reset ~ "]" %}
             {% endif %}

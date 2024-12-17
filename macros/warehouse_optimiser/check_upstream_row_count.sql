@@ -15,7 +15,7 @@
     {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
 
     {% if cache_value %}
-        {{ dbt_macro_polo.logging(macro_name, message="Upstream row count from cache", model_id=model_id, status=cache_value | string) }}
+        {{ dbt_macro_polo.logging(macro_name, message="Upstream row count from cache", model_id=model_id, status=cache_value | upper) }}
         {{ return(cache_value) }}
     {% endif %}
 
@@ -28,7 +28,7 @@
         {# Determine if target exists #}
         {{ dbt_macro_polo.logging(macro_name, "Checking if target relation exists", model_id=model_id, level='DEBUG') }}
         {% set target_exists = load_relation(this) is not none %}
-        {{ dbt_macro_polo.logging(macro_name, "Target relation exists: " ~ target_exists | string, model_id=model_id, level='DEBUG') }}
+        {{ dbt_macro_polo.logging(macro_name, "Target relation exists: " ~ target_exists, model_id=model_id, level='DEBUG') }}
 
         {# Fetch environment-specific XS warehouse name #}
         {{ dbt_macro_polo.logging(macro_name, "Allocating warehouse", model_id=model_id, level='DEBUG') }}
@@ -42,23 +42,23 @@
             {%- set upstream_dependency = [upstream_dependency] -%}
         {%- endif -%}
 
-        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=(upstream_dependency | length) | string) }}
+        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=upstream_dependency | length) }}
 
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
             {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dependency, timestamp_column, warehouse, maximum_timestamp) -%}
-            {{ dbt_macro_polo.logging(message="Row count for " ~ dependency, model_id=model_id, status=rows | string) }}
+            {{ dbt_macro_polo.logging(message="Row count for " ~ dependency, model_id=model_id, status=rows) }}
             {%- set row_count.value = row_count.value + rows -%}
         {%- endfor -%}
         
-        {{ dbt_macro_polo.logging(message="Total upstream row count", model_id=model_id, status=row_count.value | string) }}
+        {{ dbt_macro_polo.logging(message="Total upstream row count", model_id=model_id, status=row_count.value) }}
 
     {% else %}
         {{ dbt_macro_polo.logging(message="No upstream dependencies specified", model_id=model_id) }}
     {%- endif -%}
 
     {# Cache and return result #}
-    {{ dbt_macro_polo.logging(macro_name, "Caching upstream row count for " ~ upstream_dependency | string ~ ": " ~ row_count.value | string, model_id=model_id, level='DEBUG') }}
+    {{ dbt_macro_polo.logging(macro_name, "Caching upstream row count for " ~ upstream_dependency ~ ": " ~ row_count.value, model_id=model_id, level='DEBUG') }}
     {% do macro_polo.get('cache', {}).update({cache_key: row_count.value}) %}
     {{ return(row_count.value) }}
 {%- endmacro -%}
