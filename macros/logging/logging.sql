@@ -3,88 +3,55 @@
 {% endmacro %}
 
 {% macro default__logging(macro_name=none, message=none, level='INFO', model_id=none, status=none) %}
-    {% set macro_polo = var('macro_polo', {}) %}
     {% if execute %}
-
-        {% set git_link = "Visit https://github.com/DominikGolebiewski/dbt-macro-polo?tab=readme-ov-file for more information" %}
-
+        {% set macro_polo = var('macro_polo', {}) %}
         {% set level = level | upper %}
         {% set global_level = macro_polo.get('logging_level', 'INFO') | upper %}
         
-        {% set level_hierarchy = {
-            'DEBUG': 0,
-            'INFO': 1,
-            'WARN': 2,
-            'ERROR': 3
-        } %}
-        
-        {% set message_level_value = level_hierarchy.get(level, 1) %}
-        {% set global_level_value = level_hierarchy.get(global_level, 1) %}
-        
-        {% if message_level_value >= global_level_value %}
-            {# Status indicators and colors #}
-            {% set status_by_level = {
-                'DEBUG': 'DEBUG',
-                'INFO': 'SUCCESS',
-                'WARN': 'WARNING',
-                'ERROR': 'ERROR'
-            } %}
-
-            {# ANSI colour codes matching dbt #}
-            {% set color_codes = {
-                'DEBUG': '\033[90m',       
-                'INFO': '\033[34m',     
-                'WARNING': '\033[38;5;214m',    
-                'ERROR': '\033[31m'        
+        {# Simplified level hierarchy using direct comparison #}
+        {% set level_order = ['DEBUG', 'INFO', 'WARN', 'ERROR'] %}
+        {% if level_order.index(level) >= level_order.index(global_level) %}
+            
+            {# Simplified colour and status mapping #}
+            {% set config = {
+                'DEBUG': {'color': '\033[90m', 'status': 'DEBUG', 'log_fn': 'log'},
+                'INFO': {'color': '\033[34m', 'status': 'SUCCESS', 'log_fn': 'log'},
+                'WARN': {'color': '\033[38;5;214m', 'status': 'WARNING', 'log_fn': 'warn'},
+                'ERROR': {'color': '\033[31m', 'status': 'ERROR', 'log_fn': 'error'}
             } %}
             
-            {% set light_cyan = '\033[96m' %}
-            {% set reset_code = '\033[0m' %}
+            {% set reset = '\033[0m' %}
+            {% set level_config = config[level] %}
+            {% set status = status if status is not none else level_config['status'] %}
             
-            {# Get status and color #}
+            {# Simplified message construction #}
             {% set prefix = "Macro Polo: " %}
-            {% set status = status if status is not none else status_by_level.get(level, 'INFO') %}
-            {% set color_code = color_codes.get(status, color_codes['INFO']) %}
-
-            {# Format sequence and message #}
-            {% set sequence_display = "      " %}
-            {% set macro_name = macro_name ~ " • " if macro_name is not none else "" %}
-            {% set model_id = " • " ~ model_id if model_id is not none else "" %}
+            {% set parts = [
+                level_config['color'] ~ prefix ~ reset if level != 'DEBUG' else '\033[90m' ~ prefix,
+                macro_name ~ " • " if macro_name is not none else "",
+                message,
+                " • " ~ model_id if model_id is not none else "",
+                reset if level != 'DEBUG' else ''
+            ] %}
+            {% set base_message = parts | join('') %}
             
-            {# Modify message formatting based on level #}
-            {% if level == 'WARN' %}
-                {% set base_message = color_code ~ prefix ~ reset_code ~ macro_name ~ message ~ model_id  %}
-            {% elif level in ['ERROR', 'DEBUG'] %}
-                {% set base_message = color_code ~ macro_name ~ message ~ model_id ~ reset_code %}
-            {% else %}
-                {% set base_message = light_cyan ~ macro_name ~ message ~ model_id ~ reset_code %}
+            {# Add status indicator for INFO and WARN levels #}
+            {% if level in ['INFO', 'WARN'] %}
+                {% set message_length = (base_message | replace('\033[90m', '') | replace('\033[34m', '') | replace('\033[38;5;214m', '') | replace('\033[31m', '') | replace('\033[0m', '') | length) %}
+                {% set status_length = status | length + 3 %}  {# +3 for brackets and spaces #}
+                {% set dots = "." * (80 - message_length) %}
+                {% set base_message = base_message ~ dots ~ " [" ~ level_config['color'] ~ status ~ reset ~ "]" %}
             {% endif %}
             
-            {# Calculate dots for alignment #}
-            {% set total_width = 108 %}
-            {% set dots_count = total_width - (base_message | length) - 20 %}
-            {% set dots = "." * dots_count if dots_count > 0 else "" %}
-            
-            {# Construct final message #}
-            {% if level in ['ERROR', 'DEBUG'] %}
-                {% set log_message = base_message %}
-            {% elif level == 'WARN' %}
-                {% set log_message = base_message ~ " " ~ dots ~ " " ~ "[" ~ color_code ~ status  ~ reset_code ~ "]" %}
-            {% else %}
-                {% set log_message = base_message ~ " " ~ dots ~ " " ~ "[" ~ color_code ~ status ~ reset_code ~ "]" %}
+            {# Simplified logging dispatch #}
+            {% if level_config['log_fn'] == 'log' %}
+                {{ log(base_message, info=true) }}
+            {% elif level_config['log_fn'] == 'warn' %}
+                {{ exceptions.warn(base_message) }}
+            {% elif level_config['log_fn'] == 'error' %}
+                {{ exceptions.raise_compiler_error(base_message) }}
             {% endif %}
             
-            {% if level == 'DEBUG' %}
-                {{ log(log_message, info=true) }}
-            {% elif level == 'INFO' %}
-                {{ log(log_message, info=true) }}
-            {% elif level == 'WARN' %}
-                {{ exceptions.warn(log_message) }}
-            {% elif level == 'ERROR' %}
-                {{ exceptions.raise_compiler_error(log_message) }}
-            {% else %}
-                {{ log(log_message, info=true) }}
-            {% endif %}
         {% endif %}
     {% endif %}
 {% endmacro %}

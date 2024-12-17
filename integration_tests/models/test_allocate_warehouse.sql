@@ -1,24 +1,36 @@
-{% set test_results = [] %}
-{% set is_relation_exist = load_relation(this) is not none %}
-{% set materialisation = config.get('materialized', 'undefined') | lower %}
-{% set is_full_refresh = flags.FULL_REFRESH or not is_relation_exist or materialisation == 'table' %}
-{% set warehouse_prefix = var('macro_polo', {}).get('warehouse_config', {}).get('environment', {}).get(target.name, {}).get('warehouse_name_prefix') %}
+{% set test_cases = [
+    {
+        'name': 'Basic warehouse allocation',
+        'incremental_size': 'xs',
+        'fullrefresh_size': none,
+        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ '_xs'
+    },
+    {
+        'name': 'Full refresh warehouse allocation',
+        'incremental_size': 'xs',
+        'fullrefresh_size': 's',
+        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ ('_s' if dbt_macro_polo.should_full_refresh() else '_xs')
+    },
+    {
+        'name': 'Full refresh with default size',
+        'incremental_size': 'm',
+        'fullrefresh_size': none,
+        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ '_m'
+    }
+] %}
 
-{# Test Case 1 #}
-{% do test_results.append({
-    'test_name': 'Full refresh and incremental allocation',
-    'model_name': this.name,
-    'actual': dbt_macro_polo.allocate_warehouse('xs', 's'),
-    'expected': warehouse_prefix ~ ('_s' if is_full_refresh else '_xs')
-}) %}
 
 {# Process test results #}
 {% set failed_tests = [] %}
-{% for test in test_results %}
-    {% if test.actual != test.expected %}
+{% for test_case in test_cases %}
+    {% set actual = dbt_macro_polo.allocate_warehouse(
+        incremental_size=test_case.incremental_size,
+        fullrefresh_size=test_case.fullrefresh_size
+    ) | string %}
+    
+    {% if actual != test_case.expected %}
         {% do failed_tests.append(
-            test.test_name ~ ': Expected "' ~ test.expected ~ '", got "' ~ test.actual ~ '"' ~
-            ' in model ' ~ test.model_name
+            test_case.name ~ ': Expected "' ~ test_case.expected ~ '", got "' ~ actual ~ '"'
         ) %}
     {% endif %}
 {% endfor %}
@@ -28,15 +40,18 @@
     {{ dbt_macro_polo.logging(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR') }}
 {% endif %}
 
-with test_results as (
-    {% for test in test_results %}
-    select
-        '{{ test.test_name }}' as test_name,
-        '{{ test.model_name }}' as model_name,
-        '{{ test.expected }}' as expected,
-        '{{ test.actual }}' as actual,
-        '✅ PASS' as status
-        {% if not loop.last %} union all {% endif %}
+select 
+    case when count(*) = 0 then true else false end as test_passed
+from (
+    {% for test_case in test_cases %}
+    select 
+        '{{ test_case.name }}' as test_name,
+        '{{ dbt_macro_polo.allocate_warehouse(
+            incremental_size=test_case.incremental_size,
+            fullrefresh_size=test_case.fullrefresh_size
+        ) }}' as actual,
+        '{{ test_case.expected }}' as expected
+    where actual != expected
+    {% if not loop.last %}union all{% endif %}
     {% endfor %}
 )
-select * from test_results

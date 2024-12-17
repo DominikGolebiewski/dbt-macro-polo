@@ -20,7 +20,7 @@
     {% if execute %}
 
         {# Cache handling #}
-        {% set cache_key = '_macro_polo_max_ts_' ~ model_id | replace('.', '_') ~ timestamp_column  ~ ('_' ~ predicate | replace(' ', '_') if predicate is not none else '') %}
+        {% set cache_key = '_macro_polo_max_ts_' ~ model_id | replace('.', '_') ~ '_' ~ timestamp_column  ~ ('_' ~ predicate | replace(' ', '_') if predicate is not none else '') %}
         {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
     
         {% if cache_value %}
@@ -73,10 +73,11 @@
         {% endif %}
 
         {# Cache and return result #}
-        {{ dbt_macro_polo.logging(macro_name, message="Macro Polo: Caching maximum timestamp '" ~ timestamp ~ "' with cache key '" ~ cache_key ~ "'", model_id=model_id, level='DEBUG') }}
-        {% do macro_polo.cache.update({cache_key: timestamp}) %}
-        {{ dbt_macro_polo.logging(message="Macro Polo: Resolved maximum timestamp", model_id=model_id, status=timestamp) }}
-        {{ return("'" ~ timestamp ~ "'::timestamp") }}
+        {% set timestamp_str = timestamp | string %}  {# Convert timestamp to string for logging #}
+        {{ dbt_macro_polo.logging(macro_name, message="Macro Polo: Caching maximum timestamp '" ~ timestamp_str ~ "' with cache key '" ~ cache_key ~ "'", model_id=model_id, level='DEBUG') }}
+        {% do macro_polo.cache.update({cache_key: timestamp_str}) %}
+        {{ dbt_macro_polo.logging(message="Macro Polo: Resolved maximum timestamp", model_id=model_id, status=timestamp_str) }}
+        {{ return("'" ~ timestamp_str ~ "'::timestamp") }}
 
     {% endif %}
 

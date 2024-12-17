@@ -28,11 +28,10 @@ vars:
   # DBT compatibility with legacy surrogate_key macro
   surrogate_key_treat_nulls_as_empty_strings: True
   
-
   # Macro Polo 
   macro_polo:
     cache: {}
-    logging_level: info
+    logging_level: debug
     warehouse_optimiser:
       enabled: true
       default_warehouse_size: xs

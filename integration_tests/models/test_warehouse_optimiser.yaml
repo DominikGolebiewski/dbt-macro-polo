@@ -1,0 +1,56 @@
+version: 2
+
+models:
+- name: test_warehouse_optimiser
+  description: ""
+
+  config:
+    materialized: 'incremental'
+    incremental_strategy: 'delete+insert'
+    unique_key: 'id'
+    timestamp_column: 'run_started_time'
+    pre_hook: [ "{{ dbt_macro_polo.warehouse_optimiser() }}" ]
+
+    meta:
+      warehouse_optimiser:
+        enabled: true
+        operation_type:
+          on_full_refresh:
+            warehouse_size: s
+          on_run:
+            ctas:
+              warehouse_size: xs
+              monitoring:
+                enabled: true
+                thresholds:
+                - rows: 5
+                  warehouse_size: s
+                - rows: 10
+                  warehouse_size: m
+              scheduling:
+                enabled: true
+                schedules:
+                - name: "Peak Hours"
+                  days: [ "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" ]
+                  times:
+                    start: "07:00"
+                    end: "10:30"
+                  warehouse_size: m
+
+            delete:
+              warehouse_sizes: xs
+              scheduling:
+                enabled: true
+                schedules:
+                - name: "Peak Hours"
+                  days: [ "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" ]
+                  times:
+                    start: "07:00"
+                    end: "10:30"
+                  warehouse_size: s
+            insert:
+              warehouse_size: xs
+          on_dry_run:
+            upstream_dependency:
+            - seed_dummy_data_initial_run
+            - seed_dummy_data_incremental_run

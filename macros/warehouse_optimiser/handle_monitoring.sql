@@ -1,8 +1,8 @@
-{% macro handle_monitoring(macro_name, schedule, row_count, thresholds, default_warehouse_size) %}
-    {{ return(adapter.dispatch('handle_monitoring', 'dbt_macro_polo')(macro_name, schedule, row_count, thresholds, default_warehouse_size)) }}
+{% macro handle_monitoring(schedule, row_count, thresholds, default_warehouse_size) %}
+    {{ return(adapter.dispatch('handle_monitoring', 'dbt_macro_polo')(schedule, row_count, thresholds, default_warehouse_size)) }}
 {% endmacro %}
 
-{% macro default__handle_monitoring(macro_name, schedule, row_count, thresholds, default_warehouse_size) %}
+{% macro default__handle_monitoring(schedule, row_count, thresholds, default_warehouse_size) %}
 
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('handle_monitoring') %}

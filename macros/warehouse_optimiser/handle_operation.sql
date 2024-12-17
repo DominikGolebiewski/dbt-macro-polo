@@ -1,8 +1,8 @@
-{% macro handle_operation(macro_name, model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
-    {{ return(adapter.dispatch('handle_operation', 'dbt_macro_polo')(macro_name, model_id, query_operation, active_config, has_on_dry_run_config, row_count)) }}
+{% macro handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
+    {{ return(adapter.dispatch('handle_operation', 'dbt_macro_polo')(model_id, query_operation, active_config, has_on_dry_run_config, row_count)) }}
 {% endmacro %}
 
-{% macro default__handle_operation(macro_name, model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
+{% macro default__handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
 
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('handle_operation') %}
@@ -33,11 +33,11 @@
 
     {# Handle scheduling if configured #}
     {%- if operation_config and operation_config is mapping -%}
-        {{ return(dbt_macro_polo.handle_scheduling(macro_name, operation_config, row_count, optimiser_config, has_on_dry_run_config, default_warehouse_size)) }}
+        {{ return(dbt_macro_polo.handle_scheduling(operation_config, row_count, has_on_dry_run_config, default_warehouse_size)) }}
     {%- endif -%}
 
     {# Return default size if no special handling needed #}
-    {{ dbt_macro_polo.logging(message="Using default warehouse size", model_id=model_id, status=operation_size | upper) }}
+    {{ dbt_macro_polo.logging(message="Using default warehouse size", model_id=model_id, status=default_warehouse_size | upper) }}
     {{ return(default_warehouse_size) }}
 
 {%- endmacro -%}
