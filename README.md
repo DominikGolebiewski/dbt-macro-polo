@@ -21,7 +21,7 @@ Please make sure to test these macros thoroughly in your own environment before 
    ```yaml
    packages:
      - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-       revision: 0.0.2  # Specify the git release version you want to use
+       revision: 0.1.0  # Specify the git release version you want to use
    ```
 
 2. **Install the package**
@@ -31,10 +31,10 @@ Please make sure to test these macros thoroughly in your own environment before 
 
 ## Macro Collection 📚
 
-### [get_warehouse](macros/get_warehouse/get_warehouse.sql)
+### [allocate_warehouse](macros/allocate_warehouse/allocate_warehouse.sql)
 
 ** Snowflake Only **
-Dynamically sets warehouse size based on operation context (incremental and full-refresh). Perfect for optimising compute costs.
+Dynamically sets warehouse size based on operation context (incremental and full-refresh).
 
 #### Configuration Requirements
 
@@ -42,17 +42,15 @@ Dynamically sets warehouse size based on operation context (incremental and full
 
 ```yaml
 vars:
-    warehouse_config:
-        # Define available warehouse sizes for validation
-        warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl']
-        # Map your dbt targets to warehouse configurations
-        environments:
-            production:
-                target_name: prod # Matches your profiles.yml target
-                warehouse_name_prefix: production_warehouse
-            development:
-                target_name: dev
-                warehouse_name_prefix: development_warehouse
+  warehouse_config:
+    # Define available warehouse sizes for validation
+    warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl']
+    # Map your dbt targets to warehouse configurations
+    environment:
+      prod: # Matches your profiles.yml target
+        warehouse_name_prefix: prod_wh # Matches your warehouse name prefix
+      dev:
+        warehouse_name_prefix: dev_wh
 ```
 
 Check out the [integration tests](integration_tests/dbt_project.yml) for example.
@@ -64,7 +62,7 @@ Check out the [integration tests](integration_tests/dbt_project.yml) for example
 ```sql
 {{ config(
         pre_hook=[
-            'use warehouse {{ dbt_macro_polo.get_warehouse(incremental_size="s", full_refresh_size="xl") }}'
+            'use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size="s", full_refresh_size="xl") }}'
         ]
     )
 ) }}
@@ -90,27 +88,27 @@ For initial run:
 
 ```sql
 -- Development environment (target: dev)
-use warehouse development_warehouse_xl;
+use warehouse dev_wh_xl;
 -- Production environment (target: prod)
-use warehouse production_warehouse_xl;
+use warehouse prd_wh_xl;
 ```
 
 For incremental runs:
 
 ```sql
 -- Development environment (target: dev)
-use warehouse development_warehouse_s;
+use warehouse dev_wh_s;
 -- Production environment (target: prod)
-use warehouse production_warehouse_s;
+use warehouse prd_wh_s;
 ```
 
 For full refresh runs:
 
 ```sql
 -- Development environment (target: dev)
-use warehouse development_warehouse_xl;
+use warehouse dev_wh_xl;
 -- Production environment (target: prod)
-use warehouse production_warehouse_xl;
+use warehouse prd_wh_xl;
 ```
 
 The warehouse name is dynamically constructed using:
@@ -120,6 +118,80 @@ The warehouse name is dynamically constructed using:
 If full refresh size is not provided, the warehouse size will be the same as the incremental size.
 View materialisation will always use the incremental size even if full refresh size is provided.
 Any other materialisation type other then `view`, `table` or `incremental` will use the target warehouse size.
+
+### [get_max_timestamp](macros/get_max_timestamp/get_max_timestamp.sql)
+
+** Snowflake Only **
+Efficiently retrieves and caches the maximum timestamp from a specified column in a model, with built-in warehouse management.
+
+#### Parameters
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| timestamp_column | Optional | 'loaded_timestamp' | Column name containing timestamps to evaluate |
+| predicate | Optional | none | WHERE clause to filter the records (e.g., "status = 'active'") |
+| warehouse_size | Optional | 'xs' | Size of the warehouse to use for the query (xs, s, m, l, xl) |
+| model_name | Optional | this.name | Name of the model to query. Defaults to current model |
+
+#### Configuration Requirements
+
+1. **Configure macro_polo in dbt_project.yml**
+
+```yaml
+vars:
+  macro_polo:
+    cache: {}  # Required for caching functionality
+```
+
+#### Usage Example
+
+1. **Basic usage in your model**
+
+```sql
+{% set max_timestamp = dbt_macro_polo.get_max_timestamp() %}
+
+select *
+from {{ ref('my_source_table') }}
+where created_at > {{ max_timestamp }}
+```
+
+2. **Advanced usage with all parameters**
+
+```sql
+{% set max_timestamp = dbt_macro_polo.get_max_timestamp(
+    timestamp_column='created_at',
+    predicate="status = 'active'",
+    warehouse_size='m',
+    model_name='my_source_model'
+) %}
+
+select *
+from {{ ref('my_source_table') }}
+where created_at > {{ max_timestamp }}
+```
+
+3. **Resolution Examples**
+
+For first execution:
+```sql
+/* Query generated by get_max_timestamp macro */
+select coalesce(max(created_at), '0'::timestamp) as max_ts
+from my_source_model
+where status = 'active'
+```
+
+For subsequent executions:
+- Returns cached value if available
+- Only re-queries when cache is invalid or empty
+
+The macro provides:
+- Automatic result caching for improved performance
+- Dynamic warehouse allocation based on specified size
+- Comprehensive error handling and logging
+- Proper timestamp typing and null handling
+- Automatic warehouse cleanup after execution
+
+If the timestamp cannot be resolved, the macro returns `false` and logs an appropriate error message.
 
 ## Contributing 🤝
 
