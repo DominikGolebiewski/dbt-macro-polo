@@ -34,15 +34,15 @@ Comprehensive validation and error checking for:
 ```sql
 {% raw %}
 -- Basic usage
-{% set max_ts = get_max_timestamp() %}
+{% set max_ts = dbt_macro_polo.get_max_timestamp() %}
 -- With custom timestamp column and predicate
-{% set max_ts = get_max_timestamp(
+{% set max_ts = dbt_macro_polo.get_max_timestamp(
 timestamp_column='created_at',
 predicate="status = 'active'",
 warehouse_size='s'
 ) %}
 -- With all parameters
-{% set max_ts = get_max_timestamp(
+{% set max_ts = dbt_macro_polo.get_max_timestamp(
 timestamp_column='updated_at',
 predicate='category = "sales"',
 warehouse_size='m',
