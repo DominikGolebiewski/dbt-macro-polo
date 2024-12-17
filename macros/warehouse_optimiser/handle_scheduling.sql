@@ -43,7 +43,6 @@
                     {% if schedule.get('monitoring', {}).get('enabled', false) and has_on_dry_run_config %}
                         {{ dbt_macro_polo.logging(message=schedule_name ~ " monitoring enabled", model_id=model_id, status=true | string | upper) }}   
                         {% set final_size.value = dbt_macro_polo.handle_monitoring(
-                            macro_name,
                             schedule,
                             row_count,
                             schedule.get('monitoring', {}).get('thresholds', []),
@@ -64,7 +63,6 @@
             {% if has_on_dry_run_config and monitoring_enabled %}
                 {{ dbt_macro_polo.logging(message="Monitoring enabled", model_id=model_id, status=true | string | upper) }}
                 {% set final_size.value = dbt_macro_polo.handle_monitoring(
-                    macro_name,
                     operation_config,
                     row_count,
                     operation_config.get('monitoring', {}).get('thresholds', []),
@@ -80,7 +78,6 @@
         {% if has_on_dry_run_config and monitoring_enabled %}
             {{ dbt_macro_polo.logging(message="Monitoring enabled", model_id=model_id, status=true | string | upper) }}
             {% set final_size.value = dbt_macro_polo.handle_monitoring(
-                macro_name,
                 operation_config,
                 row_count,
                 operation_config.get('monitoring', {}).get('thresholds', []),
