@@ -42,7 +42,7 @@
             {%- set upstream_dependency = [upstream_dependency] -%}
         {%- endif -%}
 
-        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=upstream_dependency | length) }}
+        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=upstream_dependency) }}
 
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
