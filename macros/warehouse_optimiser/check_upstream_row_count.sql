@@ -22,7 +22,7 @@
     {# Initialise row count #}
     {%- set row_count = namespace(value=0) -%}
 
-    {%- if upstream_dependency is string or (upstream_dependency is sequence and upstream_dependency | length > 0) -%}
+    {%- if upstream_dependency is string or (upstream_dependency is sequence) -%}
         {{ dbt_macro_polo.logging(macro_name, "Initialising row count", model_id=model_id, level='DEBUG') }}
         
         {# Determine if target exists #}
@@ -42,7 +42,7 @@
             {%- set upstream_dependency = [upstream_dependency] -%}
         {%- endif -%}
 
-        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=upstream_dependency) }}
+        {{ dbt_macro_polo.logging(message="Upstream models count", model_id=model_id, status=upstream_dependency | length) }}
 
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
