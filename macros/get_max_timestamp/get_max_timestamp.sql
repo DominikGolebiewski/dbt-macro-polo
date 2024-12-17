@@ -74,7 +74,7 @@
 
         {# Cache and return result #}
         {{ dbt_macro_polo.logging(macro_name, message="Macro Polo: Caching maximum timestamp '" ~ timestamp ~ "' with cache key '" ~ cache_key ~ "'", model_id=model_id, level='DEBUG') }}
-        {% do macro_polo.update({'cache': {cache_key: timestamp}}) %}
+        {% do macro_polo.cache.update({cache_key: timestamp}) %}
         {{ dbt_macro_polo.logging(message="Macro Polo: Resolved maximum timestamp", model_id=model_id, status=timestamp) }}
         {{ return("'" ~ timestamp ~ "'::timestamp") }}
 

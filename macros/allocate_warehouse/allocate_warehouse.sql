@@ -153,7 +153,7 @@
 
     {# Cache and return result #}
     {{ dbt_macro_polo.logging(macro_name, message="Macro Polo Caching warehouse '" ~ warehouse_id ~ "' with cache key '" ~ cache_key ~ "'", level='DEBUG') }}
-    {% do var('_cache', {}).update({cache_key: warehouse_id}) %}
+    {% do macro_polo.cache.update({cache_key: warehouse_id}) %}
     {{ dbt_macro_polo.logging(message="Macro Polo: Allocated warehouse", model_id=model_id, status=warehouse_id | upper) }}
     {{ return(warehouse_id) }}
     

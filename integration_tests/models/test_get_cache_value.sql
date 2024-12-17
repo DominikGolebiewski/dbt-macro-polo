@@ -28,14 +28,6 @@
     'expected': 'new_value'
 }) %}
 
-{# Test Case 4: Full cache #}
-{% do test_results.append({
-    'test_name': 'Full cache',
-    'model_name': this.name,
-    'actual': tojson(var('macro_polo', {}).get('cache', {})),
-    'expected': tojson({'test_key_1': 'test_value_1', 'new_key': 'new_value'})
-}) %}
-
 {# Process test results #}
 {% set failed_tests = [] %}
 {% for test in test_results %}

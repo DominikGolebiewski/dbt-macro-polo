@@ -1,0 +1,24 @@
+version: 2
+
+models:
+- name: test_handle_operation
+  description: ""
+
+  config:
+    materialized: 'incremental'
+    incremental_strategy: 'delete+insert'
+    unique_key: 'id'
+    timestamp_column: 'run_started_time'
+    pre_hook: ["{{ dbt_macro_polo.warehouse_optimiser() }}"]
+
+    meta:
+      warehouse_optimiser:
+        enabled: true
+        operation_type:
+          on_run:
+            ctas:
+              warehouse_size: s
+            delete:
+              warehouse_size: xs
+            insert:
+              warehouse_size: s

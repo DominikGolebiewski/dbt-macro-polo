@@ -33,8 +33,8 @@
             {# ANSI colour codes matching dbt #}
             {% set color_codes = {
                 'DEBUG': '\033[90m',       
-                'INFO': '\033[96m',     
-                'WARNING': '\033[33m',    
+                'INFO': '\033[34m',     
+                'WARNING': '\033[38;5;214m',    
                 'ERROR': '\033[31m'        
             } %}
             
@@ -42,6 +42,7 @@
             {% set reset_code = '\033[0m' %}
             
             {# Get status and color #}
+            {% set prefix = "Macro Polo: " %}
             {% set status = status if status is not none else status_by_level.get(level, 'INFO') %}
             {% set color_code = color_codes.get(status, color_codes['INFO']) %}
 
@@ -52,11 +53,11 @@
             
             {# Modify message formatting based on level #}
             {% if level == 'WARN' %}
-                {% set base_message = color_code ~ macro_name ~ message ~ model_id %}
+                {% set base_message = color_code ~ prefix ~ reset_code ~ macro_name ~ message ~ model_id  %}
             {% elif level in ['ERROR', 'DEBUG'] %}
                 {% set base_message = color_code ~ macro_name ~ message ~ model_id ~ reset_code %}
             {% else %}
-                {% set base_message = color_code ~ macro_name ~ reset_code ~ message ~ model_id %}
+                {% set base_message = light_cyan ~ macro_name ~ message ~ model_id ~ reset_code %}
             {% endif %}
             
             {# Calculate dots for alignment #}
@@ -68,7 +69,7 @@
             {% if level in ['ERROR', 'DEBUG'] %}
                 {% set log_message = base_message %}
             {% elif level == 'WARN' %}
-                {% set log_message = base_message ~ " " ~ dots ~ " " ~ "[" ~ status ~ "]" ~ reset_code %}
+                {% set log_message = base_message ~ " " ~ dots ~ " " ~ "[" ~ color_code ~ status  ~ reset_code ~ "]" %}
             {% else %}
                 {% set log_message = base_message ~ " " ~ dots ~ " " ~ "[" ~ color_code ~ status ~ reset_code ~ "]" %}
             {% endif %}

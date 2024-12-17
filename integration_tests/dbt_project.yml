@@ -19,8 +19,10 @@ clean-targets: ["target", "dbt_packages"]
 require-dbt-version: [">=1.3.0", "<2.0.0"]
 
 dispatch:
-  - macro_namespace: 'dbt_macro_polo'
-    search_order: ['dbt_macro_polo_integration_tests', 'dbt_macro_polo']
+  - macro_namespace: dbt_macro_polo
+    search_order: [ 'dbt_macro_polo_integration_tests','dbt_macro_polo' ]
+  - macro_namespace: dbt
+    search_order: [ 'dbt_macro_polo_integration_tests','dbt_macro_polo', 'dbt' ]
 
 vars:
   # DBT compatibility with legacy surrogate_key macro
@@ -31,6 +33,9 @@ vars:
   macro_polo:
     cache: {}
     logging_level: info
+    warehouse_optimiser:
+      enabled: true
+      default_warehouse_size: xs
     warehouse_config:
       warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
       environment:
