@@ -1,7 +1,4 @@
-# DBT Macro Polo 🎯
-
 ![macro_polo_logo](https://github.com/user-attachments/assets/797407eb-73bf-449f-8de2-01a2a533ab06)
-
 
 > A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system.
 
@@ -28,7 +25,14 @@ This project aims to:
 - Experiment with novel solutions
 - Share sophisticated solutions with the dbt community
 
-> **⚠️ IMPORTANT**: This repository is actively being developed and some features, especially warehouse_optimiser, are not fully functional or may produce unexpected results.
+
+>**⚠️ IMPORTANT**: 
+>This repository is actively being developed and some features may not be fully functional or may produce unexpected results in your environment. 
+> 
+> List of known limitations and caveats:
+>- warehouse_optimiser may produce unexpected results if setup incorrectly
+>- Logging is not yet fully implemented withing warehouse_optimiser, especially DEBUG level
+>- Compilation and docs generation is taking longer due to timestamp retrival
 
 ## Installation
 
