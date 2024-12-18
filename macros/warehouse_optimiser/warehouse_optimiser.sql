@@ -9,12 +9,25 @@
     {% set model_id = macro_ctx.model_id %}
     {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
+    {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
+    {% set is_delete_insert = model.config.get('incremental_strategy', 'undefinded') == 'delete+insert' %}
     
     {# Validate query operation #}
     {% if query_operation not in ['ctas', 'insert', 'delete'] %}
         {{ dbt_macro_polo.logging(message="Invalid query operation. Expected: 'ctas', 'insert', or 'delete'. Received: " ~ query_operation, 
             level='ERROR', model_id=model_id) }}
         {{ return('') }}
+    {% endif %}
+
+    {% if not (is_incremental and is_delete_insert) %}
+        {{ dbt_macro_polo.logging(message="Warehouse Optimiser is only supported for incremental models with delete+insert strategy."
+            ~ "\n\n Expected: \n   materialized: incremental \n   incremental_strategy: delete+insert"
+            ~ "\n\n Received: \n   materialized: " ~ model.config.get('materialized', 'undefined') 
+            ~ "\n   incremental_strategy: " ~ model.config.get('incremental_strategy', 'undefined'),
+            model_id="\n\n In model: " ~ model_id, 
+            level='ERROR'
+        ) }}
+        {{ return(false) }}
     {% endif %}
 
     {# Get and validate configurations #}
