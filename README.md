@@ -42,7 +42,7 @@ This project aims to:
 ```yaml
 packages:
   - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-    revision: 0.1.0-beta.1
+    revision: 0.1.1-beta.1
 ```
 
 2. **Install the package**
