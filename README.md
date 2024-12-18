@@ -6,6 +6,8 @@
 [![Snowflake](https://img.shields.io/badge/Snowflake-Ready-29B5E8.svg)](https://www.snowflake.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
+
 ## 📚 Table of Contents
 
 - [Overview](#overview)
