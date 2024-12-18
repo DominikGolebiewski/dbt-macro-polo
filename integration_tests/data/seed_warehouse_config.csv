@@ -1,0 +1,4 @@
+operation,row_count,expected_size,schedule_name,start_time,end_time,now_time,days
+delete,0,xs,peak_hours,09:00,17:00,10:00,monday
+insert,1000,s,off_peak,17:00,09:00,18:00,tuesday
+ctas,5000,m,weekend,00:00,23:59,12:00,saturday

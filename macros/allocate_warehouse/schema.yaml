@@ -1,0 +1,12 @@
+version: 2
+
+macros:
+- name: allocate_warehouse
+  description: '{{ doc("allocate_warehouse") }}'
+  arguments:
+  - name: incremental_size
+    type: string
+    description: Required. The warehouse size to use for incremental runs (xs, s, m, l)
+  - name: fullrefresh_size
+    type: string
+    description: Optional. The warehouse size to use for full-refresh runs. Defaults to incremental_size if not specified

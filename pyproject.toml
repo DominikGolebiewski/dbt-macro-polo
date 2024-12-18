@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-macro-polo"
-version = "0.0.1"
+version = "0.1.0-beta.1"
 description = "A sophisticated exploration of dbt macro capabilities, pushing the boundaries of what's possible with dbt's macro system."
 authors = ["Dominik Golebiewski <dominik.golebiewski@atheon.co.uk>"]
 license = "MIT"
@@ -9,9 +9,8 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-dbt-snowflake = "^1.8.4"
-dbt-core = "^1.8.9"
-
+dbt-snowflake = "^1.8.6"
+dbt-core = "^1.8.4"
 
 [build-system]
 requires = ["poetry-core"]

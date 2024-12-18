@@ -1,0 +1,38 @@
+version: 2
+
+macros:
+  - name: create_macro_context
+    description: '{{ doc("create_macro_context") }}'
+    arguments:
+      - name: macro_name
+        type: string
+        description: Name of the macro being executed
+
+  - name: get_cache_value
+    description: '{{ doc("get_cache_value") }}'
+    arguments:
+      - name: cache_key
+        type: string
+        description: Unique identifier for the cached value
+
+  - name: get_delete_insert_merge_sql
+    description: '{{ doc("get_delete_insert_merge_sql") }}'
+    arguments:
+      - name: target
+        type: relation
+        description: Target table for the merge operation
+      - name: source
+        type: relation
+        description: Source table containing the new/updated data
+      - name: unique_key
+        type: string | list
+        description: Column(s) that uniquely identify records
+      - name: dest_columns
+        type: list
+        description: List of columns in the destination table
+      - name: incremental_predicates
+        type: list
+        description: Additional predicates for incremental processing
+
+  - name: should_full_refresh
+    description: '{{ doc("should_full_refresh") }}'

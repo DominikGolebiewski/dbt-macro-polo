@@ -1,0 +1,233 @@
+[0;34mLoading environment variables...[0m
+[0;34mInstalling dbt dependencies...[0m
+[0m00:12:42  Running with dbt=1.9.0
+[0m00:12:42  Installing ../
+[0m00:12:42  Installed from <local @ ../>
+[0;34mRunning dbt seeds...[0m
+[0m00:12:44  Running with dbt=1.9.0
+[0m00:12:44  Registered adapter: snowflake=1.9.0
+[0m00:12:44  Found 9 models, 4 seeds, 497 macros
+[0m00:12:44  
+[0m00:12:44  Concurrency: 10 threads (target='dev')
+[0m00:12:44  
+[0m00:12:45  1 of 9 START sql view model dbt_dgolebiewski.test_allocate_warehouse ........... [RUN]
+[0m00:12:45  2 of 9 START sql view model dbt_dgolebiewski.test_create_macro_context ......... [RUN]
+[0m00:12:45  3 of 9 START sql view model dbt_dgolebiewski.test_get_cache_value .............. [RUN]
+[0m00:12:45  4 of 9 START sql view model dbt_dgolebiewski.test_get_max_timestamp ............ [RUN]
+[0m00:12:45  5 of 9 START sql view model dbt_dgolebiewski.test_handle_monitoring ............ [RUN]
+[0m00:12:45  6 of 9 START sql view model dbt_dgolebiewski.test_handle_scheduling ............ [RUN]
+[0m00:12:45  7 of 9 START sql view model dbt_dgolebiewski.test_is_within_time_range ......... [RUN]
+[0m00:12:45  8 of 9 START sql view model dbt_dgolebiewski.test_logging ...................... [RUN]
+[0m00:12:45  9 of 9 START sql incremental model dbt_dgolebiewski.test_warehouse_optimiser_basic  [RUN]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': {}} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'test_key_1', 'cache_value': 'test_value_1'} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp', 'cache_value': {}} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'peak_hours', 'warehouse_size': 's', 'times': {'start': '08:00', 'end': '17:00'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}]}
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'business_hours', 'start': '09:00', 'end': '17:00', 'current': datetime.datetime(2024, 1, 1, 14, 30)}
+[0m00:12:45  [90mMacro Polo: ALLOCATE_WAREHOUSE • Caching warehouse 'developer_xs' with cache key '_macro_polo_allocate_warehouse_xs'
+[0m00:12:45  [34mMacro Polo: [0mTest info message[0m................................................... [[34mSUCCESS[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'non_existent_key', 'cache_value': {}} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': {}} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m1500000 >= 1000000[0m]
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_is_within_time_range[0m [[34mTRUE[0m]
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse • dbt_dgolebiewski.test_allocate_warehouse[0m...... [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [90mMacro Polo: test_macro • Test debug message
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'new_key', 'cache_value': 'new_value'} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [90mMacro Polo: ALLOCATE_WAREHOUSE • Caching warehouse 'developer_xs' with cache key '_macro_polo_allocate_warehouse_xs'
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mL[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'peak_hours', 'warehouse_size': 's', 'times': {'start': '08:00', 'end': '17:00'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}] current time: 2025-01-01 09:30:00 current day: wednesday
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'business_hours', 'start': '09:00', 'end': '17:00', 'current': datetime.datetime(2024, 1, 1, 8, 30)}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [38;5;214mMacro Polo: [0mTest warning message • test_schema.test_model[0m....................... [[38;5;214mWARNING[0m]
+[0m00:12:45  [38;5;214mMacro Polo: [0mMacro Polo: No on_dry_run_config found. No warehouse switch will be performed. • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[38;5;214mWARNING[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'test_key_1', 'cache_value': 'test_value_1'} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse • dbt_dgolebiewski.test_get_max_timestamp[0m....... [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'peak_hours', 'start': '08:00', 'end': '17:00', 'current': datetime.datetime(2025, 1, 1, 9, 30)}
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_is_within_time_range[0m [[34mFALSE[0m]
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_allocate_warehouse[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [34mMacro Polo: [0mTest message with status[0m............................................ [[34mTEST[0m]
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mCTAS[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'non_existent_key', 'cache_value': {}} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m500000 >= 100000[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'business_hours', 'start': '09:00', 'end': '17:00', 'current': datetime.datetime(2024, 1, 1, 14, 30)}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_m', 'cache_value': {}} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [34mMacro Polo: [0mThis is a very long message that should be aligned with dots[0m........ [[34mSUCCESS[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: ctas with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': 'new_key', 'cache_value': 'new_value'} • dbt_dgolebiewski.test_get_cache_value
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mM[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mPEAK_HOURS[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_is_within_time_range[0m [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: ALLOCATE_WAREHOUSE • Caching warehouse 'developer_m' with cache key '_macro_polo_allocate_warehouse_m'
+[0m00:12:45  [34mMacro Polo: [0mTest info message[0m................................................... [[34mSUCCESS[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': {}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'off_peak_hours', 'warehouse_size': 'xs', 'times': {'start': '12:01', 'end': '23:59'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}]}
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'business_hours', 'start': '09:00', 'end': '17:00', 'current': datetime.datetime(2024, 1, 1, 8, 30)}
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse • dbt_dgolebiewski.test_allocate_warehouse[0m...... [[34mDEVELOPER_M[0m]
+[0m00:12:45  [90mMacro Polo: test_macro • Test debug message
+[0m00:12:45  [90mMacro Polo: ALLOCATE_WAREHOUSE • Caching warehouse 'developer_s' with cache key '_macro_polo_allocate_warehouse_s'
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m50000 >= 10000[0m]
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_is_within_time_range[0m [[34mFALSE[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [38;5;214mMacro Polo: [0mTest warning message • test_schema.test_model[0m....................... [[38;5;214mWARNING[0m]
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mS[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'off_peak_hours', 'warehouse_size': 'xs', 'times': {'start': '12:01', 'end': '23:59'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}] current time: 2025-01-01 14:30:00 current day: wednesday
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_allocate_warehouse[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [34mMacro Polo: [0mTest message with status[0m............................................ [[34mTEST[0m]
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for CTAS • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'off_peak_hours', 'start': '12:01', 'end': '23:59', 'current': datetime.datetime(2025, 1, 1, 14, 30)}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [34mMacro Polo: [0mThis is a very long message that should be aligned with dots[0m........ [[34mSUCCESS[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mNo row threshold matched, using default warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m [[34mXS[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_allocate_warehouse[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mOFF_PEAK_HOURS[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_m', 'cache_value': 'developer_m'} • dbt_dgolebiewski.test_allocate_warehouse
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDELETE[0m]
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m1500000 >= 1000000[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'weekend_hours', 'warehouse_size': 'm', 'times': {'start': '00:00', 'end': '23:59'}, 'days': ['saturday', 'sunday']}]}
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_allocate_warehouse[0m [[34mDEVELOPER_M[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: delete with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mL[0m]
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'weekend_hours', 'warehouse_size': 'm', 'times': {'start': '00:00', 'end': '23:59'}, 'days': ['saturday', 'sunday']}] current time: 2025-01-04 14:30:00 current day: saturday
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m500000 >= 100000[0m]
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'weekend_hours', 'start': '00:00', 'end': '23:59', 'current': datetime.datetime(2025, 1, 4, 14, 30)}
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for DELETE • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mM[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mWEEKEND_HOURS[0m]
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mRow threshold matched • dbt_dgolebiewski.test_handle_monitoring[0m..... [[34m50000 >= 10000[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'peak_hours', 'warehouse_size': 's', 'times': {'start': '08:00', 'end': '17:00'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}]}
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mINSERT[0m]
+[0m00:12:45  [34mMacro Polo: [0mUsing warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m...... [[34mS[0m]
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: insert with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [90mMacro Polo: HANDLE_MONITORING • Thresholds: [{'rows': 1000000, 'warehouse_size': 'l'}, {'rows': 100000, 'warehouse_size': 'm'}, {'rows': 10000, 'warehouse_size': 's'}] • dbt_dgolebiewski.test_handle_monitoring
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'peak_hours', 'warehouse_size': 's', 'times': {'start': '08:00', 'end': '17:00'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}] current time: 2025-01-01 09:30:00 current day: wednesday
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mNo row threshold matched, using default warehouse size • dbt_dgolebiewski.test_handle_monitoring[0m [[34mXS[0m]
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'peak_hours', 'start': '08:00', 'end': '17:00', 'current': datetime.datetime(2025, 1, 1, 9, 30)}
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for INSERT • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mPEAK_HOURS[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'off_peak_hours', 'warehouse_size': 'xs', 'times': {'start': '12:01', 'end': '23:59'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}]}
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [38;5;214mMacro Polo: [0mMacro Polo: No on_dry_run_config found. No warehouse switch will be performed. • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[38;5;214mWARNING[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'off_peak_hours', 'warehouse_size': 'xs', 'times': {'start': '12:01', 'end': '23:59'}, 'days': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']}] current time: 2025-01-01 14:30:00 current day: wednesday
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mCTAS[0m]
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'off_peak_hours', 'start': '12:01', 'end': '23:59', 'current': datetime.datetime(2025, 1, 1, 14, 30)}
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: ctas with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mOFF_PEAK_HOURS[0m]
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Scheduling config: {'enabled': True, 'schedules': [{'name': 'weekend_hours', 'warehouse_size': 'm', 'times': {'start': '00:00', 'end': '23:59'}, 'days': ['saturday', 'sunday']}]}
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for CTAS • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mScheduling enabled • dbt_dgolebiewski.test_handle_scheduling[0m........ [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: HANDLE_SCHEDULING • Set schedules: [{'name': 'weekend_hours', 'warehouse_size': 'm', 'times': {'start': '00:00', 'end': '23:59'}, 'days': ['saturday', 'sunday']}] current time: 2025-01-04 14:30:00 current day: saturday
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: IS_WITHIN_TIME_RANGE • Checking time range: {'schedule': 'weekend_hours', 'start': '00:00', 'end': '23:59', 'current': datetime.datetime(2025, 1, 4, 14, 30)}
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDELETE[0m]
+[0m00:12:45  [34mMacro Polo: [0mSchedule time range check • dbt_dgolebiewski.test_handle_scheduling[0m. [[34mTRUE[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: delete with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [34mMacro Polo: [0mSchedule matched • dbt_dgolebiewski.test_handle_scheduling[0m.......... [[34mWEEKEND_HOURS[0m]
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for DELETE • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mINSERT[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: insert with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for INSERT • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:45  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [38;5;214mMacro Polo: [0mMacro Polo: No on_dry_run_config found. No warehouse switch will be performed. • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[38;5;214mWARNING[0m]
+[0m00:12:45  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mCTAS[0m]
+[0m00:12:45  [90mMacro Polo: HANDLE_OPERATION • Processing operation: ctas with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:45  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:45  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  [34mMacro Polo: [0mFinal warehouse selection for CTAS • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:45  1 of 9 OK created sql view model dbt_dgolebiewski.test_allocate_warehouse ...... [[32mSUCCESS 1[0m in 0.42s]
+[0m00:12:46  3 of 9 OK created sql view model dbt_dgolebiewski.test_get_cache_value ......... [[32mSUCCESS 1[0m in 0.74s]
+[0m00:12:46  8 of 9 OK created sql view model dbt_dgolebiewski.test_logging ................. [[32mSUCCESS 1[0m in 0.74s]
+[0m00:12:46  7 of 9 OK created sql view model dbt_dgolebiewski.test_is_within_time_range .... [[32mSUCCESS 1[0m in 0.74s]
+[0m00:12:46  2 of 9 OK created sql view model dbt_dgolebiewski.test_create_macro_context .... [[32mSUCCESS 1[0m in 0.75s]
+[0m00:12:46  5 of 9 OK created sql view model dbt_dgolebiewski.test_handle_monitoring ....... [[32mSUCCESS 1[0m in 0.75s]
+[0m00:12:46  6 of 9 OK created sql view model dbt_dgolebiewski.test_handle_scheduling ....... [[32mSUCCESS 1[0m in 0.81s]
+[0m00:12:46  [90mMacro Polo: GET_MAX_TIMESTAMP • Caching maximum timestamp '2024-01-05 00:00:00' with cache key '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp' • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mMacro Polo: Resolved maximum timestamp • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 00:00:00[0m]
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp', 'cache_value': {}} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:46  [90mMacro Polo: GET_MAX_TIMESTAMP • Caching maximum timestamp '2024-01-05 12:00:00' with cache key '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp' • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mMacro Polo: Resolved maximum timestamp • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 12:00:00[0m]
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': "_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp_status_=_'active'", 'cache_value': {}} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:46  [90mMacro Polo: GET_MAX_TIMESTAMP • Caching maximum timestamp '2024-01-04 00:00:00' with cache key '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp_status_=_'active'' • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mMacro Polo: Resolved maximum timestamp • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-04 00:00:00[0m]
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp', 'cache_value': '2024-01-05 00:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 00:00:00[0m]
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': "_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp_status_=_'active'", 'cache_value': {}} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:46  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34mDEVELOPER_S[0m]
+[0m00:12:47  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDELETE[0m]
+[0m00:12:47  [90mMacro Polo: HANDLE_OPERATION • Processing operation: delete with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_s', 'cache_value': 'developer_s'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:47  [34mMacro Polo: [0mFinal warehouse selection for DELETE • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_S[0m]
+[0m00:12:47  [90mMacro Polo: Is full refresh: False • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [90mMacro Polo: Active config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [34mMacro Polo: [0mMacro Polo: Starting Warehouse Optimiser • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mINSERT[0m]
+[0m00:12:47  [90mMacro Polo: HANDLE_OPERATION • Processing operation: insert with config: {'ctas': {'warehouse_size': 's'}, 'delete': {'warehouse_size': 's'}, 'insert': {'warehouse_size': 'xs'}}
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_allocate_warehouse_xs', 'cache_value': 'developer_xs'} • dbt_dgolebiewski.test_warehouse_optimiser_basic
+[0m00:12:47  [34mMacro Polo: [0mAllocated warehouse from cache • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:47  [34mMacro Polo: [0mFinal warehouse selection for INSERT • dbt_dgolebiewski.test_warehouse_optimiser_basic[0m [[34mDEVELOPER_XS[0m]
+[0m00:12:47  [90mMacro Polo: GET_MAX_TIMESTAMP • Caching maximum timestamp '2024-01-04 12:00:00' with cache key '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp_status_=_'active'' • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mMacro Polo: Resolved maximum timestamp • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-04 12:00:00[0m]
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp', 'cache_value': '2024-01-05 00:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 00:00:00[0m]
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp', 'cache_value': '2024-01-05 12:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 12:00:00[0m]
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': "_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp_status_=_'active'", 'cache_value': '2024-01-04 00:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-04 00:00:00[0m]
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': '_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_loaded_timestamp', 'cache_value': '2024-01-05 00:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-05 00:00:00[0m]
+[0m00:12:47  [90mMacro Polo: GET_CACHE_VALUE • Cache handling: {'cache_key': "_macro_polo_max_ts_dbt_dgolebiewski_test_get_max_timestamp_custom_timestamp_status_=_'active'", 'cache_value': '2024-01-04 12:00:00'} • dbt_dgolebiewski.test_get_max_timestamp
+[0m00:12:47  [34mMacro Polo: [0mResolved maximum timestamp from cache • dbt_dgolebiewski.test_get_max_timestamp[0m [[34m2024-01-04 12:00:00[0m]
+[0m00:12:47  4 of 9 OK created sql view model dbt_dgolebiewski.test_get_max_timestamp ....... [[32mSUCCESS 1[0m in 1.93s]
+[0m00:12:50  9 of 9 OK created sql incremental model dbt_dgolebiewski.test_warehouse_optimiser_basic  [[32mSUCCESS 0[0m in 4.71s]
+[0m00:12:51  
+[0m00:12:51  Finished running 1 incremental model, 8 view models in 0 hours 0 minutes and 6.87 seconds (6.87s).
+[0m00:12:51  
+[0m00:12:51  [32mCompleted successfully[0m
+[0m00:12:51  
+[0m00:12:51  Done. PASS=9 WARN=0 ERROR=0 SKIP=0 TOTAL=9
+[0;32mAll tests completed successfully![0m
