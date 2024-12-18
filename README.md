@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
+> The video demonstrates the package in its alpha version, so the appearance, parameter names, and functionality may differ from the current release.
 
 ## 📚 Table of Contents
 
