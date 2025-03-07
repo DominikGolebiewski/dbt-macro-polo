@@ -27,6 +27,9 @@
     {% set project_config = macro_polo.get('warehouse_optimiser', {}) %}
     {% set model_config = model.config.get('meta', {}).get('warehouse_optimiser', {}) %}
     
+    {{ log(project_config, info=true) }}
+    {{ log(model_config, info=true) }}
+
     {# Check if optimiser is enabled #}
     {% if not (project_config.get('enabled', false) and model_config.get('enabled', false)) %}
         {% if query_operation == 'ctas' %}
