@@ -4,9 +4,7 @@
 
 {% macro default__warehouse_optimiser(query_operation='ctas') %}
 
-    {# Initialise macro context #}
-    {% set macro_ctx = dbt_macro_polo.create_macro_context('warehouse_optimiser') %}
-    {% set model_id = macro_ctx.model_id %}
+    {% set model_id = this.schema | lower ~ '.' ~ this.name | lower %}
     {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
@@ -20,13 +18,8 @@
     {% endif %}
 
     {% if not (is_incremental and is_delete_insert) %}
-        {{ dbt_macro_polo.logging(message="Warehouse Optimiser is only supported for incremental models with delete+insert strategy."
-            ~ "\n\n Expected: \n   materialized: incremental \n   incremental_strategy: delete+insert"
-            ~ "\n\n Received: \n   materialized: " ~ model.config.get('materialized', 'undefined') 
-            ~ "\n   incremental_strategy: " ~ model.config.get('incremental_strategy', 'undefined'),
-            model_id="\n\n In model: " ~ model_id, 
-            level='ERROR'
-        ) }}
+        {{ dbt_macro_polo.logging(message="Warehouse Optimiser requires incremental models with delete+insert strategy.", 
+            model_id=model_id, level='ERROR') }}
         {{ return(false) }}
     {% endif %}
 
@@ -34,58 +27,50 @@
     {% set project_config = macro_polo.get('warehouse_optimiser', {}) %}
     {% set model_config = model.config.get('meta', {}).get('warehouse_optimiser', {}) %}
     
-    {# Early returns if optimiser is disabled #}
-    {% if not (project_config and project_config.get('enabled', false)) %}
+    {# Check if optimiser is enabled #}
+    {% if not (project_config.get('enabled', false) and model_config.get('enabled', false)) %}
         {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="Warehouse Optimiser is globally disabled or not configured", level='WARN') }}
-        {% endif %}
-        {{ return('') }}
-    {% endif %}
-
-    {% if not (model_config and model_config.get('enabled', false)) %}
-        {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="Warehouse Optimiser is disabled for this model", model_id=model_id, level='DEBUG') }}
+            {{ dbt_macro_polo.logging(
+                message="Warehouse Optimiser is " ~ 
+                ("globally disabled" if not project_config.get('enabled', false) else "disabled for this model"), 
+                model_id=model_id, 
+                level=('WARN' if not project_config.get('enabled', false) else 'DEBUG')
+            ) }}
         {% endif %}
         {{ return('') }}
     {% endif %}
 
     {# Get operation configurations #}
+    {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set operation_type = model_config.get('operation_type', {}) %}
-    {% set on_full_refresh_config = operation_type.get('on_full_refresh', {}) %}
-    {% set on_run_config = operation_type.get('on_run', {}) %}
+    {% set active_config = operation_type.get('on_full_refresh' if is_full_refresh else 'on_run', {}) %}
+
     {% set on_dry_run_config = operation_type.get('on_dry_run', {}) %}
     {% set has_on_dry_run_config = on_dry_run_config is mapping and on_dry_run_config | length > 0 %}
-    {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
+    
 
-    {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh, model_id=model_id, level='DEBUG') }}
+    {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh ~ ", Active config: " ~ active_config, 
+        model_id=model_id, level='DEBUG') }}
 
-    {% set active_config = on_run_config if not is_full_refresh else on_full_refresh_config %}
-
-    {{ dbt_macro_polo.logging(message="Active config: " ~ active_config, model_id=model_id, level='DEBUG') }}
-
-    {% if not on_run_config %}
-        {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="No on_run_config found. Target warehouse size will be used for incremental runs.", level='WARN', model_id=model_id) }}
+    {# Check for missing configurations #}
+    {% if query_operation == 'ctas' %}
+        {% if not operation_type.get('on_run', {}) %}
+            {{ dbt_macro_polo.logging(message="No on_run_config found. Target warehouse size will be used for incremental runs.", 
+                level='WARN', model_id=model_id) }}
         {% endif %}
-        {{ return('') }}
-    {% endif %}
-
-    {% if not on_full_refresh_config %}
-        {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="Macro Polo: No full refresh config found. Using default warehouse size.", level='WARN', model_id=model_id) }}
+        
+        {% if not operation_type.get('on_full_refresh', {}) %}
+            {{ dbt_macro_polo.logging(message="No full refresh config found. Using default warehouse size.", 
+                level='WARN', model_id=model_id) }}
         {% endif %}
-    {% endif %}
-
-    {% if not has_on_dry_run_config %}
-        {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="Macro Polo: No on_dry_run_config found. No warehouse switch will be performed.", model_id=model_id, level='WARN') }}
+        
+        {% if not has_on_dry_run_config %}
+            {{ dbt_macro_polo.logging(message="No on_dry_run_config found. No warehouse switch will be performed.", 
+                model_id=model_id, level='WARN') }}
         {% endif %}
     {% endif %}
 
-    {# Get upstream dependency config - handle v1 and v2 compatibility #}
-    {% set upstream_dependency = on_dry_run_config.get('upstream_dependency', []) %}
-
-    {{ dbt_macro_polo.logging(message="Macro Polo: Starting Warehouse Optimiser", model_id=model_id, status=query_operation | upper) }}
+    {{ dbt_macro_polo.logging(message="Starting Warehouse Optimiser", model_id=model_id, status=query_operation | upper) }}
  
     {% if execute %}
         {# Get row count for CTAS operations #}
