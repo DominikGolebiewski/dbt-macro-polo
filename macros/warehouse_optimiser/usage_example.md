@@ -28,7 +28,7 @@ config:
           ctas:
             default: l
             schedule:
-              - cron: "0 7-19 * * 1-5"  # Every hour from 7am to 7pm, Monday to Friday
+              - cron: "0 7-19 * * 1-5"  # Business hours (7am-7pm weekdays)
                 scale: xl
               - cron: "0 0 * * *"       # At midnight every day
                 scale: xxl
@@ -79,6 +79,15 @@ Cron expressions use the standard 5-field format:
 * * * * *
 ```
 
+### Time Range Handling
+
+The cron expression interpreter intelligently handles time ranges. For example, the cron expression `0 7-19 * * 1-5` is interpreted as:
+
+- For any time between 7am and 7pm (inclusive)
+- On weekdays (Monday to Friday)
+
+This means that a model running at 2:30pm on a Wednesday would match this cron expression and use the corresponding warehouse size.
+
 ### Common Patterns
 
 - `* * * * *` - Every minute
@@ -86,17 +95,19 @@ Cron expressions use the standard 5-field format:
 - `0 * * * *` - Every hour
 - `0 */2 * * *` - Every 2 hours
 - `0 0 * * *` - Every day at midnight
-- `0 8-17 * * 1-5` - Every hour from 8am to 5pm, Monday to Friday
-- `*/30 9-16 * * 1-5` - Every 30 minutes between 9am and 4pm, Monday to Friday
+- `0 8-17 * * 1-5` - Business hours (8am to 5pm, Monday to Friday)
+- `*/30 9-16 * * 1-5` - Every 30 minutes during business hours
 
 ## How Cron Matching Works
 
-The warehouse optimizer will:
+For time-range expressions like `0 7-19 * * 1-5`, the warehouse optimizer will:
 
-1. Parse the cron expression into its components
-2. Compare the current time with the cron expression
-3. If matched, use the corresponding warehouse size (scale)
-4. If no cron expression matches, fall back to the default warehouse size
-5. Apply monitoring thresholds if configured
+1. Detect that this is a time-range pattern (hours have a range, minutes have specific values)
+2. Check if the current time falls within the time range (7am to 7pm)
+3. Check if the current day of week is within the valid days (Monday to Friday)
+4. If both are true, use the corresponding warehouse size
+5. Apply monitoring thresholds if configured and applicable
 
-The cron expression is evaluated at the time the model runs, allowing for dynamic scaling based on schedule, which is especially useful for optimizing resource usage during peak and off-peak times. 
+For regular cron expressions, each field is checked for an exact match.
+
+The cron expression is evaluated at the time the model runs, allowing for dynamic scaling based on schedule. This is especially useful for optimizing resource usage during peak and off-peak times. 

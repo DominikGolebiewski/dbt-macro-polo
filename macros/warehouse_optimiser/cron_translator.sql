@@ -136,89 +136,141 @@
     {{ return(result) }}
 {% endmacro %}
 
-{% macro is_cron_match(cron_expression, current_time=none) %}
-    {{ return(adapter.dispatch('is_cron_match', 'dbt_macro_polo')(cron_expression, current_time)) }}
+{% macro cron_match(cron_expression, current_time=none) %}
+    {{ return(adapter.dispatch('cron_match', 'dbt_macro_polo')(cron_expression, current_time)) }}
 {% endmacro %}
 
-{% macro default__is_cron_match(cron_expression, current_time=none) %}
-    {# Initialise macro context #}
-    {% set macro_context = dbt_macro_polo.create_macro_context("is_cron_match") %}
-    {% set macro_name = macro_context.macro_name %}
-    {% set model_id = macro_context.model_id %}
-
+{% macro default__cron_match(cron_expression, current_time=none) %}
     {# Get current time if not provided #}
     {% set current_time = current_time or modules.datetime.datetime.now() %}
     
     {# Parse cron expression #}
-    {% set cron_parts = dbt_macro_polo.parse_cron_expression(cron_expression) %}
-    {% if cron_parts is none %}
+    {% set parts = cron_expression.split() %}
+    {% if parts | length != 5 %}
+        {{ log("Invalid cron expression format: " ~ cron_expression, info=true) }}
         {{ return(false) }}
     {% endif %}
     
-    {# Map day of week names to numbers (0-6 where 0 is Sunday) #}
-    {% set day_of_week_names = {
-        'sun': 0, 'sunday': 0,
-        'mon': 1, 'monday': 1,
-        'tue': 2, 'tuesday': 2, 
-        'wed': 3, 'wednesday': 3,
-        'thu': 4, 'thursday': 4,
-        'fri': 5, 'friday': 5,
-        'sat': 6, 'saturday': 6
-    } %}
+    {# Extract fields #}
+    {% set minute = parts[0] %}
+    {% set hour = parts[1] %}
+    {% set day_month = parts[2] %}
+    {% set month = parts[3] %}
+    {% set day_week = parts[4] %}
     
-    {# Expand each field to get valid values #}
-    {% set minutes = dbt_macro_polo.expand_cron_field(cron_parts.minute, 0, 59) %}
-    {% set hours = dbt_macro_polo.expand_cron_field(cron_parts.hour, 0, 23) %}
-    {% set days_of_month = dbt_macro_polo.expand_cron_field(cron_parts.day_of_month, 1, 31) %}
-    {% set months = dbt_macro_polo.expand_cron_field(cron_parts.month, 1, 12) %}
-    
-    {# Parse day of week, handling named days #}
-    {% set days_of_week_field = cron_parts.day_of_week.lower() %}
-    {% set days_of_week = [] %}
-    
-    {# Replace named days with numbers #}
-    {% for name, number in day_of_week_names.items() %}
-        {% set days_of_week_field = days_of_week_field | replace(name, number | string) %}
+    {# Map day of week names to numbers #}
+    {% set day_names = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}
+    {% for name, num in day_names.items() %}
+        {% set day_week = day_week | lower | replace(name, num | string) %}
     {% endfor %}
     
-    {# Expand day of week #}
-    {% set days_of_week = dbt_macro_polo.expand_cron_field(days_of_week_field, 0, 6) %}
+    {# Get current date components #}
+    {% set cur = {
+        'minute': current_time.minute,
+        'hour': current_time.hour,
+        'day_month': current_time.day,
+        'month': current_time.month,
+        'day_week': (current_time.weekday() + 1) % 7  # Adjust to cron's Sunday=0 convention
+    } %}
     
-    {# Get current date/time components #}
-    {% set current_minute = current_time.minute %}
-    {% set current_hour = current_time.hour %}
-    {% set current_day_of_month = current_time.day %}
-    {% set current_month = current_time.month %}
-    {% set current_day_of_week = current_time.weekday() %}
+    {# Check if this is a time range (e.g., 0 7-19 * * 1-5) #}
+    {% set is_time_range = hour.find('-') >= 0 and minute != '*' and minute.find('-') < 0 %}
     
-    {# Adjust Python's weekday (0-6, Monday is 0) to cron's convention (0-6, Sunday is 0) #}
-    {% set current_day_of_week = (current_day_of_week + 1) % 7 %}
+    {# Time range check (e.g., business hours) #}
+    {% if is_time_range %}
+        {# Parse hour range #}
+        {% set hour_range = hour.split('-') %}
+        {% set hour_start = hour_range[0] | int %}
+        {% set hour_end = hour_range[1] | int %}
+        
+        {# Check if current hour is in range #}
+        {% set hour_match = cur.hour >= hour_start and cur.hour <= hour_end %}
+        
+        {# Check day and month #}
+        {% set day_match = field_matches(day_month, cur.day_month, 1, 31) %}
+        {% set day_week_match = field_matches(day_week, cur.day_week, 0, 6) %}
+        {% set month_match = field_matches(month, cur.month, 1, 12) %}
+        
+        {# Day match is special - either day of month or day of week matches #}
+        {% if day_month != '*' and day_week != '*' %}
+            {% set day_match = day_match or day_week_match %}
+        {% elif day_month == '*' %}
+            {% set day_match = day_week_match %}
+        {% endif %}
+        
+        {{ return(hour_match and day_match and month_match) }}
     
-    {# Check if current time matches the cron expression #}
-    {% set minute_match = current_minute in minutes %}
-    {% set hour_match = current_hour in hours %}
-    {% set month_match = current_month in months %}
-    
-    {# Day match is true if either day of month or day of week matches (or's relationship) #}
-    {% set day_of_month_match = current_day_of_month in days_of_month %}
-    {% set day_of_week_match = current_day_of_week in days_of_week %}
-    {% set day_match = day_of_month_match or (cron_parts.day_of_month == '*' and day_of_week_match) %}
-    
-    {# If both day_of_month and day_of_week are specified (not *), only one needs to match #}
-    {% if cron_parts.day_of_month != '*' and cron_parts.day_of_week != '*' %}
-        {% set day_match = day_of_month_match or day_of_week_match %}
+    {# Standard cron match #}
+    {% else %}
+        {# Check each field #}
+        {% set minute_match = field_matches(minute, cur.minute, 0, 59) %}
+        {% set hour_match = field_matches(hour, cur.hour, 0, 23) %}
+        {% set day_match = field_matches(day_month, cur.day_month, 1, 31) %}
+        {% set day_week_match = field_matches(day_week, cur.day_week, 0, 6) %}
+        {% set month_match = field_matches(month, cur.month, 1, 12) %}
+        
+        {# Day match is special - either day of month or day of week matches #}
+        {% if day_month != '*' and day_week != '*' %}
+            {% set day_match = day_match or day_week_match %}
+        {% elif day_month == '*' %}
+            {% set day_match = day_week_match %}
+        {% endif %}
+        
+        {{ return(minute_match and hour_match and day_match and month_match) }}
+    {% endif %}
+{% endmacro %}
+
+{% macro field_matches(field, value, min_val, max_val) %}
+    {{ return(adapter.dispatch('field_matches', 'dbt_macro_polo')(field, value, min_val, max_val)) }}
+{% endmacro %}
+
+{% macro default__field_matches(field, value, min_val, max_val) %}
+    {# Handle wildcards #}
+    {% if field == '*' %}
+        {{ return(true) }}
     {% endif %}
     
-    {# Log match details #}
-    {{ dbt_macro_polo.logging(macro_name, "Cron match details: " ~ {
-        "minute": minute_match,
-        "hour": hour_match,
-        "day": day_match,
-        "month": month_match,
-        "current_time": current_time,
-        "cron": cron_expression
-    }, level='DEBUG') }}
+    {# Handle comma-separated values #}
+    {% if field.find(',') >= 0 %}
+        {% for val in field.split(',') %}
+            {% if field_matches(val, value, min_val, max_val) %}
+                {{ return(true) }}
+            {% endif %}
+        {% endfor %}
+        {{ return(false) }}
+    {% endif %}
     
-    {# Return true if all components match #}
-    {{ return(minute_match and hour_match and day_match and month_match) }}
+    {# Handle ranges #}
+    {% if field.find('-') >= 0 %}
+        {% set range_parts = field.split('-') %}
+        {% set start = range_parts[0] | int %}
+        {% set end = range_parts[1] | int %}
+        {{ return(value >= start and value <= end) }}
+    {% endif %}
+    
+    {# Handle steps #}
+    {% if field.find('/') >= 0 %}
+        {% set step_parts = field.split('/') %}
+        {% set range_expr = step_parts[0] %}
+        {% set step = step_parts[1] | int %}
+        
+        {# Determine the range #}
+        {% if range_expr == '*' %}
+            {% set start = min_val %}
+            {% set end = max_val %}
+        {% elif range_expr.find('-') >= 0 %}
+            {% set range_parts = range_expr.split('-') %}
+            {% set start = range_parts[0] | int %}
+            {% set end = range_parts[1] | int %}
+        {% else %}
+            {% set start = range_expr | int %}
+            {% set end = max_val %}
+        {% endif %}
+        
+        {# Check if value matches step pattern #}
+        {{ return(value >= start and value <= end and (value - start) % step == 0) }}
+    {% endif %}
+    
+    {# Handle simple value #}
+    {{ return(value == field | int) }}
 {% endmacro %} 
