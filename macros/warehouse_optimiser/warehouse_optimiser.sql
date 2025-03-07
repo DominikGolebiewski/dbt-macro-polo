@@ -4,7 +4,7 @@
 
 {% macro default__warehouse_optimiser(query_operation='ctas') %}
 
-    {% set model_id = model %}
+    {% set model_id = this.schema ~ '.' ~ this.name %}
     {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
@@ -43,18 +43,18 @@
     {# Get operation configurations #}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set operation_type = model_config.get('operation_type', {}) %}
-    {% set active_config = operation_type.get('on_full_refresh' if is_full_refresh else 'on_run', {}) %}
+    {% set active_config = operation_type.get('full_refresh' if is_full_refresh else 'incremental', {}) %}
 
-    {% set on_dry_run_config = operation_type.get('on_dry_run', {}) %}
+    {% set on_dry_run_config = operation_type.get('dry_run', {}) %}
     {% set has_on_dry_run_config = on_dry_run_config is mapping and on_dry_run_config | length > 0 %}
     
 
     {{ dbt_macro_polo.logging(message="Is full refresh: " ~ is_full_refresh ~ ", Active config: " ~ active_config, 
-        model_id=model_id, level='DEBUG') }}
+        model_id=model_id, level='INFO') }}
 
     {# Check for missing configurations #}
-    {% if query_operation == 'ctas' %}
-        {% if not operation_type.get('on_run', {}) %}
+    {# {% if query_operation == 'ctas' %}
+        {% if not operation_type.get('incremental', {}) %}
             {{ dbt_macro_polo.logging(message="No on_run_config found. Target warehouse size will be used for incremental runs.", 
                 level='WARN', model_id=model_id) }}
         {% endif %}
@@ -68,7 +68,7 @@
             {{ dbt_macro_polo.logging(message="No on_dry_run_config found. No warehouse switch will be performed.", 
                 model_id=model_id, level='WARN') }}
         {% endif %}
-    {% endif %}
+    {% endif %} #}
 
     {{ dbt_macro_polo.logging(message="Starting Warehouse Optimiser", model_id=model_id, status=query_operation | upper) }}
  
@@ -76,7 +76,7 @@
         {# Get row count for CTAS operations #}
         {% set row_count = macro_polo.get('cache', {}).get('_upstream_row_count_' ~ model_id | replace('.', '_'), 0) %}
         {% if query_operation == 'ctas' and not is_full_refresh and has_on_dry_run_config %}
-            {% set row_count = dbt_macro_polo.get_upstream_row_count(model_id, upstream_dependency, timestamp_column) %}
+            {% set row_count = dbt_macro_polo.get_upstream_row_count(model_id, on_dry_run_config.get('upstream_dependency', []), timestamp_column) %}
         {% endif %}
     
         {# Determine and allocate warehouse #}
