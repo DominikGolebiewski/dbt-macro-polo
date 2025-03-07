@@ -4,7 +4,7 @@
 
 {% macro default__warehouse_optimiser(query_operation='ctas') %}
 
-    {% set model_id = this.schema | lower ~ '.' ~ this.name | lower %}
+    {% set model_id = model %}
     {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
