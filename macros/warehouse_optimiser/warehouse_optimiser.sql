@@ -58,15 +58,6 @@
     {% endif %}
 {% endmacro %}
 
-{% macro should_full_refresh() %}
-    {{ return(adapter.dispatch('should_full_refresh', 'dbt_macro_polo')()) }}
-{% endmacro %}
-
-{% macro default__should_full_refresh() %}
-    {% set full_refresh = flags.FULL_REFRESH %}
-    {{ return(full_refresh) }}
-{% endmacro %}
-
 {% macro handle_warehouse_switch(operation_type) %}
     {{ return(adapter.dispatch('handle_warehouse_switch', 'dbt_macro_polo')(operation_type)) }}
 {% endmacro %}
