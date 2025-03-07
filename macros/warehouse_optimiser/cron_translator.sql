@@ -165,13 +165,11 @@
     {% endfor %}
     
     {# Get current date components #}
-    {% set cur = {
-        'minute': current_time.minute,
-        'hour': current_time.hour,
-        'day_month': current_time.day,
-        'month': current_time.month,
-        'day_week': (current_time.weekday() + 1) % 7  # Adjust to cron's Sunday=0 convention
-    } %}
+    {% set cur_minute = current_time.minute %}
+    {% set cur_hour = current_time.hour %}
+    {% set cur_day_month = current_time.day %}
+    {% set cur_month = current_time.month %}
+    {% set cur_day_week = (current_time.weekday() + 1) % 7 %}  {# Adjust to cron's Sunday=0 convention #}
     
     {# Check if this is a time range (e.g., 0 7-19 * * 1-5) #}
     {% set is_time_range = hour.find('-') >= 0 and minute != '*' and minute.find('-') < 0 %}
@@ -184,12 +182,12 @@
         {% set hour_end = hour_range[1] | int %}
         
         {# Check if current hour is in range #}
-        {% set hour_match = cur.hour >= hour_start and cur.hour <= hour_end %}
+        {% set hour_match = cur_hour >= hour_start and cur_hour <= hour_end %}
         
         {# Check day and month #}
-        {% set day_match = field_matches(day_month, cur.day_month, 1, 31) %}
-        {% set day_week_match = field_matches(day_week, cur.day_week, 0, 6) %}
-        {% set month_match = field_matches(month, cur.month, 1, 12) %}
+        {% set day_match = match_field(day_month, cur_day_month, 1, 31) %}
+        {% set day_week_match = match_field(day_week, cur_day_week, 0, 6) %}
+        {% set month_match = match_field(month, cur_month, 1, 12) %}
         
         {# Day match is special - either day of month or day of week matches #}
         {% if day_month != '*' and day_week != '*' %}
@@ -203,11 +201,11 @@
     {# Standard cron match #}
     {% else %}
         {# Check each field #}
-        {% set minute_match = field_matches(minute, cur.minute, 0, 59) %}
-        {% set hour_match = field_matches(hour, cur.hour, 0, 23) %}
-        {% set day_match = field_matches(day_month, cur.day_month, 1, 31) %}
-        {% set day_week_match = field_matches(day_week, cur.day_week, 0, 6) %}
-        {% set month_match = field_matches(month, cur.month, 1, 12) %}
+        {% set minute_match = match_field(minute, cur_minute, 0, 59) %}
+        {% set hour_match = match_field(hour, cur_hour, 0, 23) %}
+        {% set day_match = match_field(day_month, cur_day_month, 1, 31) %}
+        {% set day_week_match = match_field(day_week, cur_day_week, 0, 6) %}
+        {% set month_match = match_field(month, cur_month, 1, 12) %}
         
         {# Day match is special - either day of month or day of week matches #}
         {% if day_month != '*' and day_week != '*' %}
@@ -220,11 +218,7 @@
     {% endif %}
 {% endmacro %}
 
-{% macro field_matches(field, value, min_val, max_val) %}
-    {{ return(adapter.dispatch('field_matches', 'dbt_macro_polo')(field, value, min_val, max_val)) }}
-{% endmacro %}
-
-{% macro default__field_matches(field, value, min_val, max_val) %}
+{% macro match_field(field, value, min_val, max_val) %}
     {# Handle wildcards #}
     {% if field == '*' %}
         {{ return(true) }}
@@ -233,14 +227,19 @@
     {# Handle comma-separated values #}
     {% if field.find(',') >= 0 %}
         {% for val in field.split(',') %}
-            {% if field_matches(val, value, min_val, max_val) %}
+            {% if match_single_field(val, value, min_val, max_val) %}
                 {{ return(true) }}
             {% endif %}
         {% endfor %}
         {{ return(false) }}
     {% endif %}
     
-    {# Handle ranges #}
+    {# Handle single value or pattern #}
+    {{ return(match_single_field(field, value, min_val, max_val)) }}
+{% endmacro %}
+
+{% macro match_single_field(field, value, min_val, max_val) %}
+    {# Handle range #}
     {% if field.find('-') >= 0 %}
         {% set range_parts = field.split('-') %}
         {% set start = range_parts[0] | int %}
@@ -254,17 +253,18 @@
         {% set range_expr = step_parts[0] %}
         {% set step = step_parts[1] | int %}
         
-        {# Determine the range #}
-        {% if range_expr == '*' %}
-            {% set start = min_val %}
-            {% set end = max_val %}
-        {% elif range_expr.find('-') >= 0 %}
-            {% set range_parts = range_expr.split('-') %}
-            {% set start = range_parts[0] | int %}
-            {% set end = range_parts[1] | int %}
-        {% else %}
-            {% set start = range_expr | int %}
-            {% set end = max_val %}
+        {# Determine range for step #}
+        {% set start = min_val %}
+        {% set end = max_val %}
+        
+        {% if range_expr != '*' %}
+            {% if range_expr.find('-') >= 0 %}
+                {% set r_parts = range_expr.split('-') %}
+                {% set start = r_parts[0] | int %}
+                {% set end = r_parts[1] | int %}
+            {% else %}
+                {% set start = range_expr | int %}
+            {% endif %}
         {% endif %}
         
         {# Check if value matches step pattern #}
