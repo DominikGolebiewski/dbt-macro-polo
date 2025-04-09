@@ -9,4 +9,6 @@
 {% import 'warehouse_optimiser/handle_scheduling.sql' as _ %}
 {% import 'warehouse_optimiser/handle_monitoring.sql' as _ %}
 {% import 'warehouse_optimiser/check_upstream_row_count.sql' as _ %}
-{% import 'warehouse_optimiser/cron_translator.sql' as _ %} 
+{% import 'warehouse_optimiser/cron_translator.sql' as _ %}
+{% import 'warehouse_optimiser/ml_warehouse_optimiser.sql' as _ %}
+{% import 'warehouse_optimiser/query_llm_api.sql' as _ %} 

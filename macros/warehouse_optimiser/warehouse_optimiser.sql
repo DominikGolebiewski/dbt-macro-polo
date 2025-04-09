@@ -30,8 +30,20 @@
         {% endif %}
         {{ return('') }}
     {% endif %}
-
-    {# Get operation configurations #}
+    
+    {# Check if ML-based optimisation is enabled #}
+    {% set use_ml = model_config.get('use_ml', false) %}
+    {% set ml_model_type = model_config.get('ml_model_type', 'regression') %}
+    {% set ml_config = var('macro_polo', {}).get('ml_warehouse_optimiser', {}) %}
+    {% set ml_enabled = ml_config.get('enabled', false) %}
+    
+    {# If ML is enabled, use the ML-based optimiser #}
+    {% if use_ml and ml_enabled %}
+        {{ log("Using ML-based Warehouse Optimiser with model type: " ~ ml_model_type, info=true) }}
+        {{ return(dbt_macro_polo.ml_warehouse_optimiser(query_operation, ml_model_type)) }}
+    {% endif %}
+    
+    {# Get operation configurations for rule-based optimisation #}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set operation_type = model_config.get('operation_type', {}) %}
     {% set active_config = operation_type.get('full_refresh' if is_full_refresh else 'incremental', {}) %}
@@ -66,5 +78,17 @@
     {% set warehouse_stmt = dbt_macro_polo.warehouse_optimiser(operation_type) %}
     {% if warehouse_stmt %}
         {{ warehouse_stmt }};
+    {% endif %}
+{% endmacro %}
+
+{% macro should_full_refresh() %}
+    {{ return(adapter.dispatch('should_full_refresh', 'dbt_macro_polo')()) }}
+{% endmacro %}
+
+{% macro default__should_full_refresh() %}
+    {% if flags.FULL_REFRESH %}
+        {{ return(true) }}
+    {% else %}
+        {{ return(false) }}
     {% endif %}
 {% endmacro %}
