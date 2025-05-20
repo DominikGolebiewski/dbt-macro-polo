@@ -35,7 +35,7 @@ This project aims to:
 > List of known limitations and caveats:
 >- warehouse_optimiser may produce unexpected results if setup incorrectly
 >- Logging is not yet fully implemented withing warehouse_optimiser, especially DEBUG level
->- Compilation and docs generation is taking longer due to timestamp retrival
+>- Compilation and docs generation is taking longer due to timestamp retrieval
 
 ## Installation
 
