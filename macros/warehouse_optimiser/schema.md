@@ -40,7 +40,7 @@ vars:
     cache: {} # Required for caching functionality
     warehouse_optimiser: # Required for warehouse optimiser functionality
       enabled: true # Enable warehouse optimiser in your project - global setting
-      default_warehouse: 'xs' # Default warehouse size to use if no specific settings are provided
+      default_warehouse_size: 'xs' # Default warehouse size to use if no specific settings are provided
     warehouse_config: # Required for warehouse config functionality
       warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Explicit list of available warehouse sizes in your project
       environment:

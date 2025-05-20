@@ -10,7 +10,7 @@
     {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
-    {% set is_delete_insert = model.config.get('incremental_strategy', 'undefinded') == 'delete+insert' %}
+    {% set is_delete_insert = model.config.get('incremental_strategy', 'undefined') == 'delete+insert' %}
     
     {# Validate query operation #}
     {% if query_operation not in ['ctas', 'insert', 'delete'] %}

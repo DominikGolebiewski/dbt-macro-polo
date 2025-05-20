@@ -129,7 +129,7 @@ vars:
   macro_polo:
     warehouse_optimiser:
       enabled: true
-      default_warehouse: 'xs'
+      default_warehouse_size: 'xs'
 ```
 
 ## Usage Example
