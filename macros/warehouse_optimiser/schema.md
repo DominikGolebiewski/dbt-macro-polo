@@ -8,7 +8,7 @@ A sophisticated macro for dynamically optimising warehouse sizes based on operat
 #### Status: Beta 🚧
 
 This macro is currently in beta. Whilst functional, there are several known limitations and areas for improvement:
-- Time-based scheduling currently only supports 24-hour format
+- Scheduling now supports cron expressions for flexible timing
 - Warehouse size validation needs enhancement
 - Cache invalidation strategy needs refinement
 - Error handling could be more graceful
@@ -107,8 +107,7 @@ config:
   - Automatic warehouse scaling
 
 - **Flexible Scheduling**:
-  - Time-based warehouse allocation
-  - Day-of-week scheduling
+  - Cron-based warehouse allocation
   - Multiple schedule support
   - Peak/Off-peak handling
 
@@ -150,10 +149,7 @@ meta:
             enabled: true # Enable scheduling
             schedules: # List of schedules to apply
               - name: "Peak Hours - Weekdays" # Name of the schedule
-                days: ["monday", "tuesday", "wednesday", "thursday", "friday"] # Days of the week to apply the schedule
-                times:
-                  start: "07:00" # Start time of the schedule
-                  end: "22:00" # End time of the schedule
+                cron: "0 7-22 * * 1-5" # Cron expression for weekday peak hours
                 warehouse_size: s # Warehouse size to use for schedule
                 monitoring:
                   enabled: true # Enable source row count monitoring for warehouse size in schedule
@@ -169,7 +165,7 @@ meta:
    - Start with conservative warehouse sizes
    - Test thoroughly in development
    - Monitor query performance
-   - Use time-based scheduling for predictable workloads
+   - Use cron-based scheduling for predictable workloads
 
 2. **DON'T**:
    - Use with non-incremental materialisations
