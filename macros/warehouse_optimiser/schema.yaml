@@ -96,3 +96,17 @@ macros:
       - name: end_time
         type: string
         description: Schedule end time in HH:MM format
+
+  - name: is_cron_schedule
+    description: >
+      Evaluates whether a cron expression matches the provided timestamp.
+    arguments:
+      - name: schedule_name
+        type: string
+        description: Name of the schedule being evaluated
+      - name: cron_expr
+        type: string
+        description: Cron expression in five-field format
+      - name: current_time
+        type: datetime
+        description: Current timestamp

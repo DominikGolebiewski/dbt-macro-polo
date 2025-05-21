@@ -53,6 +53,23 @@
         },
         'current_time': modules.datetime.datetime(2025, 1, 4, 14, 30),
         'expected': 'm'
+    },
+    {
+        'name': 'cron_schedule_match',
+        'operation_config': {
+            'scheduling': {
+                'enabled': true,
+                'schedules': [
+                    {
+                        'name': 'lunchtime',
+                        'warehouse_size': 'm',
+                        'cron': '30 12 * * 1-5'
+                    }
+                ]
+            }
+        },
+        'current_time': modules.datetime.datetime(2025, 1, 1, 12, 30),
+        'expected': 'm'
     }
 ] %}
 

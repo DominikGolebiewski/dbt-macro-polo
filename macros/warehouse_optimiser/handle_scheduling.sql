@@ -33,16 +33,17 @@
         {{ dbt_macro_polo.logging(macro_name, "Set schedules: " ~ schedules ~ " current time: " ~ current_time ~ " current day: " ~ current_day, level='DEBUG') }}
 
         {% for schedule in schedules %}
+            {% set cron_expr = schedule.get('cron') %}
             {% set times = schedule.get('times', {}) %}
             {% set days = schedule.get('days', []) %}
             {% set schedule_name = schedule.get('name', 'Unnamed schedule') %}
 
-            {% if current_day in days %}
-                {% if dbt_macro_polo.is_within_time_range(schedule_name, current_time, times.get('start'), times.get('end')) %}
+            {% if cron_expr %}
+                {% if dbt_macro_polo.is_cron_schedule(schedule_name, cron_expr, current_time) %}
                     {% set is_matched.value = true %}
                     {{ dbt_macro_polo.logging(message="Schedule matched", model_id=model_id, status=schedule_name | upper) }}
                     {% if schedule.get('monitoring', {}).get('enabled', false) and has_on_dry_run_config %}
-                        {{ dbt_macro_polo.logging(message=schedule_name ~ " monitoring enabled", model_id=model_id, status=true | string | upper) }}   
+                        {{ dbt_macro_polo.logging(message=schedule_name ~ " monitoring enabled", model_id=model_id, status=true | string | upper) }}
                         {% set final_size.value = dbt_macro_polo.handle_monitoring(
                             schedule,
                             row_count,
@@ -53,6 +54,25 @@
                         {% set final_size.value = schedule.get('warehouse_size', default_warehouse_size) %}
                     {% endif %}
                     {% break %}
+                {% endif %}
+            {% else %}
+                {% if current_day in days %}
+                    {% if dbt_macro_polo.is_within_time_range(schedule_name, current_time, times.get('start'), times.get('end')) %}
+                        {% set is_matched.value = true %}
+                        {{ dbt_macro_polo.logging(message="Schedule matched", model_id=model_id, status=schedule_name | upper) }}
+                        {% if schedule.get('monitoring', {}).get('enabled', false) and has_on_dry_run_config %}
+                            {{ dbt_macro_polo.logging(message=schedule_name ~ " monitoring enabled", model_id=model_id, status=true | string | upper) }}
+                            {% set final_size.value = dbt_macro_polo.handle_monitoring(
+                                schedule,
+                                row_count,
+                                schedule.get('monitoring', {}).get('thresholds', []),
+                                schedule.get('warehouse_size', default_warehouse_size)
+                            ) %}
+                        {% else %}
+                            {% set final_size.value = schedule.get('warehouse_size', default_warehouse_size) %}
+                        {% endif %}
+                        {% break %}
+                    {% endif %}
                 {% endif %}
             {% endif %}
             {% if is_matched.value %}
@@ -127,4 +147,87 @@
     {{ dbt_macro_polo.logging(message="Schedule time range check", model_id=model_id, status=is_within_range | string | upper) }}
 
     {{ return(is_within_range) }}
+{% endmacro %}
+
+{% macro cron_field_match(field, value, min_value, max_value) %}
+    {{ return(adapter.dispatch('cron_field_match', 'dbt_macro_polo')(field, value, min_value, max_value)) }}
+{% endmacro %}
+
+{% macro default__cron_field_match(field, value, min_value, max_value) %}
+    {% if ',' in field %}
+        {% for part in field.split(',') %}
+            {% if dbt_macro_polo.cron_field_match(part, value, min_value, max_value) %}
+                {{ return(true) }}
+            {% endif %}
+        {% endfor %}
+        {{ return(false) }}
+    {% endif %}
+
+    {% if field == '*' %}
+        {{ return(true) }}
+    {% endif %}
+
+    {% if '/' in field %}
+        {% set prefix, step = field.split('/') %}
+        {% set step = step | int %}
+        {% if prefix == '*' %}
+            {% set start = min_value %}
+            {% set end = max_value %}
+        {% elif '-' in prefix %}
+            {% set start, end = prefix.split('-') %}
+            {% set start = start | int %}
+            {% set end = end | int %}
+        {% else %}
+            {% set start = prefix | int %}
+            {% set end = max_value %}
+        {% endif %}
+        {{ return(value >= start and value <= end and (value - start) % step == 0) }}
+    {% endif %}
+
+    {% if '-' in field %}
+        {% set start, end = field.split('-') %}
+        {{ return(value >= (start|int) and value <= (end|int)) }}
+    {% endif %}
+
+    {{ return(value == (field | int)) }}
+{% endmacro %}
+
+{% macro is_cron_schedule(schedule_name, cron_expr, current_time) %}
+    {{ return(adapter.dispatch('is_cron_schedule', 'dbt_macro_polo')(schedule_name, cron_expr, current_time)) }}
+{% endmacro %}
+
+{% macro default__is_cron_schedule(schedule_name, cron_expr, current_time) %}
+
+    {% set macro_ctx = dbt_macro_polo.create_macro_context('is_cron_schedule') %}
+    {% set macro_name = macro_ctx.macro_name %}
+    {% set model_id = macro_ctx.model_id %}
+
+    {% if current_time is none %}
+        {% set current_time = modules.datetime.datetime.now() %}
+    {% endif %}
+
+    {% set parts = cron_expr.split() %}
+    {% if parts | length != 5 %}
+        {{ dbt_macro_polo.logging(message='Invalid cron expression: ' ~ cron_expr, model_id=model_id, status='ERROR') }}
+        {{ return(false) }}
+    {% endif %}
+
+    {% set fields = [
+        {'f': parts[0], 'v': current_time.minute, 'min': 0, 'max': 59},
+        {'f': parts[1], 'v': current_time.hour, 'min': 0, 'max': 23},
+        {'f': parts[2], 'v': current_time.day, 'min': 1, 'max': 31},
+        {'f': parts[3], 'v': current_time.month, 'min': 1, 'max': 12},
+        {'f': parts[4], 'v': current_time.isoweekday() % 7, 'min': 0, 'max': 6}
+    ] %}
+
+    {% set match = true %}
+    {% for item in fields %}
+        {% if not dbt_macro_polo.cron_field_match(item.f, item.v, item.min, item.max) %}
+            {% set match = false %}
+            {% break %}
+        {% endif %}
+    {% endfor %}
+
+    {{ dbt_macro_polo.logging(macro_name, "Cron check: " ~ cron_expr ~ " -> " ~ match, level='DEBUG', model_id=model_id) }}
+    {{ return(match) }}
 {% endmacro %}
