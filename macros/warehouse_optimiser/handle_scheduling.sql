@@ -55,9 +55,6 @@
                     {% break %}
                 {% endif %}
             {% endif %}
-            {% if is_matched.value %}
-                {% break %}
-            {% endif %}
         {% endfor %}
 
         {% if not is_matched.value %}
@@ -123,7 +120,7 @@
     }, level='DEBUG') }}
 
     {# Check if current time is within range #}
-    {% set is_within_range = current_minutes >= start_minutes and current_minutes <= end_minutes %}
+    {% set is_within_range = current_minutes >= start_minutes and current_minutes < end_minutes %}
     {{ dbt_macro_polo.logging(message="Schedule time range check", model_id=model_id, status=is_within_range | string | upper) }}
 
     {{ return(is_within_range) }}

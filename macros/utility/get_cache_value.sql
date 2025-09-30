@@ -9,7 +9,7 @@
     
     {% set macro_polo = var('macro_polo', {}) %}
     {% set cache = macro_polo.get('cache', {}) %}
-    {% set cache_value = cache.get(cache_key, {}) %}
+    {% set cache_value = cache.get(cache_key, none) %}
     {{ dbt_macro_polo.logging(macro_name, message="Cache handling: " ~ {'cache_key': cache_key, 'cache_value': cache_value}, level='DEBUG', model_id=model_id) }}
     {{ return(cache_value) }}
 {% endmacro %}
