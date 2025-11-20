@@ -107,6 +107,9 @@
 
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}
+
+
+                    {{ dbt_macro_polo.log_event(message="The volume is: " ~ volume, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
                     {% if win_scaling.get('enabled') %}
                         {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, warehouse_size, model_id, macro_name) %}
                     {% endif %}
