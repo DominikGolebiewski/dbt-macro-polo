@@ -44,7 +44,7 @@
             {%- set final_msg = header ~ package_label ~ context_str ~ " " ~ c ~ message ~ r -%}
 
             {# --- Right Aligned Status (Optional) --- #}
-            {%- if status -%}
+            {%- if status is not none -%}
                 {# Simple padding approximation #}
                 {%- set padding = 80 - (message | length) - (model_id | length if model_id else 0) - 25 -%}
                 {%- set padding = padding if padding > 0 else 5 -%}
