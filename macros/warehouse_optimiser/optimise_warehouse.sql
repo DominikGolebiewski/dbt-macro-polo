@@ -25,7 +25,7 @@
         {{ return('') }}
     {% endif %}
     
-    {{ dbt_macro_polo.logging(message="Starting optimisation for operation", status=query_operation | upper, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+    {{ dbt_macro_polo.logging(message="Starting optimisation for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
 
     {% set is_incremental = model.config.get('materialized') == 'incremental' %}
     {% set strategy = model.config.get('incremental_strategy') %}
