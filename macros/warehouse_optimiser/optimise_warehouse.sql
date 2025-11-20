@@ -51,36 +51,26 @@
         {{ return('') }}
     {% endif %}
 
-    {# 3. Volume Determination (if needed) #}
-    {# We check if any monitoring is enabled in the active config to decide if we need row counts #}
-    {% set upstream_dependency = op_type_config.get('on_dry_run', {}).get('upstream_dependency', []) %}
-    {% set needs_volume_check = false %}
-    
-    {# Check basic monitoring #}
-    {% if active_config.get('monitoring', {}).get('enabled') %}
-        {% set needs_volume_check = true %}
-    {% endif %}
-    
-    {# Check schedule monitoring #}
-    {% if not needs_volume_check and active_config.get('scheduling', {}).get('enabled') %}
-        {% for schedule in active_config.get('scheduling', {}).get('schedules', []) %}
-            {% if schedule.get('monitoring', {}).get('enabled') %}
-                {% set needs_volume_check = true %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-
+    {# 3. Volume Determination #}
+    {% set upstream_dependency = op_type_config.get('upstream_dependency', []) %}
     {% set volume = 0 %}
-    {% if needs_volume_check and execute and not is_full_refresh %}
+    
+    {% if execute and not is_full_refresh %}
         {% set timestamp_column = model.config.get('timestamp_column') %}
         {% if not timestamp_column %}
              {{ dbt_macro_polo.logging(message="timestamp_column required for monitoring", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
         {% set volume = dbt_macro_polo.get_upstream_volume(model_id, upstream_dependency, timestamp_column) %}
     {% endif %}
-
-    {# 4. Size Determination #}
-    {% set target_size = dbt_macro_polo.determine_optimal_size(active_config, volume, model_id) %}
+    
+    {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
+    {% if volume == 0 and not is_full_refresh %}
+         {{ dbt_macro_polo.logging(message="Zero upstream volume detected", status='XS', level='INFO', model_id=model_id, macro_name=macro_name) }}
+         {% set target_size = 'xs' %}
+    {% else %}
+         {# 4. Size Determination #}
+         {% set target_size = dbt_macro_polo.determine_optimal_size(active_config, volume, model_id) %}
+    {% endif %}
 
     {# 5. Allocation #}
     {% set warehouse = dbt_macro_polo.allocate_warehouse(target_size) %}
