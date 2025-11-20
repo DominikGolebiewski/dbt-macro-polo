@@ -42,7 +42,7 @@ config:
 In your model configuration:
 
 config(
-    pre_hook="{{ dbt_macro_polo.adaptive_compute() }}"
+    pre_hook="dbt_macro_polo.adaptive_compute()"
 )
 
 
