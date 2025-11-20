@@ -16,7 +16,7 @@
     {# Update: Use adaptive_compute for project config #}
     {% set adaptive_config = macro_polo.get('adaptive_compute', {}) %}
     {# Update: Use compute_provisioning for model config #}
-    {% set model_config = model.config.get('meta', {}).get('compute_provisioning', {}) %}
+    {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
 
     {# Check if adaptive compute is enabled globally and at model level #}
     {% if not (adaptive_config.get('enabled', false) and model_config.get('enabled', false)) %}
