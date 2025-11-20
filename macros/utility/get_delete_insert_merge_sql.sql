@@ -7,7 +7,7 @@
     {%- set dest_cols_csv = get_quoted_csv(dest_columns | map(attribute="name")) -%}
 
     {% if unique_key %}
-        {{ dbt_macro_polo.handle_warehouse_switch('delete') }}
+        {{ dbt_macro_polo.handle_warehouse_switch('prune') }}
         {% if unique_key is sequence and unique_key is not string %}
             delete from {{ target }}
             using {{ source }}
@@ -38,7 +38,7 @@
         {% endif %}
     {% endif %}
     
-    {{ dbt_macro_polo.handle_warehouse_switch('insert') }}
+    {{ dbt_macro_polo.handle_warehouse_switch('append') }}
     insert into {{ target }} ({{ dest_cols_csv }})
     (
         select {{ dest_cols_csv }}
