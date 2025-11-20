@@ -103,10 +103,12 @@
                 {% if dbt_macro_polo.is_within_time_range(window.get('name'), current_time, time_range.get('start'), time_range.get('end')) %}
                     {{ dbt_macro_polo.log_event(message="Schedule matched: " ~ window.get('name'), model_id=model_id, level='DEBUG', macro_name=macro_name) }}
                     
+                    {% set warehouse_size = window.get('warehouse_size', base_size) %}
+
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}
                     {% if win_scaling.get('enabled') %}
-                        {{ return(dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, window.get('warehouse_size', base_size))) }}
+                        {{ return(dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, window.get('warehouse_size', warehouse_size))) }}
                     {% endif %}
                     
                     {{ return(window.get('warehouse_size', base_size)) }}
