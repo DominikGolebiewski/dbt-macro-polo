@@ -52,7 +52,7 @@
 {% endmacro %}
 
 {% macro default__handle_warehouse_switch(operation) %}
-    {% set warehouse_stmt = dbt_macro_polo.optimise_warehouse(operation) %}
+    {% set warehouse_stmt = dbt_macro_polo.adaptive_compute(operation) %}
     {% if warehouse_stmt %}
         {{ warehouse_stmt }};
     {% endif %}
