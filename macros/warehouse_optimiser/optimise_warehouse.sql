@@ -18,9 +18,14 @@
 
     {# Check if optimiser is enabled globally and at model level #}
     {% if not (optimiser_config.get('enabled', false) and model_config.get('enabled', false)) %}
-        {{ dbt_macro_polo.logging(message="Warehouse Optimiser disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+        {# Only log disabled status once during CTAS to reduce noise #}
+        {% if query_operation == 'ctas' %}
+            {{ dbt_macro_polo.logging(message="Warehouse Optimiser disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+        {% endif %}
         {{ return('') }}
     {% endif %}
+    
+    {{ dbt_macro_polo.logging(message="Starting optimisation for operation", status=query_operation | upper, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
 
     {% set is_incremental = model.config.get('materialized') == 'incremental' %}
     {% set strategy = model.config.get('incremental_strategy') %}
