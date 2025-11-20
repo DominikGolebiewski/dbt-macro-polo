@@ -3,19 +3,19 @@
         'name': 'Basic warehouse allocation',
         'incremental_size': 'xs',
         'fullrefresh_size': none,
-        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('resource_prefix') ~ '_xs'
+        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('warehouse_name_prefix') ~ '_xs'
     },
     {
         'name': 'Full refresh warehouse allocation',
         'incremental_size': 'xs',
         'fullrefresh_size': 's',
-        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('resource_prefix') ~ ('_s' if dbt_macro_polo.should_full_refresh() else '_xs')
+        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('warehouse_name_prefix') ~ ('_s' if dbt_macro_polo.should_full_refresh() else '_xs')
     },
     {
         'name': 'Full refresh with default size',
         'incremental_size': 'm',
         'fullrefresh_size': none,
-        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('resource_prefix') ~ '_m'
+        'expected': var('macro_polo').get('infrastructure_definition').get('environment_context').get(target.name, target.name).get('warehouse_name_prefix') ~ '_m'
     }
 ] %}
 
@@ -37,7 +37,7 @@
 
 {# Report results #}
 {% if failed_tests | length > 0 %}
-    {{ dbt_macro_polo.logging(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR') }}
+    {{ dbt_macro_polo.log_event(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR') }}
 {% endif %}
 
 select 

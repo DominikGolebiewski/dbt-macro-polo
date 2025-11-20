@@ -24,14 +24,14 @@
     {% set size_suffix = fullrefresh if is_full_refresh else incremental %}
 
     {# Get and validate configuration #}
-    {% set infrastructure_def = macro_polo.get('infrastructure_definitions', {}) %}
+    {% set infrastructure_def = macro_polo.get('infrastructure_definition', {}) %}
     {% if not infrastructure_def %}
-        {% set msg = "Configuration Error (dbt_project.yml): infrastructure_definitions project variable must be defined." %}
+        {% set msg = "Configuration Error (dbt_project.yml): infrastructure_definition project variable must be defined." %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {# Get and validate environment configuration #}
-    {% set environments = infrastructure_def.get('environment_contexts', {}) %}
+    {% set environments = infrastructure_def.get('environment_context', {}) %}
     {% set env_config = environments.get(target.name) %}
 
     {% if not env_config %}
@@ -39,9 +39,9 @@
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
-    {% set warehouse_prefix = env_config.get('resource_prefix') %}
+    {% set warehouse_prefix = env_config.get('warehouse_name_prefix') %}
     {% if not warehouse_prefix %}
-        {% set msg = "Configuration Error (dbt_project.yml): resource_prefix missing for environment: " ~ target.name %}
+        {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 

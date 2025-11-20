@@ -36,8 +36,8 @@ vars:
       baseline_size: xs
     infrastructure_definition:
       allowed_sizes: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
-      environment_contexts:
+      environment_context:
         ci:
-          resource_prefix: ci
+          warehouse_name_prefix: ci
         dev:
-          resource_prefix: developer
+          warehouse_name_prefix: developer

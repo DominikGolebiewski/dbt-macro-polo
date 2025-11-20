@@ -29,11 +29,11 @@ The macro expects the following configuration in your `dbt_project.yml`:
 vars:
   infrastructure_definition:
     allowed_sizes: ['xs', 's', 'm', 'l']
-    environment_contexts:
+    environment_context:
         dev:
-            resource_prefix: dev_wh
+            warehouse_name_prefix: dev_wh
         prod:
-            resource_prefix: prd_wh
+            warehouse_name_prefix: prd_wh
 {%- endraw -%}
 ```
 
@@ -65,7 +65,7 @@ The macro will raise errors in the following scenarios:
 
 ## Dependencies
 
-- Requires the `logging` macro for debug and error logging
+- Requires the `log_event` macro for debug and error logging
 - Requires the `create_macro_context` macro for execution context
 
 {% enddocs %}
