@@ -23,15 +23,7 @@
     {% set wh = dbt_macro_polo.allocate_warehouse('xs') %}
 
     {% if target_exists and timestamp_column %}
-        {% set query %}
-            use warehouse {{ wh }};
-            select max({{ timestamp_column }}) from {{ this }};
-        {% endset %}
-        {% set result = run_query(query) %}
-        {% if result and result.rows %}
-            {% set max_timestamp = result.columns[0].values()[0] %}
-        {% endif %}
-        {# If max_timestamp is None (empty table), default to 1900 #}
+        {% set max_timestamp = dbt_macro_polo.get_max_timestamp(timestamp_column=timestamp_column) %}
         {% if not max_timestamp %}
              {% set max_timestamp = '1900-01-01' %}
         {% endif %}
