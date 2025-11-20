@@ -41,11 +41,10 @@ config:
 
 In your model configuration:
 
-```sql
-{{ config(
+config(
     pre_hook="{{ dbt_macro_polo.adaptive_compute() }}"
-) }}
-```
+)
+
 
 ## Logic Flow
 
