@@ -5,7 +5,7 @@
 {% macro default__measure_upstream_volume(model_id, upstream_dependency, timestamp_column) %}
     
     {% set macro_name = 'measure_upstream_volume' %}
-    {% set state_key = '_macro_polo_upstream_volume_' ~ model_id | replace('.', '_') ~ '_' ~ timestamp_column %}
+    {% set state_key = '_macro_polo_upstream_volume_' ~ model_id | replace('.', '_') %}
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
 
     {% if state_value %}
@@ -44,7 +44,7 @@
             use warehouse {{ wh }};
             select count(1) from {{ dep_relation }}
             {% if target_exists and timestamp_column %}
-                where {{ timestamp_column }} > '{{ max_value }}'
+                where {{ timestamp_column }} > {{ max_value }}
             {% endif %}
         {% endset %}
         
