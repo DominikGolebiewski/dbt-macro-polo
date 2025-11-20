@@ -27,7 +27,7 @@ The macro expects the following configuration in your `dbt_project.yml`:
 ```yaml
 {%- raw -%}
 vars:
-  infrastructure_definitions:
+  infrastructure_definition:
     allowed_sizes: ['xs', 's', 'm', 'l']
     environment_contexts:
         dev:
