@@ -32,10 +32,9 @@
             {%- set b = colors['BOLD'] -%}
             
             {# --- Message Construction --- #}
-            {# Format: [Timestamp] [Level] [Model] Message ... [Status] #}
+            {# Format: [Level] [Model] Message ... [Status] #}
             
-            {%- set time_str = modules.datetime.datetime.now().strftime('%H:%M:%S') -%}
-            {%- set header = "[" ~ time_str ~ "] " ~ icons[level] ~ " " ~ b ~ level.ljust(5) ~ r -%}
+            {%- set header = icons[level] ~ " " ~ b ~ level.ljust(5) ~ r -%}
             
             {%- set context_info = [] -%}
             {%- if model_id -%}

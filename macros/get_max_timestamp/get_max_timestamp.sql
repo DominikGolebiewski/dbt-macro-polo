@@ -1,20 +1,13 @@
 {% macro get_max_timestamp(timestamp_column='loaded_timestamp', predicate=none, warehouse_size='xs', model_name=this.name) %}
 
-    {# Initialise macro context #}
-    {% set macro_ctx = dbt_macro_polo.create_macro_context('get_max_timestamp') %}
-    {% set macro_name = macro_ctx.macro_name %}
-    {% set model_id = macro_ctx.model_id %}
     {% set macro_polo = var('macro_polo', {}) %}
+    {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
+    {% set macro_name = 'get_max_timestamp' %}
 
     {# Input validation #}
     {% if not timestamp_column %}
-        {{ dbt_macro_polo.logging(message="Macro Polo Configuration Error: timestamp_column is required and needs to be defined as"
-        ~ " string literal or optionally in model config:"
-        ~ "\n  config ( timestamp_column='loaded_timestamp' )",
-        level='ERROR', 
-        model_id=model_id
-        ) }}
-        {{ return(false) }}
+        {% set msg = "Configuration Error: timestamp_column is required and needs to be defined as string literal or optionally in model config." %}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {% if execute %}
@@ -24,25 +17,20 @@
         {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
     
         {% if cache_value %}
-            {{ dbt_macro_polo.logging(message="Resolved maximum timestamp from cache", model_id=model_id, status=cache_value | upper) }}
+            {{ dbt_macro_polo.logging(message="Resolved maximum timestamp from cache", model_id=model_id, status=cache_value | upper, macro_name=macro_name) }}
             {{ return("'" ~ cache_value ~ "'::timestamp") }}
         {% endif %}
 
         {# Warehouse allocation #}
         {% set warehouse = dbt_macro_polo.allocate_warehouse(warehouse_size) %}
         {% if not warehouse %}
-            {{ dbt_macro_polo.logging(message="Failed to allocate warehouse", level='ERROR', model_id=model_id) }}
-            {{ return(false) }}
+            {{ dbt_macro_polo.logging(message="Failed to allocate warehouse", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
 
         {# Get relation with validation #}
         {% set relation = adapter.get_relation(this.database, this.schema, model_name) if model_name is not none else this %}
         {% if not relation %}
-            {{ dbt_macro_polo.logging(message="Relation not found: " ~ model_name, 
-            level='ERROR', 
-            model_id=model_id
-            ) }}
-            {{ return(false) }}
+            {{ dbt_macro_polo.logging(message="Relation not found: " ~ model_name, level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
 
         {# Build and execute query #}
@@ -62,24 +50,22 @@
         {% do run_query('use warehouse ' ~ target.warehouse) %}
 
         {% if not result %}
-            {{ dbt_macro_polo.logging(message="Query execution failed", level='ERROR', model_id=model_id) }}
-            {{ return(false) }}
+            {{ dbt_macro_polo.logging(message="Query execution failed", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
 
         {# Process and validate result #}
         {% set timestamp = result.columns[0].values()[0] %}
         {% if timestamp is none %}
-            {{ dbt_macro_polo.logging(message="No timestamp value returned", level='ERROR', model_id=model_id) }}
-            {{ return(false) }}
+            {{ dbt_macro_polo.logging(message="No timestamp value returned", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
 
         {# Cache and return result #}
 
         {# Convert timestamp to string for logging #}
         {% set timestamp_str = timestamp | string %}
-        {{ dbt_macro_polo.logging(macro_name, message="Caching maximum timestamp '" ~ timestamp_str ~ "' with cache key '" ~ cache_key ~ "'", model_id=model_id, level='DEBUG') }}
+        {{ dbt_macro_polo.logging(message="Caching maximum timestamp '" ~ timestamp_str ~ "' with cache key '" ~ cache_key ~ "'", model_id=model_id, level='DEBUG', macro_name=macro_name) }}
         {% do macro_polo.cache.update({cache_key: timestamp_str}) %}
-        {{ dbt_macro_polo.logging(message="Macro Polo: Resolved maximum timestamp", model_id=model_id, status=timestamp_str) }}
+        {{ dbt_macro_polo.logging(message="Resolved maximum timestamp", model_id=model_id, status=timestamp_str, macro_name=macro_name) }}
         {{ return("'" ~ timestamp_str ~ "'::timestamp") }}
 
     {% endif %}
