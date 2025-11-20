@@ -108,11 +108,11 @@
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}
                     {% if win_scaling.get('enabled') %}
-                        {{ return(dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, window.get('warehouse_size', warehouse_size))) }}
-                        {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+                        {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, warehouse_size) %}
+                        {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ warehouse_size, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
                     {% endif %}
                     
-                    {{ return(window.get('warehouse_size', base_size)) }}
+                    {{ return(warehouse_size) }}
                 {% endif %}
             {% endif %}
         {% endfor %}
