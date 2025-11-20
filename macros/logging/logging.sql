@@ -12,10 +12,10 @@
             
             {# --- Styling Configuration --- #}
             {%- set colors = {
-                'DEBUG': '\033[90m',       {# Gray #}
-                'INFO':  '\033[36m',       {# Cyan #}
-                'WARN':  '\033[33m',       {# Yellow #}
-                'ERROR': '\033[31m',       {# Red #}
+                'DEBUG': '\033[90m',
+                'INFO':  '\033[36m',
+                'WARN':  '\033[33m',
+                'ERROR': '\033[31m',
                 'RESET': '\033[0m',
                 'BOLD':  '\033[1m'
             } -%}
