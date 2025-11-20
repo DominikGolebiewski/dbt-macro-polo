@@ -16,13 +16,16 @@ The macro inspects the current model's configuration and run context to determin
 The macro relies on the `adaptive_compute` project configuration and `compute_provisioning` model configuration.
 
 ### Project Config (dbt_project.yml)
+```yaml
 vars:
   macro_polo:
     adaptive_compute:
       enabled: true
       baseline_size: 'xs'
+```
 
 ### Model Config (schema.yml or config block)
+```yaml
 config:
   meta:
     compute_provisioning:
@@ -36,15 +39,17 @@ config:
                thresholds:
                  - rows: 1000000
                    warehouse_size: 'xl'
+```
 
 ## Usage Example
 
 In your model configuration:
 
-config(
+```sql
+{{ config(
     pre_hook="dbt_macro_polo.adaptive_compute()"
-)
-
+) }}
+```
 
 ## Logic Flow
 
@@ -60,7 +65,7 @@ config(
 ## Dependencies
 
 - `provision_compute`: For actual warehouse allocation.
-- `get_upstream_volume`: For calculating data volume.
+- `measure_upstream_volume`: For calculating data volume.
 - `log_event`: For observability.
 
 {% enddocs %}

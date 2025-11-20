@@ -1,59 +1,49 @@
-{% macro adaptive_compute(query_operation='ctas') %}
-    {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(query_operation)) }}
+{% macro adaptive_compute(operation='build') %}
+    {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(operation)) }}
 {% endmacro %}
 
-{% macro default__adaptive_compute(query_operation='ctas') %}
+{% macro default__adaptive_compute(operation='build') %}
 
     {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set macro_name = 'adaptive_compute' %}
     
     {# 1. Validation #}
-    {% if query_operation not in ['ctas', 'insert', 'delete'] %}
-        {{ dbt_macro_polo.log_event(message="Invalid query operation: " ~ query_operation, level='ERROR', model_id=model_id, macro_name=macro_name) }}
+    {% if operation not in ['build', 'append', 'prune'] %}
+        {{ dbt_macro_polo.log_event(message="Invalid operation type: " ~ operation, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
-    {# Update: Use adaptive_compute for project config #}
     {% set adaptive_config = macro_polo.get('adaptive_compute', {}) %}
-    {# Update: Use compute_provisioning for model config #}
     {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
 
     {# Check if adaptive compute is enabled globally and at model level #}
     {% if not (adaptive_config.get('enabled', false) and model_config.get('enabled', false)) %}
-        {# Only log disabled status once during CTAS to reduce noise #}
-        {% if query_operation == 'ctas' %}
+        {# Only log disabled status once during build to reduce noise #}
+        {% if operation == 'build' %}
             {{ dbt_macro_polo.log_event(message="Adaptive Compute disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
-        {{ return('') }}
+        {{ return(none) }}
     {% endif %}
     
-    {{ dbt_macro_polo.log_event(message="Starting adaptive compute for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Starting adaptive compute for operation", status=operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
 
     {% set is_incremental = model.config.get('materialized') == 'incremental' %}
     {% set strategy = model.config.get('incremental_strategy') %}
     
     {% if not (is_incremental and strategy == 'delete+insert') %}
-         {{ dbt_macro_polo.log_event(message="Adaptive compute requires incremental materialization with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Adaptive compute requires incremental materialisation with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {# 2. Configuration Resolution #}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set strategies_config = model_config.get('execution_strategies', {}) %}
     
-    {# Map legacy operations to new strategy keys #}
-    {% set operation_map = {
-        'ctas': 'build',
-        'insert': 'append',
-        'delete': 'prune'
-    } %}
-    
     {% if is_full_refresh %}
         {% set active_config = strategies_config.get('full_refresh', {}) %}
         {% set context_label = 'FULL_REFRESH' %}
     {% else %}
-        {% set strategy_key = operation_map.get(query_operation, query_operation) %}
-        {% set active_config = strategies_config.get('incremental', {}).get(strategy_key, {}) %}
-        {% set context_label = query_operation | upper %}
+        {% set active_config = strategies_config.get('incremental', {}).get(operation, {}) %}
+        {% set context_label = operation | upper %}
     {% endif %}
 
     {% if not active_config %}
@@ -68,9 +58,9 @@
     {% if execute and not is_full_refresh %}
         {% set timestamp_column = model.config.get('timestamp_column') %}
         {% if not timestamp_column %}
-             {{ dbt_macro_polo.log_event(message="timestamp_column required for monitoring", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+             {{ dbt_macro_polo.log_event(message="timestamp_column required for volume monitoring", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
-        {% set volume = dbt_macro_polo.get_upstream_volume(model_id, volume_monitors, timestamp_column) %}
+        {% set volume = dbt_macro_polo.measure_upstream_volume(model_id, volume_monitors, timestamp_column) %}
     {% endif %}
     
     {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
