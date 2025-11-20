@@ -6,7 +6,6 @@
 
     {% set macro_polo = var('macro_polo', {}) %}
 
-
     {# Validate input parameters #}
     {% if not incremental_size %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
@@ -28,7 +27,6 @@
     {% if not warehouse_config %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_config project variable must be defined." %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Get and validate environment configuration #}
@@ -39,7 +37,6 @@
     {% if not warehouse_prefix %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Cache handling #}
