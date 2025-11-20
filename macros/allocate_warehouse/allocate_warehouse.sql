@@ -49,7 +49,7 @@
     {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
     
     {% if cache_value %}
-        {{ dbt_macro_polo.logging(message="Allocated warehouse from cache", model_id=model_id, status=cache_value | upper, macro_name='allocate_warehouse') }}
+        {{ dbt_macro_polo.logging(message="Allocated warehouse from cache", level='DEBUG', model_id=model_id, status=cache_value | upper, macro_name='allocate_warehouse') }}
         {{ return(cache_value) }}
     {% endif %}
 
