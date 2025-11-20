@@ -27,8 +27,19 @@
     {% set is_full_refresh = flags.FULL_REFRESH or not is_relation_exist or materialisation == 'table' %}
     {% set size_suffix = fullrefresh if is_full_refresh else incremental %}
 
+    {# Get and validate environment configuration #}
+    {% set environments = warehouse_config.get('environment', {}) %}
+    {% set env_config = environments.get(target.name) %}
+
+    {% set warehouse_prefix = env_config.get('warehouse_name_prefix') %}
+    {% if not warehouse_prefix %}
+        {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ exceptions.raise_compiler_error(msg) }}
+    {% endif %}
+
     {# Cache handling #}
-    {% set cache_key = '_macro_polo_allocate_warehouse_' ~ size_suffix %}
+    {% set cache_key = '_macro_polo_allocate_warehouse_' ~  warehouse_prefix ~ '_' ~ size_suffix %}
     {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
     
     {% if cache_value %}
@@ -81,19 +92,8 @@
         {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
-    {# Get and validate environment configuration #}
-    {% set environments = warehouse_config.get('environment', {}) %}
-    {% set env_config = environments.get(target.name) %}
-
     {% if not env_config %}
         {% set msg = "Configuration Error (dbt_project.yml): No configuration found for target environment: " ~ target.name %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
-    {% endif %}
-
-    {% set warehouse_prefix = env_config.get('warehouse_name_prefix') %}
-    {% if not warehouse_prefix %}
-        {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
         {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
