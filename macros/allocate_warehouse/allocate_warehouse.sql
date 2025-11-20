@@ -5,12 +5,12 @@
 {% macro snowflake__allocate_warehouse(incremental_size, fullrefresh_size=none) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
+    {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
 
     {# Validate input parameters #}
     {% if not incremental_size %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {% set incremental = incremental_size | trim | lower %}
@@ -26,7 +26,7 @@
     {% set warehouse_config = macro_polo.get('warehouse_config', {}) %}
     {% if not warehouse_config %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_config project variable must be defined." %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {# Get and validate environment configuration #}
@@ -35,13 +35,13 @@
 
     {% if not env_config %}
         {% set msg = "Configuration Error (dbt_project.yml): No configuration found for target environment: " ~ target.name %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {% set warehouse_prefix = env_config.get('warehouse_name_prefix') %}
     {% if not warehouse_prefix %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {# Cache handling #}
@@ -49,7 +49,7 @@
     {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
     
     {% if cache_value %}
-        {{ dbt_macro_polo.logging(message="Allocated warehouse from cache", model_id=model_id, status=cache_value | upper) }}
+        {{ dbt_macro_polo.logging(message="Allocated warehouse from cache", model_id=model_id, status=cache_value | upper, macro_name='allocate_warehouse') }}
         {{ return(cache_value) }}
     {% endif %}
 
@@ -59,7 +59,7 @@
 
     {% if not configured_sizes or not (configured_sizes is sequence and configured_sizes is not string and configured_sizes is not mapping) %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_size parameter must be a list of strings. Current value: " ~ configured_sizes %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {% set invalid_configured_sizes = [] %}
@@ -71,7 +71,7 @@
 
     {% if invalid_configured_sizes %}
         {% set msg = "Configuration Error (dbt_project.yml): Invalid warehouse size(s) configured: " ~ invalid_configured_sizes ~ ". Valid sizes are: " ~ available_sizes %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {# Validate requested sizes against configured sizes #}
@@ -84,20 +84,20 @@
 
     {% if invalid_requested_sizes %}
         {% set msg = "Configuration Error: Requested size(s) not in configured warehouse_size list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ configured_sizes %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {# Generate and validate warehouse identifier #}
     {% set warehouse_id = warehouse_prefix ~ "_" ~ size_suffix %}
     {% if warehouse_id | length > 255 %}
         {% set msg = "Configuration Error: Generated warehouse_id exceeds 255 characters: " ~ warehouse_id %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id, macro_name='allocate_warehouse') }}
     {% endif %}
 
     {# Cache and return result #}
-    {{ dbt_macro_polo.logging(macro_name, message="Caching warehouse '" ~ warehouse_id ~ "' with cache key '" ~ cache_key ~ "'", level='DEBUG') }}
+    {{ dbt_macro_polo.logging(message="Caching warehouse '" ~ warehouse_id ~ "' with cache key '" ~ cache_key ~ "'", level='DEBUG', macro_name='allocate_warehouse') }}
     {% do macro_polo.cache.update({cache_key: warehouse_id}) %}
-    {{ dbt_macro_polo.logging(message="Allocated warehouse", model_id=model_id, status=warehouse_id | upper) }}
+    {{ dbt_macro_polo.logging(message="Allocated warehouse", model_id=model_id, status=warehouse_id | upper, macro_name='allocate_warehouse') }}
     {{ return(warehouse_id) }}
     
 {% endmacro %}
