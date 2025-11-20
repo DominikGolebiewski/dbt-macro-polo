@@ -65,7 +65,7 @@
     
     {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
     {% if volume == 0 and not is_full_refresh %}
-         {{ dbt_macro_polo.log_event(message="Zero upstream volume detected. Using XS warehouse", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Zero upstream volume detected. Using XS warehouse.", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
          {% set target_size = 'xs' %}
     {% else %}
          {# 4. Size Determination #}
@@ -133,8 +133,10 @@
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
         {% if volume >= t.rows %}
+            {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
             {{ return(t.warehouse_size) }}
         {% endif %}
     {% endfor %}
+    {{ dbt_macro_polo.log_event(message="No volume threshold matched. Using default warehouse size: " ~ default_size, level='DEBUG', model_id=model_id, macro_name=macro_name) %}
     {{ return(default_size) }}
 {% endmacro %}
