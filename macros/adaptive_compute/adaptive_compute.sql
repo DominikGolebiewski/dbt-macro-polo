@@ -108,8 +108,7 @@
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}
                     {% if win_scaling.get('enabled') %}
-                        {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, warehouse_size) %}
-                        {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ warehouse_size, level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+                        {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, warehouse_size, model_id, macro_name) %}
                     {% endif %}
                     
                     {{ return(warehouse_size) }}
@@ -127,17 +126,19 @@
     {{ return(base_size) }}
 {% endmacro %}
 
-{% macro evaluate_thresholds(thresholds, volume, default_size) %}
-    {{ return(adapter.dispatch('evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size)) }}
+{% macro evaluate_thresholds(thresholds, volume, default_size, model_id, macro_name) %}
+    {{ return(adapter.dispatch('evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size, model_id, macro_name)) }}
 {% endmacro %}
 
-{% macro default__evaluate_thresholds(thresholds, volume, default_size) %}
+{% macro default__evaluate_thresholds(thresholds, volume, default_size, model_id, macro_name) %}
     {# Sort thresholds descending by rows #}
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
         {% if volume >= t.rows %}
             {{ return(t.warehouse_size) }}
+            {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size, level='DEBUG', status=volume ~ " >= " ~ t.rows, model_id=model_id, macro_name=macro_name) }}
         {% endif %}
     {% endfor %}
+    {{ dbt_macro_polo.log_event(message="No volume threshold matched. Using default warehouse size: " ~ default_size, level='DEBUG', status=volume ~ " < " ~ sorted[0].rows, model_id=model_id, macro_name=macro_name) }}
     {{ return(default_size) }}
 {% endmacro %}
