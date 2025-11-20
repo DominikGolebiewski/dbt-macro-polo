@@ -5,11 +5,7 @@
 {% macro snowflake__allocate_warehouse(incremental_size, fullrefresh_size=none) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
-    
-    {# Initialise macro context #}
-    {% set macro_ctx = dbt_macro_polo.create_macro_context('allocate_warehouse') %}
-    {% set macro_name = macro_ctx.macro_name %}
-    {% set model_id = macro_ctx.model_id %}
+
 
     {# Validate input parameters #}
     {% if not incremental_size %}
@@ -26,6 +22,14 @@
     {% set materialisation = config.get('materialized', 'undefined') | lower %}
     {% set is_full_refresh = flags.FULL_REFRESH or not is_relation_exist or materialisation == 'table' %}
     {% set size_suffix = fullrefresh if is_full_refresh else incremental %}
+
+    {# Get and validate configuration #}
+    {% set warehouse_config = macro_polo.get('warehouse_config', {}) %}
+    {% if not warehouse_config %}
+        {% set msg = "Configuration Error (dbt_project.yml): warehouse_config project variable must be defined." %}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+        {{ exceptions.raise_compiler_error(msg) }}
+    {% endif %}
 
     {# Get and validate environment configuration #}
     {% set environments = warehouse_config.get('environment', {}) %}
@@ -45,14 +49,6 @@
     {% if cache_value %}
         {{ dbt_macro_polo.logging(message="Allocated warehouse from cache", model_id=model_id, status=cache_value | upper) }}
         {{ return(cache_value) }}
-    {% endif %}
-
-    {# Get and validate configuration #}
-    {% set warehouse_config = macro_polo.get('warehouse_config', {}) %}
-    {% if not warehouse_config %}
-        {% set msg = "Configuration Error (dbt_project.yml): warehouse_config project variable must be defined." %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Get and validate configured sizes #}
