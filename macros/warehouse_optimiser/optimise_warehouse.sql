@@ -78,7 +78,7 @@
     {% endif %}
 
     {# 4. Size Determination #}
-    {% set target_size = determine_optimal_size(active_config, volume, model_id) %}
+    {% set target_size = dbt_macro_polo.determine_optimal_size(active_config, volume, model_id) %}
 
     {# 5. Allocation #}
     {% set warehouse = dbt_macro_polo.allocate_warehouse(target_size) %}
@@ -110,7 +110,7 @@
                     
                     {# Schedule Monitoring Override #}
                     {% if schedule.get('monitoring', {}).get('enabled') %}
-                        {{ return(evaluate_thresholds(schedule.get('monitoring', {}).get('thresholds', []), volume, schedule.get('warehouse_size', base_size))) }}
+                        {{ return(dbt_macro_polo.evaluate_thresholds(schedule.get('monitoring', {}).get('thresholds', []), volume, schedule.get('warehouse_size', base_size))) }}
                     {% endif %}
                     
                     {{ return(schedule.get('warehouse_size', base_size)) }}
@@ -121,7 +121,7 @@
 
     {# Check Base Monitoring #}
     {% if config.get('monitoring', {}).get('enabled') %}
-        {{ return(evaluate_thresholds(config.get('monitoring', {}).get('thresholds', []), volume, base_size)) }}
+        {{ return(dbt_macro_polo.evaluate_thresholds(config.get('monitoring', {}).get('thresholds', []), volume, base_size)) }}
     {% endif %}
 
     {{ return(base_size) }}
