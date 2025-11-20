@@ -41,16 +41,6 @@ config:
                    warehouse_size: 'xl'
 ```
 
-## Usage Example
-
-In your model configuration:
-
-```sql
-{{ config(
-    pre_hook="dbt_macro_polo.adaptive_compute()"
-) }}
-```
-
 ## Logic Flow
 
 1.  **Validation**: Checks if the operation is valid and if adaptive compute is enabled.
