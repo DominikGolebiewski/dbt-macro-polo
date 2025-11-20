@@ -88,7 +88,12 @@
 
 {% endmacro %}
 
+{# Snowflake specific implementation #}
 {% macro _determine_optimal_size(config, volume, model_id) %}
+    {{ return(adapter.dispatch('_determine_optimal_size', 'dbt_macro_polo')(config, volume, model_id)) }}
+{% endmacro %}
+
+{% macro default___determine_optimal_size(config, volume, model_id) %}
     {% set default_size = var('macro_polo', {}).get('warehouse_optimiser', {}).get('default_warehouse_size', 'xs') %}
     {% set base_size = config.get('warehouse_size', default_size) %}
     
@@ -123,6 +128,10 @@
 {% endmacro %}
 
 {% macro _evaluate_thresholds(thresholds, volume, default_size) %}
+    {{ return(adapter.dispatch('_evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size)) }}
+{% endmacro %}
+
+{% macro default___evaluate_thresholds(thresholds, volume, default_size) %}
     {# Sort thresholds descending by rows #}
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
