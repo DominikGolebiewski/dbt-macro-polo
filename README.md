@@ -63,7 +63,7 @@ vars:
       baseline_size: 'xs' # Default warehouse size
     
     # Infrastructure definitions (Warehouses)
-    infrastructure_definitions: 
+    infrastructure_definition: 
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Valid warehouse sizes
       environment_contexts:
         prod: 
@@ -99,7 +99,7 @@ vars:
 vars:
   macro_polo:
     runtime_state: {} 
-    infrastructure_definitions:
+    infrastructure_definition:
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl']
       environment_contexts:
         <target_name>:

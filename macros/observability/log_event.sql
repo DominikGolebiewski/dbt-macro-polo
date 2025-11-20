@@ -3,6 +3,7 @@
 {% endmacro %}
 
 {% macro default__log_event(message, level, model_id, status, macro_name) %}
+
     {%- if execute -%}
         {%- set level = level | upper -%}
         {# Update: Read from observability.log_level #}

@@ -34,7 +34,7 @@ vars:
     adaptive_compute:
       enabled: true
       baseline_size: xs
-    infrastructure_definitions:
+    infrastructure_definition:
       allowed_sizes: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
       environment_contexts:
         ci:
