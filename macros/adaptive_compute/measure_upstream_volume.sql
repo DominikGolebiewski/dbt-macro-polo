@@ -51,16 +51,16 @@
         {% if execute %}
             {% set res = run_query(query) %}
             {% if res and res.rows %}
-                {% set count = res.columns[0].values()[0] or 0 %}
+                {% set count = res.columns[0].values()[0] %}
                 {% set total_rows.value = total_rows.value + count %}
             {% endif %}
         {% endif %}
     {% endfor %}
 
-    {{ dbt_macro_polo.log_event(message="Total upstream volume calculated", status=total_rows.value, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Total upstream volume calculated", status=total_rows.value or 0, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
     
     {# Update: Use runtime_state instead of cache #}
-    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: total_rows.value}) %}
+    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: total_rows.value or 0}) %}
     
     {{ return(total_rows.value) }}
 
