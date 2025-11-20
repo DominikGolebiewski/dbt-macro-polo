@@ -3,13 +3,25 @@
 {% endmacro %}
 
 {% macro default__get_cache_value(cache_key) %}
-    {% set macro_ctx = dbt_macro_polo.create_macro_context('get_cache_value') %}
-    {% set macro_name = macro_ctx.macro_name %}
-    {% set model_id = macro_ctx.model_id %}
     
     {% set macro_polo = var('macro_polo', {}) %}
     {% set cache = macro_polo.get('cache', {}) %}
-    {% set cache_value = cache.get(cache_key, {}) %}
-    {{ dbt_macro_polo.logging(macro_name, message="Cache handling: " ~ {'cache_key': cache_key, 'cache_value': cache_value}, level='DEBUG', model_id=model_id) }}
+    {% set cache_value = cache.get(cache_key) %}
+    
+    {% if cache_value %}
+        {{ dbt_macro_polo.logging(
+            message="Cache hit for key: " ~ cache_key, 
+            status="HIT", 
+            level='DEBUG', 
+            macro_name='get_cache_value'
+        ) }}
+    {% else %}
+        {{ dbt_macro_polo.logging(
+            message="Cache miss for key: " ~ cache_key, 
+            level='DEBUG', 
+            macro_name='get_cache_value'
+        ) }}
+    {% endif %}
+
     {{ return(cache_value) }}
 {% endmacro %}
