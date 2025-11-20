@@ -16,16 +16,13 @@ The macro inspects the current model's configuration and run context to determin
 The macro relies on the `adaptive_compute` project configuration and `compute_provisioning` model configuration.
 
 ### Project Config (dbt_project.yml)
-```yaml
 vars:
   macro_polo:
     adaptive_compute:
       enabled: true
       baseline_size: 'xs'
-```
 
 ### Model Config (schema.yml or config block)
-```yaml
 config:
   meta:
     compute_provisioning:
@@ -39,7 +36,6 @@ config:
                thresholds:
                  - rows: 1000000
                    warehouse_size: 'xl'
-```
 
 ## Usage Example
 
