@@ -51,7 +51,7 @@
         {% if execute %}
             {% set res = run_query(query) %}
             {% if res and res.rows %}
-                {% set count = default(res.columns[0].values()[0], 0) %}
+                {% set count = res.columns[0].values()[0] or 0 %}
                 {% set total_rows.value = total_rows.value + count %}
             {% endif %}
         {% endif %}
