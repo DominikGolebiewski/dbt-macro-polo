@@ -65,7 +65,7 @@
     
     {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
     {% if volume == 0 and not is_full_refresh %}
-         {{ dbt_macro_polo.log_event(message="Zero upstream volume detected", status='XS', level='INFO', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Zero upstream volume detected. Using XS warehouse", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
          {% set target_size = 'xs' %}
     {% else %}
          {# 4. Size Determination #}
