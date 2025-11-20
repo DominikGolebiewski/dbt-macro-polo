@@ -78,7 +78,7 @@
     {% endif %}
 
     {# 4. Size Determination #}
-    {% set target_size = _determine_optimal_size(active_config, volume, model_id) %}
+    {% set target_size = determine_optimal_size(active_config, volume, model_id) %}
 
     {# 5. Allocation #}
     {% set warehouse = dbt_macro_polo.allocate_warehouse(target_size) %}
@@ -89,11 +89,11 @@
 {% endmacro %}
 
 {# Snowflake specific implementation #}
-{% macro _determine_optimal_size(config, volume, model_id) %}
-    {{ return(adapter.dispatch('_determine_optimal_size', 'dbt_macro_polo')(config, volume, model_id)) }}
+{% macro determine_optimal_size(config, volume, model_id) %}
+    {{ return(adapter.dispatch('determine_optimal_size', 'dbt_macro_polo')(config, volume, model_id)) }}
 {% endmacro %}
 
-{% macro default___determine_optimal_size(config, volume, model_id) %}
+{% macro default__determine_optimal_size(config, volume, model_id) %}
     {% set default_size = var('macro_polo', {}).get('warehouse_optimiser', {}).get('default_warehouse_size', 'xs') %}
     {% set base_size = config.get('warehouse_size', default_size) %}
     
@@ -110,7 +110,7 @@
                     
                     {# Schedule Monitoring Override #}
                     {% if schedule.get('monitoring', {}).get('enabled') %}
-                        {{ return(_evaluate_thresholds(schedule.get('monitoring', {}).get('thresholds', []), volume, schedule.get('warehouse_size', base_size))) }}
+                        {{ return(evaluate_thresholds(schedule.get('monitoring', {}).get('thresholds', []), volume, schedule.get('warehouse_size', base_size))) }}
                     {% endif %}
                     
                     {{ return(schedule.get('warehouse_size', base_size)) }}
@@ -121,17 +121,17 @@
 
     {# Check Base Monitoring #}
     {% if config.get('monitoring', {}).get('enabled') %}
-        {{ return(_evaluate_thresholds(config.get('monitoring', {}).get('thresholds', []), volume, base_size)) }}
+        {{ return(evaluate_thresholds(config.get('monitoring', {}).get('thresholds', []), volume, base_size)) }}
     {% endif %}
 
     {{ return(base_size) }}
 {% endmacro %}
 
-{% macro _evaluate_thresholds(thresholds, volume, default_size) %}
-    {{ return(adapter.dispatch('_evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size)) }}
+{% macro evaluate_thresholds(thresholds, volume, default_size) %}
+    {{ return(adapter.dispatch('evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size)) }}
 {% endmacro %}
 
-{% macro default___evaluate_thresholds(thresholds, volume, default_size) %}
+{% macro default__evaluate_thresholds(thresholds, volume, default_size) %}
     {# Sort thresholds descending by rows #}
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
