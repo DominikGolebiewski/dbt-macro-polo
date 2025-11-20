@@ -1,8 +1,8 @@
 version: 2
 
 macros:
-- name: allocate_warehouse
-  description: '{{ doc("allocate_warehouse") }}'
+- name: provision_compute
+  description: '{{ doc("provision_compute") }}'
   arguments:
   - name: incremental_size
     type: string

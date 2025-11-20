@@ -1,6 +1,6 @@
-{% docs allocate_warehouse %}
+{% docs provision_compute %}
 
-# allocate_warehouse
+# provision_compute
 
 This macro dynamically allocates a Snowflake warehouse based on specified size parameters and environment configuration. It includes caching functionality to optimise warehouse allocation across multiple calls.
 
@@ -27,13 +27,13 @@ The macro expects the following configuration in your `dbt_project.yml`:
 ```yaml
 {%- raw -%}
 vars:
-  warehouse_config:
-    warehouse_size: ['xs', 's', 'm', 'l']
-    environment:
+  infrastructure_definitions:
+    allowed_sizes: ['xs', 's', 'm', 'l']
+    environment_contexts:
         dev:
-            warehouse_name_prefix: dev_wh
+            resource_prefix: dev_wh
         prod:
-            warehouse_name_prefix: prd_wh
+            resource_prefix: prd_wh
 {%- endraw -%}
 ```
 
@@ -51,7 +51,7 @@ vars:
 
 ```jinja
 {%- raw -%}
-use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size='xs', fullrefresh_size='m') }}
+use warehouse {{ dbt_macro_polo.provision_compute(incremental_size='xs', fullrefresh_size='m') }}
 {%- endraw -%}
 ```
 

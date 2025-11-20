@@ -3,19 +3,19 @@
         'name': 'Basic warehouse allocation',
         'incremental_size': 'xs',
         'fullrefresh_size': none,
-        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ '_xs'
+        'expected': var('macro_polo').get('infrastructure_definitions').get('environment_contexts').get(target.name, target.name).get('resource_prefix') ~ '_xs'
     },
     {
         'name': 'Full refresh warehouse allocation',
         'incremental_size': 'xs',
         'fullrefresh_size': 's',
-        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ ('_s' if dbt_macro_polo.should_full_refresh() else '_xs')
+        'expected': var('macro_polo').get('infrastructure_definitions').get('environment_contexts').get(target.name, target.name).get('resource_prefix') ~ ('_s' if dbt_macro_polo.should_full_refresh() else '_xs')
     },
     {
         'name': 'Full refresh with default size',
         'incremental_size': 'm',
         'fullrefresh_size': none,
-        'expected': var('macro_polo').get('warehouse_config').get('environment').get(target.name, target.name).get('warehouse_name_prefix') ~ '_m'
+        'expected': var('macro_polo').get('infrastructure_definitions').get('environment_contexts').get(target.name, target.name).get('resource_prefix') ~ '_m'
     }
 ] %}
 
@@ -23,7 +23,7 @@
 {# Process test results #}
 {% set failed_tests = [] %}
 {% for test_case in test_cases %}
-    {% set actual = dbt_macro_polo.allocate_warehouse(
+    {% set actual = dbt_macro_polo.provision_compute(
         incremental_size=test_case.incremental_size,
         fullrefresh_size=test_case.fullrefresh_size
     ) | string %}
@@ -46,7 +46,7 @@ from (
     {% for test_case in test_cases %}
     select 
         '{{ test_case.name }}' as test_name,
-        '{{ dbt_macro_polo.allocate_warehouse(
+        '{{ dbt_macro_polo.provision_compute(
             incremental_size=test_case.incremental_size,
             fullrefresh_size=test_case.fullrefresh_size
         ) }}' as actual,

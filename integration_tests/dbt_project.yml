@@ -28,19 +28,16 @@ vars:
   
   # Macro Polo 
   macro_polo:
-    cache: {}
-    logging_level: debug
-    warehouse_optimiser:
+    runtime_state: {}
+    observability:
+        log_level: debug
+    adaptive_compute:
       enabled: true
-      default_warehouse_size: xs
-    warehouse_config:
-      warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
-      environment:
+      baseline_size: xs
+    infrastructure_definitions:
+      allowed_sizes: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
+      environment_contexts:
         ci:
-          warehouse_name_prefix: ci
+          resource_prefix: ci
         dev:
-          warehouse_name_prefix: developer
-
-
-
-
+          resource_prefix: developer

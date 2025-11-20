@@ -1,0 +1,5 @@
+version: 2
+
+macros:
+  - name: get_high_water_mark
+    description: '{{ doc("get_high_water_mark") }}'

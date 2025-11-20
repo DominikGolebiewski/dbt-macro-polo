@@ -14,9 +14,9 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
 - [Overview](#overview)
 - [Installation](#installation)
 - [Macro Collection](#macro-collection)
-  - [allocate_warehouse](#allocate_warehouse)
-  - [get_max_timestamp](#get_max_timestamp)
-  - [warehouse_optimiser](#warehouse_optimiser)
+  - [provision_compute](#provision_compute)
+  - [get_high_water_mark](#get_high_water_mark)
+  - [optimise_warehouse](#optimise_warehouse)
 <!-- - [Contributing](#contributing-) -->
 - [Resources](#resources-)
 
@@ -33,9 +33,9 @@ This project aims to:
 >This repository is actively being developed and some features may not be fully functional or may produce unexpected results in your environment. 
 > 
 > List of known limitations and caveats:
->- warehouse_optimiser may produce unexpected results if setup incorrectly
->- Logging is not yet fully implemented withing warehouse_optimiser, especially DEBUG level
->- Compilation and docs generation is taking longer due to timestamp retrieval
+> - optimise_warehouse may produce unexpected results if setup incorrectly
+> - Logging is not yet fully implemented withing optimise_warehouse, especially DEBUG level
+> - Compilation and docs generation is taking longer due to timestamp retrieval
 
 ## Installation
 
@@ -55,19 +55,23 @@ dbt deps
 ```yaml
 vars:
   macro_polo:
-    cache: {} # Required for caching functionality
-    warehouse_optimiser: # Required for warehouse optimiser functionality
-      enabled: true # Enable warehouse optimiser in your project - global setting
-      default_warehouse_size: 'xs' # Default warehouse size to use if no specific settings are provided
-    warehouse_config: # Required for warehouse config functionality
-      warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Explicit list of available warehouse sizes in your project
-      environment:
-        prod: # Matches your profiles.yml target
-          warehouse_name_prefix: prod_wh # Prefix for warehouse names in your production environment
+    runtime_state: {} # Required for caching functionality (formerly 'cache')
+    
+    # Project-level configuration for warehouse optimization
+    adaptive_compute:
+      enabled: true # Enable/Disable globally
+      baseline_size: 'xs' # Default warehouse size
+    
+    # Infrastructure definitions (Warehouses)
+    infrastructure_definitions: 
+      allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Valid warehouse sizes
+      environment_contexts:
+        prod: 
+          resource_prefix: prod_wh # Warehouse name prefix for prod
         dev:
-          warehouse_name_prefix: dev_wh
+          resource_prefix: dev_wh # Warehouse name prefix for dev
         <target_name>:
-          warehouse_name_prefix: <warehouse_name_prefix>
+          resource_prefix: <resource_prefix>
         ...
 ```
 
@@ -83,7 +87,7 @@ vars:
 
 ## Macro Collection
 
-### allocate_warehouse
+### provision_compute
 
 > **Snowflake Only** - Dynamically sets warehouse size based on operation context.
 
@@ -94,12 +98,12 @@ vars:
 ```yaml
 vars:
   macro_polo:
-    cache: {} # Required for caching functionality
-    warehouse_config:
-      warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl']
-      environment:
+    runtime_state: {} 
+    infrastructure_definitions:
+      allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl']
+      environment_contexts:
         <target_name>:
-          warehouse_name_prefix: <warehouse_name_prefix>
+          resource_prefix: <resource_prefix>
         ...
 ```
 
@@ -108,7 +112,7 @@ In your model:
 ```sql
 {{ config(
     pre_hook=[
-        'use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size="s", full_refresh_size="xl") }}'
+        'use warehouse {{ dbt_macro_polo.provision_compute(incremental_size="s", fullrefresh_size="xl") }}'
     ]
 ) }}
 ```
@@ -120,13 +124,13 @@ config:
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'
-    pre_hook: ['use warehouse {{ dbt_macro_polo.allocate_warehouse(incremental_size="s", full_refresh_size="xl") }}']
+    pre_hook: ['use warehouse {{ dbt_macro_polo.provision_compute(incremental_size="s", fullrefresh_size="xl") }}']
 ```
 
-[View Full Documentation →](/macros/allocate_warehouse/schema.md)
+[View Full Documentation →](/macros/compute_provisioning/schema.md)
 </details>
 
-### get_max_timestamp
+### get_high_water_mark
 
 > **Snowflake Only** - Efficiently retrieves and caches maximum timestamps with built-in warehouse management.
 
@@ -137,22 +141,22 @@ config:
 ```yaml
 vars:
   macro_polo:
-    cache: {}  # Required for caching
+    runtime_state: {}  # Required for caching
 ```
 
 #### Usage
 ```sql
-{% set max_timestamp = dbt_macro_polo.get_max_timestamp(
+{% set max_timestamp = dbt_macro_polo.get_high_water_mark(
     timestamp_column='created_at',
     predicate="status = 'active'",
     warehouse_size='m'
 ) %}
 ```
 
-[View Full Documentation →](/macros/get_max_timestamp/schema.md)
+[View Full Documentation →](/macros/high_water_mark/schema.md)
 </details>
 
-### warehouse_optimiser 
+### optimise_warehouse 
 
 This is a beta version of the warehouse optimiser. It is currently in development and some features may not be fully functional or produce unexpected results.
 
@@ -175,7 +179,7 @@ In your model:
     unique_key='unique_key',
     timestamp_column='loaded_timestamp',
     pre_hook=[
-        '{{ dbt_macro_polo.warehouse_optimiser() }}'
+        '{{ dbt_macro_polo.optimise_warehouse() }}'
     ]
 ) }}
 ```
@@ -187,7 +191,7 @@ config:
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'
-    pre_hook: ['{{ dbt_macro_polo.warehouse_optimiser() }}']
+    pre_hook: ['{{ dbt_macro_polo.optimise_warehouse() }}']
 ```
 
 [View Full Documentation →](/macros/warehouse_optimiser/schema.md)

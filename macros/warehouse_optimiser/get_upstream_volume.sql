@@ -4,10 +4,10 @@
 
 {% macro default__get_upstream_volume(model_id, upstream_dependency, timestamp_column) %}
     
-    {% set cache_key = '_upstream_volume_' ~ model_id | replace('.', '_') %}
-    {% set cache_value = dbt_macro_polo.get_cache_value(cache_key) %}
-    {% if cache_value %}
-        {{ return(cache_value) }}
+    {% set state_key = '_upstream_volume_' ~ model_id | replace('.', '_') %}
+    {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
+    {% if state_value %}
+        {{ return(state_value) }}
     {% endif %}
 
     {% set dependencies = [upstream_dependency] if upstream_dependency is string else upstream_dependency %}
@@ -20,10 +20,11 @@
     {# Check if target exists to determine incremental scan #}
     {% set target_exists = load_relation(this) is not none %}
     {% set max_timestamp = '1900-01-01' %}
-    {% set wh = dbt_macro_polo.allocate_warehouse('xs') %}
+    {# Update: Call provision_compute instead of allocate_warehouse #}
+    {% set wh = dbt_macro_polo.provision_compute('xs') %}
 
     {% if target_exists and timestamp_column %}
-        {% set max_timestamp = dbt_macro_polo.get_max_timestamp(timestamp_column=timestamp_column) %}
+        {% set max_timestamp = dbt_macro_polo.get_high_water_mark(timestamp_column=timestamp_column) %}
         {% if not max_timestamp %}
              {% set max_timestamp = '1900-01-01' %}
         {% endif %}
@@ -50,9 +51,9 @@
     {% endfor %}
 
     {{ dbt_macro_polo.logging(message="Total upstream volume: " ~ total_rows.value, model_id=model_id, level='DEBUG') }}
-    {% do var('macro_polo', {}).get('cache', {}).update({cache_key: total_rows.value}) %}
+    {# Update: Use runtime_state instead of cache #}
+    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: total_rows.value}) %}
     
     {{ return(total_rows.value) }}
 
 {% endmacro %}
-

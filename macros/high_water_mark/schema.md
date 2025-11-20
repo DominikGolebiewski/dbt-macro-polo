@@ -1,9 +1,9 @@
-{% docs get_max_timestamp %}
+{% docs get_high_water_mark %}
 
-# Get Max Timestamp Macro
+# Get High Water Mark Macro
 
 ## Overview
-The `get_max_timestamp` macro is designed to efficiently retrieve the maximum timestamp from a specified column in a model. It includes features such as result caching, warehouse management, and comprehensive error handling.
+The `get_high_water_mark` macro is designed to efficiently retrieve the high water mark (maximum timestamp) from a specified column in a model. It includes features such as result persistence, warehouse management, and comprehensive error handling.
 
 ## Arguments
 - `timestamp_column` (optional): Column name containing timestamps (default: 'loaded_timestamp')
@@ -12,10 +12,10 @@ The `get_max_timestamp` macro is designed to efficiently retrieve the maximum ti
 - `model_name` (optional): Target model name (default: current model)
 
 ## Features
-### Caching
-- Implements automatic caching of results
-- Cache keys are generated based on model ID and predicate
-- Cached results are returned without re-querying
+### State Persistence
+- Implements automatic persistence of results to runtime state
+- State keys are generated based on model ID and predicate
+- Persisted results are returned without re-querying
 
 ### Warehouse Management
 - Dynamically allocates warehouses based on specified size
@@ -35,17 +35,17 @@ Comprehensive validation and error checking for:
 {% raw %} -- Raw block to prevent jinja rendering
 
 -- Basic usage
-{% set max_ts = dbt_macro_polo.get_max_timestamp() %}
+{% set max_ts = dbt_macro_polo.get_high_water_mark() %}
 
 -- With custom timestamp column and predicate
-{% set max_ts = dbt_macro_polo.get_max_timestamp(
+{% set max_ts = dbt_macro_polo.get_high_water_mark(
 timestamp_column='created_at',
 predicate="status = 'active'",
 warehouse_size='s'
 ) %}
 
 -- With all parameters
-{% set max_ts = dbt_macro_polo.get_max_timestamp(
+{% set max_ts = dbt_macro_polo.get_high_water_mark(
 timestamp_column='updated_at',
 predicate='category = "sales"',
 warehouse_size='m',
@@ -62,11 +62,11 @@ model_name='my_model'
 ## Dependencies
 - Requires the `logging` macro for status reporting
 - Requires the `create_macro_context` macro for execution context
-- Requires the `allocate_warehouse` macro for warehouse management
+- Requires the `provision_compute` macro for warehouse management
 
 ## Configuration
 The macro utilises these configuration elements:
-- Cache management through the `cache` variable
+- State management through the `runtime_state` variable
 - Warehouse allocation through the warehouse management system
 - Debug logging through the logging macro
 
