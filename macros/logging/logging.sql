@@ -20,21 +20,15 @@
                 'BOLD':  '\033[1m'
             } -%}
             
-            {%- set icons = {
-                'DEBUG': '🐛',
-                'INFO':  'ℹ️ ',
-                'WARN':  '⚠️ ',
-                'ERROR': '❌'
-            } -%}
-
             {%- set c = colors[level] -%}
             {%- set r = colors['RESET'] -%}
             {%- set b = colors['BOLD'] -%}
             
             {# --- Message Construction --- #}
-            {# Format: [Level] [Model] Message ... [Status] #}
+            {# Format: [Level] [Macro-Polo] [Model] Message ... [Status] #}
             
-            {%- set header = icons[level] ~ " " ~ b ~ level.ljust(5) ~ r -%}
+            {%- set header = "[" ~ c ~ b ~ level.ljust(5) ~ r ~ "] " -%}
+            {%- set package_label = colors['DEBUG'] ~ "Macro-Polo" ~ r -%}
             
             {%- set context_info = [] -%}
             {%- if model_id -%}
@@ -45,12 +39,12 @@
             {%- endif -%}
             {%- set context_str = " " ~ context_info | join(' ') if context_info else "" -%}
 
-            {%- set final_msg = header ~ context_str ~ " " ~ c ~ message ~ r -%}
+            {%- set final_msg = header ~ package_label ~ context_str ~ " " ~ c ~ message ~ r -%}
 
             {# --- Right Aligned Status (Optional) --- #}
             {%- if status -%}
                 {# Simple padding approximation #}
-                {%- set padding = 80 - (message | length) - (model_id | length if model_id else 0) - 20 -%}
+                {%- set padding = 80 - (message | length) - (model_id | length if model_id else 0) - 25 -%}
                 {%- set padding = padding if padding > 0 else 5 -%}
                 {%- set dots = colors['DEBUG'] ~ ('.' * padding) ~ r -%}
                 {%- set final_msg = final_msg ~ " " ~ dots ~ " [" ~ c ~ b ~ status ~ r ~ "]" -%}
