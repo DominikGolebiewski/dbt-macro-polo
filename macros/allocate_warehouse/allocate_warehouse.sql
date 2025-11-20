@@ -33,6 +33,11 @@
     {% set environments = warehouse_config.get('environment', {}) %}
     {% set env_config = environments.get(target.name) %}
 
+    {% if not env_config %}
+        {% set msg = "Configuration Error (dbt_project.yml): No configuration found for target environment: " ~ target.name %}
+        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
+    {% endif %}
+
     {% set warehouse_prefix = env_config.get('warehouse_name_prefix') %}
     {% if not warehouse_prefix %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix missing for environment: " ~ target.name %}
@@ -55,7 +60,6 @@
     {% if not configured_sizes or not (configured_sizes is sequence and configured_sizes is not string and configured_sizes is not mapping) %}
         {% set msg = "Configuration Error (dbt_project.yml): warehouse_size parameter must be a list of strings. Current value: " ~ configured_sizes %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {% set invalid_configured_sizes = [] %}
@@ -68,7 +72,6 @@
     {% if invalid_configured_sizes %}
         {% set msg = "Configuration Error (dbt_project.yml): Invalid warehouse size(s) configured: " ~ invalid_configured_sizes ~ ". Valid sizes are: " ~ available_sizes %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Validate requested sizes against configured sizes #}
@@ -82,13 +85,6 @@
     {% if invalid_requested_sizes %}
         {% set msg = "Configuration Error: Requested size(s) not in configured warehouse_size list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ configured_sizes %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
-    {% endif %}
-
-    {% if not env_config %}
-        {% set msg = "Configuration Error (dbt_project.yml): No configuration found for target environment: " ~ target.name %}
-        {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Generate and validate warehouse identifier #}
@@ -96,7 +92,6 @@
     {% if warehouse_id | length > 255 %}
         {% set msg = "Configuration Error: Generated warehouse_id exceeds 255 characters: " ~ warehouse_id %}
         {{ dbt_macro_polo.logging(message=msg, level='ERROR', model_id=model_id) }}
-        {{ exceptions.raise_compiler_error(msg) }}
     {% endif %}
 
     {# Cache and return result #}
