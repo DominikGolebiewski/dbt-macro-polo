@@ -10,7 +10,6 @@
         {{ dbt_macro_polo.handle_warehouse_switch('delete') }}
         {% if unique_key is sequence and unique_key is not string %}
             delete from {{ target }}
-            -- TODO: Add a comment to the query to indicate that it is a delete operation
             using {{ source }}
             where (
                 {% for key in unique_key %}
@@ -46,4 +45,15 @@
         from {{ source }}
     )
 
+{% endmacro %}
+
+{% macro handle_warehouse_switch(operation) %}
+    {{ return(adapter.dispatch('handle_warehouse_switch', 'dbt_macro_polo')(operation)) }}
+{% endmacro %}
+
+{% macro default__handle_warehouse_switch(operation) %}
+    {% set warehouse_stmt = dbt_macro_polo.optimise_warehouse(operation) %}
+    {% if warehouse_stmt %}
+        {{ warehouse_stmt }};
+    {% endif %}
 {% endmacro %}

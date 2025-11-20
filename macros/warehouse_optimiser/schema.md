@@ -1,6 +1,6 @@
 {% docs warehouse_optimiser %}
 
-# warehouse_optimiser
+# optimise_warehouse
 
 **Snowflake Only** 🏔️
 A sophisticated macro for dynamically optimising warehouse sizes based on operation type, data volume, and time-based scheduling, featuring built-in monitoring capabilities and intelligent resource allocation.
@@ -60,7 +60,7 @@ config:
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'
-    pre_hook: ["{{ dbt_macro_polo.warehouse_optimiser() }}"]
+    pre_hook: ["{{ dbt_macro_polo.optimise_warehouse() }}"]
     
     meta:
       warehouse_optimiser:
@@ -129,83 +129,12 @@ config:
     unique_key='unique_key',
     timestamp_column='loaded_timestamp',
     pre_hook=[
-        '{{ dbt_macro_polo.warehouse_optimiser() }}'
+        '{{ dbt_macro_polo.optimise_warehouse() }}'
     ]
 ) }}
 
 select * from {{ ref('my_source_table') }}
 {% endraw %}
-```
-
-2. **Advanced Configuration with Scheduling**:
-```yaml
-meta:
-  warehouse_optimiser:
-    enabled: true
-    operation_type:
-      on_run:
-        ctas:
-          warehouse_size: xs
-          scheduling: # Scheduling configuration for warehouse size
-            enabled: true # Enable scheduling
-            schedules: # List of schedules to apply
-              - name: "Peak Hours - Weekdays" # Name of the schedule
-                days: ["monday", "tuesday", "wednesday", "thursday", "friday"] # Days of the week to apply the schedule
-                times:
-                  start: "07:00" # Start time of the schedule
-                  end: "22:00" # End time of the schedule
-                warehouse_size: s # Warehouse size to use for schedule
-                monitoring:
-                  enabled: true # Enable source row count monitoring for warehouse size in schedule
-                  thresholds:
-                    - rows: 10000000
-                      warehouse_size: m # Warehouse size to use if source row count is greater than threshold in schedule
-```
-
-#### Best Practices & Common Pitfalls ⚠️
-
-1. **DO**:
-   - Define all operation types together (CTAS, DELETE, INSERT)
-   - Start with conservative warehouse sizes
-   - Test thoroughly in development
-   - Monitor query performance
-   - Use time-based scheduling for predictable workloads
-
-2. **DON'T**:
-   - Use with non-incremental materialisations
-   - Configure operations independently
-   - Set unnecessarily large warehouse sizes
-   - Ignore the logs and monitoring outputs
-   - Skip configuration validation
-
-3. **Common Configuration Mistakes**:
-```yaml
-# ❌ INCORRECT: Missing delete+insert strategy
-config:
-    materialized: 'incremental'
-    # Missing: incremental_strategy: 'delete+insert'
-
-# ❌ INCORRECT: Incomplete operation types
-meta:
-  warehouse_optimiser:
-    operation_type:
-      on_run:
-        ctas:
-          warehouse_size: xs
-        # Missing: delete and insert configurations
-
-# ✅ CORRECT: Complete configuration
-config:
-    materialized: 'incremental'
-    incremental_strategy: 'delete+insert'
-    unique_key: ['column1', 'column2']
-    meta:
-      warehouse_optimiser:
-        operation_type:
-          on_run:
-            ctas: {...}
-            delete: {...}
-            insert: {...}
 ```
 
 #### Monitoring & Troubleshooting 🔍
@@ -214,19 +143,5 @@ config:
    - All operations are logged with model ID
    - Check dbt logs for "Macro Polo" entries
    - Monitor warehouse switches and sizes
-
-#### Future Improvements 🚀
-
-1. **Planned Features**:
-   - Automatic performance analysis
-   - Dynamic threshold adjustment
-   - Enhanced caching strategy
-
-2. **Known Limitations**:
-   - Limited to incremental materialisation with delete+insert strategy
-   - Basic scheduling capabilities
-   - Limited error recovery options
-   - Low testing coverage
-   - Logging not fully implemented
 
 {% enddocs %}

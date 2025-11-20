@@ -36,3 +36,15 @@ macros:
 
   - name: should_full_refresh
     description: '{{ doc("should_full_refresh") }}'
+
+  - name: is_within_time_range
+    description: 'Helper macro to determine if current time falls within a scheduled time range.'
+    arguments:
+      - name: schedule_name
+        type: string
+      - name: current_time
+        type: datetime
+      - name: start_time
+        type: string
+      - name: end_time
+        type: string
