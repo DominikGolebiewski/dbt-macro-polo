@@ -36,7 +36,7 @@
             use warehouse {{ wh }};
             select count(*) from {{ dep_relation }}
             {% if target_exists and timestamp_column %}
-                where {{ timestamp_column }} > '{{ max_timestamp }}'
+                where {{ timestamp_column }} > {{ max_timestamp }}
             {% endif %}
         {% endset %}
         
