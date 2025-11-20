@@ -1,12 +1,12 @@
-{% macro optimise_warehouse(query_operation='ctas') %}
-    {{ return(adapter.dispatch('optimise_warehouse', 'dbt_macro_polo')(query_operation)) }}
+{% macro adaptive_compute(query_operation='ctas') %}
+    {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(query_operation)) }}
 {% endmacro %}
 
-{% macro default__optimise_warehouse(query_operation='ctas') %}
+{% macro default__adaptive_compute(query_operation='ctas') %}
 
     {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
     {% set macro_polo = var('macro_polo', {}) %}
-    {% set macro_name = 'optimise_warehouse' %}
+    {% set macro_name = 'adaptive_compute' %}
     
     {# 1. Validation #}
     {% if query_operation not in ['ctas', 'insert', 'delete'] %}
@@ -14,12 +14,12 @@
     {% endif %}
 
     {# Update: Use adaptive_compute for project config #}
-    {% set optimiser_config = macro_polo.get('adaptive_compute', {}) %}
+    {% set adaptive_config = macro_polo.get('adaptive_compute', {}) %}
     {# Update: Use compute_provisioning for model config #}
     {% set model_config = model.config.get('meta', {}).get('compute_provisioning', {}) %}
 
-    {# Check if optimiser is enabled globally and at model level #}
-    {% if not (optimiser_config.get('enabled', false) and model_config.get('enabled', false)) %}
+    {# Check if adaptive compute is enabled globally and at model level #}
+    {% if not (adaptive_config.get('enabled', false) and model_config.get('enabled', false)) %}
         {# Only log disabled status once during CTAS to reduce noise #}
         {% if query_operation == 'ctas' %}
             {{ dbt_macro_polo.log_event(message="Adaptive Compute disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
@@ -27,13 +27,13 @@
         {{ return('') }}
     {% endif %}
     
-    {{ dbt_macro_polo.log_event(message="Starting optimisation for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Starting adaptive compute for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
 
     {% set is_incremental = model.config.get('materialized') == 'incremental' %}
     {% set strategy = model.config.get('incremental_strategy') %}
     
     {% if not (is_incremental and strategy == 'delete+insert') %}
-         {{ dbt_macro_polo.log_event(message="Optimiser requires incremental materialization with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Adaptive compute requires incremental materialization with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {# 2. Configuration Resolution #}
@@ -83,10 +83,9 @@
     {% endif %}
 
     {# 5. Allocation #}
-    {# Update: Call provision_compute instead of allocate_warehouse #}
     {% set warehouse = dbt_macro_polo.provision_compute(target_size) %}
     
-    {{ dbt_macro_polo.log_event(message="Optimiser selected warehouse", model_id=model_id, status=warehouse | upper, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Adaptive compute selected warehouse", model_id=model_id, status=warehouse | upper, macro_name=macro_name) }}
     {{ return('use warehouse ' ~ warehouse) }}
 
 {% endmacro %}
@@ -100,7 +99,7 @@
     {# Update: Use baseline_size from adaptive_compute #}
     {% set default_size = var('macro_polo', {}).get('adaptive_compute', {}).get('baseline_size', 'xs') %}
     {% set base_size = config.get('warehouse_size', default_size) %}
-    {% set macro_name = 'optimise_warehouse' %}
+    {% set macro_name = 'adaptive_compute' %}
     
     {# Check Time Based Overrides #}
     {% set time_overrides = config.get('time_based_overrides', {}) %}

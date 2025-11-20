@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
 - [Macro Collection](#macro-collection)
   - [provision_compute](#provision_compute)
   - [get_high_water_mark](#get_high_water_mark)
-  - [optimise_warehouse](#optimise_warehouse)
+  - [adaptive_compute](#adaptive_compute)
 <!-- - [Contributing](#contributing-) -->
 - [Resources](#resources-)
 
@@ -33,8 +33,8 @@ This project aims to:
 >This repository is actively being developed and some features may not be fully functional or may produce unexpected results in your environment. 
 > 
 > List of known limitations and caveats:
-> - optimise_warehouse may produce unexpected results if setup incorrectly
-> - Logging is not yet fully implemented withing optimise_warehouse, especially DEBUG level
+> - adaptive_compute may produce unexpected results if setup incorrectly
+> - Logging is not yet fully implemented withing adaptive_compute, especially DEBUG level
 > - Compilation and docs generation is taking longer due to timestamp retrieval
 
 ## Installation
@@ -65,7 +65,7 @@ vars:
     # Infrastructure definitions (Warehouses)
     infrastructure_definition: 
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Valid warehouse sizes
-      environment_contexts:
+      environment_context:
         prod: 
           resource_prefix: prod_wh # Warehouse name prefix for prod
         dev:
@@ -101,7 +101,7 @@ vars:
     runtime_state: {} 
     infrastructure_definition:
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl']
-      environment_contexts:
+      environment_context:
         <target_name>:
           resource_prefix: <resource_prefix>
         ...
@@ -156,7 +156,7 @@ vars:
 [View Full Documentation →](/macros/high_water_mark/schema.md)
 </details>
 
-### optimise_warehouse 
+### adaptive_compute 
 
 This is a beta version of the warehouse optimiser. It is currently in development and some features may not be fully functional or produce unexpected results.
 
@@ -179,7 +179,7 @@ In your model:
     unique_key='unique_key',
     timestamp_column='loaded_timestamp',
     pre_hook=[
-        '{{ dbt_macro_polo.optimise_warehouse() }}'
+        '{{ dbt_macro_polo.adaptive_compute() }}'
     ]
 ) }}
 ```
@@ -191,10 +191,10 @@ config:
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'
-    pre_hook: ['{{ dbt_macro_polo.optimise_warehouse() }}']
+    pre_hook: ['{{ dbt_macro_polo.adaptive_compute() }}']
 ```
 
-[View Full Documentation →](/macros/warehouse_optimiser/schema.md)
+[View Full Documentation →](/macros/adaptive_compute/schema.md)
 </details>
 
 <!-- #### Contributing 🤝

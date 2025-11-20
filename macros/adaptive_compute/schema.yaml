@@ -1,0 +1,9 @@
+version: 2
+
+macros:
+  - name: adaptive_compute
+    description: '{{ doc("adaptive_compute") }}'
+    arguments:
+      - name: query_operation
+        type: string
+        description: The type of operation being performed (ctas, insert, delete)

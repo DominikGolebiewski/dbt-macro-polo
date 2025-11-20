@@ -25,7 +25,7 @@
 
 {# Execute test cases and collect failures #}
 {% for test_case in test_cases %}
-    {% set actual = dbt_macro_polo.optimise_warehouse(test_case.operation) %}
+    {% set actual = dbt_macro_polo.adaptive_compute(test_case.operation) %}
         {% if actual != test_case.expected %}
             {% do failed_tests.append(test_case.test_name ~ ': Expected "' ~ test_case.expected ~ '", got "' ~ actual ~ '"') %}
         {% endif %}
@@ -33,7 +33,7 @@
 
 {# Report test failures #}
 {% if failed_tests | length > 0 %}
-    {{ dbt_macro_polo.logging(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR', model_id=model_id) }}
+    {{ dbt_macro_polo.log_event(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR', model_id=model_id) }}
 {% endif %}
 
 {# Final result assembly with base data #}
@@ -70,7 +70,7 @@ cross join (
     select 
         '{{ test_case.test_name }}' as test_name,
         '{{ test_case.expected }}' as expected,
-        '{{ dbt_macro_polo.optimise_warehouse(test_case.operation) }}' as actual
+        '{{ dbt_macro_polo.adaptive_compute(test_case.operation) }}' as actual
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 ) tests

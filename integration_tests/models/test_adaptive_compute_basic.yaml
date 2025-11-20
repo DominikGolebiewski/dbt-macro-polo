@@ -1,7 +1,7 @@
 version: 2
 
 models:
-- name: test_warehouse_optimiser_basic
+- name: test_adaptive_compute_basic
   description: ""
 
   config:
@@ -9,18 +9,18 @@ models:
     incremental_strategy: 'delete+insert'
     unique_key: 'id'
     timestamp_column: 'run_started_time'
-    pre_hook: [ "{{ dbt_macro_polo.optimise_warehouse() }}" ]
+    pre_hook: [ "{{ dbt_macro_polo.adaptive_compute() }}" ]
 
     meta:
-      warehouse_optimiser:
+      compute_provisioning:
         enabled: true
-        operation_type:
-          on_full_refresh:
+        execution_strategies:
+          full_refresh:
             warehouse_size: m
-          on_run:
-            ctas:
+          incremental:
+            build:
               warehouse_size: s
-            delete:
+            prune:
               warehouse_size: s
-            insert:
+            append:
               warehouse_size: xs
