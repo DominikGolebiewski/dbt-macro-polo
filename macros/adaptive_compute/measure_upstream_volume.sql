@@ -57,11 +57,13 @@
         {% endif %}
     {% endfor %}
 
-    {{ dbt_macro_polo.log_event(message="Total upstream volume calculated", status=total_rows.value or 0, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
+    {# Ensure we log an explicit 0 if value is None or 0 #}
+    {% set final_volume = total_rows.value if total_rows.value is not none else 0 %}
+    {{ dbt_macro_polo.log_event(message="Total upstream volume calculated", status=final_volume, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
     
     {# Update: Use runtime_state instead of cache #}
-    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: total_rows.value or 0}) %}
+    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: final_volume}) %}
     
-    {{ return(total_rows.value) }}
+    {{ return(final_volume) }}
 
 {% endmacro %}

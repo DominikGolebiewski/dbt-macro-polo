@@ -86,7 +86,7 @@
 {% endmacro %}
 
 {% macro default__determine_optimal_size(config, volume, model_id) %}
-    {# Update: Use baseline_size from adaptive_compute #}
+
     {% set default_size = var('macro_polo', {}).get('adaptive_compute', {}).get('baseline_size', 'xs') %}
     {% set base_size = config.get('warehouse_size', default_size) %}
     {% set macro_name = 'adaptive_compute' %}
