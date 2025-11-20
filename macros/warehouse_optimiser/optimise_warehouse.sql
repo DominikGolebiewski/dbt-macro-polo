@@ -10,7 +10,7 @@
     
     {# 1. Validation #}
     {% if query_operation not in ['ctas', 'insert', 'delete'] %}
-        {{ dbt_macro_polo.logging(message="Invalid query operation: " ~ query_operation, level='ERROR', model_id=model_id, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(message="Invalid query operation: " ~ query_operation, level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {# Update: Use adaptive_compute for project config #}
@@ -22,18 +22,18 @@
     {% if not (optimiser_config.get('enabled', false) and model_config.get('enabled', false)) %}
         {# Only log disabled status once during CTAS to reduce noise #}
         {% if query_operation == 'ctas' %}
-            {{ dbt_macro_polo.logging(message="Adaptive Compute disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+            {{ dbt_macro_polo.log_event(message="Adaptive Compute disabled", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
         {{ return('') }}
     {% endif %}
     
-    {{ dbt_macro_polo.logging(message="Starting optimisation for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Starting optimisation for operation", status=query_operation | upper, level='INFO', model_id=model_id, macro_name=macro_name) }}
 
     {% set is_incremental = model.config.get('materialized') == 'incremental' %}
     {% set strategy = model.config.get('incremental_strategy') %}
     
     {% if not (is_incremental and strategy == 'delete+insert') %}
-         {{ dbt_macro_polo.logging(message="Optimiser requires incremental materialization with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Optimiser requires incremental materialization with delete+insert strategy", level='ERROR', model_id=model_id, macro_name=macro_name) }}
     {% endif %}
 
     {# 2. Configuration Resolution #}
@@ -57,7 +57,7 @@
     {% endif %}
 
     {% if not active_config %}
-        {{ dbt_macro_polo.logging(message="No configuration found for " ~ context_label, level='WARN', model_id=model_id, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(message="No configuration found for " ~ context_label, level='WARN', model_id=model_id, macro_name=macro_name) }}
         {{ return('') }}
     {% endif %}
 
@@ -68,14 +68,14 @@
     {% if execute and not is_full_refresh %}
         {% set timestamp_column = model.config.get('timestamp_column') %}
         {% if not timestamp_column %}
-             {{ dbt_macro_polo.logging(message="timestamp_column required for monitoring", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+             {{ dbt_macro_polo.log_event(message="timestamp_column required for monitoring", level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {% endif %}
         {% set volume = dbt_macro_polo.get_upstream_volume(model_id, volume_monitors, timestamp_column) %}
     {% endif %}
     
     {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
     {% if volume == 0 and not is_full_refresh %}
-         {{ dbt_macro_polo.logging(message="Zero upstream volume detected", status='XS', level='INFO', model_id=model_id, macro_name=macro_name) }}
+         {{ dbt_macro_polo.log_event(message="Zero upstream volume detected", status='XS', level='INFO', model_id=model_id, macro_name=macro_name) }}
          {% set target_size = 'xs' %}
     {% else %}
          {# 4. Size Determination #}
@@ -86,7 +86,7 @@
     {# Update: Call provision_compute instead of allocate_warehouse #}
     {% set warehouse = dbt_macro_polo.provision_compute(target_size) %}
     
-    {{ dbt_macro_polo.logging(message="Optimiser selected warehouse", model_id=model_id, status=warehouse | upper, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Optimiser selected warehouse", model_id=model_id, status=warehouse | upper, macro_name=macro_name) }}
     {{ return('use warehouse ' ~ warehouse) }}
 
 {% endmacro %}
@@ -112,7 +112,7 @@
             {% if current_day in window.get('days', []) %}
                 {% set time_range = window.get('time_range', {}) %}
                 {% if dbt_macro_polo.is_within_time_range(window.get('name'), current_time, time_range.get('start'), time_range.get('end')) %}
-                    {{ dbt_macro_polo.logging(message="Schedule matched: " ~ window.get('name'), model_id=model_id, level='DEBUG', macro_name=macro_name) }}
+                    {{ dbt_macro_polo.log_event(message="Schedule matched: " ~ window.get('name'), model_id=model_id, level='DEBUG', macro_name=macro_name) }}
                     
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}

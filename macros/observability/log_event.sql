@@ -1,11 +1,12 @@
-{% macro logging(message=none, level='INFO', model_id=none, status=none, macro_name=none) %}
-    {{ return(adapter.dispatch('logging', 'dbt_macro_polo')(message, level, model_id, status, macro_name)) }}
+{% macro log_event(message=none, level='INFO', model_id=none, status=none, macro_name=none) %}
+    {{ return(adapter.dispatch('log_event', 'dbt_macro_polo')(message, level, model_id, status, macro_name)) }}
 {% endmacro %}
 
-{% macro default__logging(message, level, model_id, status, macro_name) %}
+{% macro default__log_event(message, level, model_id, status, macro_name) %}
     {%- if execute -%}
         {%- set level = level | upper -%}
-        {%- set global_level = var('macro_polo', {}).get('logging_level', 'INFO') | upper -%}
+        {# Update: Read from observability.log_level #}
+        {%- set global_level = var('macro_polo', {}).get('observability', {}).get('log_level', 'INFO') | upper -%}
         
         {%- set levels = {'DEBUG': 0, 'INFO': 1, 'WARN': 2, 'ERROR': 3} -%}
         {%- if levels[level] >= levels.get(global_level, 1) -%}

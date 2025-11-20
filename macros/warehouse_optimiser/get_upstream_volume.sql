@@ -50,7 +50,7 @@
         {% endif %}
     {% endfor %}
 
-    {{ dbt_macro_polo.logging(message="Total upstream volume: " ~ total_rows.value, model_id=model_id, level='DEBUG') }}
+    {{ dbt_macro_polo.log_event(message="Total upstream volume: " ~ total_rows.value, model_id=model_id, level='DEBUG') }}
     {# Update: Use runtime_state instead of cache #}
     {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: total_rows.value}) %}
     

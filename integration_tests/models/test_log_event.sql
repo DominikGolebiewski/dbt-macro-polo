@@ -47,12 +47,13 @@
 ] %}
 
 {# Setup test environment #}
-{% do var('macro_polo', {}).update({'logging_level': 'DEBUG'}) %}
+{# Update: Use observability.log_level #}
+{% do var('macro_polo', {}).update({'observability': {'log_level': 'DEBUG'}}) %}
 
 {# Process test results #}
 {% set failed_tests = [] %}
 {% for test_case in test_cases %}
-    {% set actual = dbt_macro_polo.logging(
+    {% set actual = dbt_macro_polo.log_event(
         message=test_case.message,
         level=test_case.level,
         macro_name=test_case.macro_name,
@@ -69,7 +70,7 @@
 
 {# Report results #}
 {% if failed_tests | length > 0 %}
-    {{ dbt_macro_polo.logging(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR') }}
+    {{ dbt_macro_polo.log_event(message="Failed tests:\n" ~ failed_tests | join('\n'), level='ERROR') }}
 {% endif %}
 
 select 
@@ -78,7 +79,7 @@ from (
     {% for test_case in test_cases %}
     select 
         '{{ test_case.name }}' as test_name,
-        '{{ dbt_macro_polo.logging(
+        '{{ dbt_macro_polo.log_event(
             message=test_case.message,
             level=test_case.level,
             macro_name=test_case.macro_name,

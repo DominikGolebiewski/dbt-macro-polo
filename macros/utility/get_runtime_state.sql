@@ -9,14 +9,14 @@
     {% set value = state.get(key) %}
     
     {% if value %}
-        {{ dbt_macro_polo.logging(
+        {{ dbt_macro_polo.log_event(
             message="Runtime state hit for key: " ~ key, 
             status=value | upper, 
             level='DEBUG', 
             macro_name='get_runtime_state'
         ) }}
     {% else %}
-        {{ dbt_macro_polo.logging(
+        {{ dbt_macro_polo.log_event(
             message="Runtime state miss for key: " ~ key, 
             level='DEBUG', 
             macro_name='get_runtime_state'
