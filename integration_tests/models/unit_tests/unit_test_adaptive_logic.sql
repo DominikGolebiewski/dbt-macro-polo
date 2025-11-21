@@ -1,6 +1,6 @@
 {{ config(materialized='view') }}
 
-{# 
+{#
    Test the logic of 'determine_optimal_size' independently of actual table volumes.
    We mock the configuration and pass explicit volume integers.
 #}
@@ -23,9 +23,8 @@
 ] %}
 
 {% for case in test_cases %}
-    select 
+    select
         {{ case.volume }} as input_volume,
         '{{ dbt_macro_polo.determine_optimal_size(threshold_config, case.volume, "unit_test_model") }}' as actual_size
     {% if not loop.last %}union all{% endif %}
 {% endfor %}
-

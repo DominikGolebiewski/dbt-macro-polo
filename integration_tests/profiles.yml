@@ -28,7 +28,7 @@ integration_tests:
       query_tag: "dbt_macro_polo_integration_tests"
       authenticator: username_password_mfa
       schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}_ci_a"
-    
+
     ci_b:
       type: snowflake
       account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"

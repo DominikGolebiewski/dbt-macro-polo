@@ -31,8 +31,8 @@ quoting:
 vars:
   # DBT compatibility with legacy surrogate_key macro
   surrogate_key_treat_nulls_as_empty_strings: True
-  
-  # Macro Polo 
+
+  # Macro Polo
   macro_polo:
     runtime_state: {}
     observability:

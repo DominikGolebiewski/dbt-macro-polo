@@ -3,9 +3,9 @@
 
 /*
     Integration Test: measure_upstream_volume
-    
+
     This test verifies that the macro correctly counts rows in an upstream source/model.
-    
+
     Dependencies:
     - seed_dummy_data_initial_run (12 rows)
 */
@@ -22,7 +22,7 @@
     {% set actual_volume = 12 %}
 {% endif %}
 
-select 
+select
     'measure_upstream_volume_basic' as test_case,
     {{ expected_volume }} as expected_value,
     {{ actual_volume }} as actual_value

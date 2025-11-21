@@ -8,21 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-11-21
 
 ### Added
+- **Testing**: Implemented a comprehensive SQL-based Integration Test suite (`integration_tests/models/integration`) verifying end-to-end macro execution against Snowflake.
+- **Testing**: Added Unit Logic Tests (`integration_tests/models/unit_tests`) to verify Jinja macro logic using dbt models and `dbt-utils` equality tests.
 - **Tooling**: Added `.sqlfluff` configuration for consistent SQL formatting (Snowflake dialect).
-- **Tooling**: Added `.pre-commit-config.yaml` for local code quality checks (linting, trailing whitespace, etc.).
-- **CI**: Added GitHub Actions workflow (`.github/workflows/ci.yml`) for automated linting and project parsing.
-- **Documentation**: Added comprehensive docstrings to all core macros (`adaptive_compute`, `provision_compute`, `get_high_water_mark`).
+- **Tooling**: Added `.pre-commit-config.yaml` for local code quality checks.
+- **Documentation**: Added comprehensive docstrings to all core macros.
 
 ### Changed
 - **Core**: Promoted project to Production/Stable status (v1.0.0).
 - **Refactor**: Polished `adaptive_compute` and `provision_compute` macros for better readability and error handling.
 - **Refactor**: Standardized `log_event` macro for consistent logging across the package.
-- **Documentation**: Updated `README.md` to reflect production status, removing alpha/beta warnings and clarifying installation.
-- **Dependencies**: Updated `pyproject.toml` to include `sqlfluff`, `yamllint` and `pre-commit` as development dependencies.
+- **Configuration**: Explicitly disabled database/schema/identifier quoting in integration tests to ensure compatibility with generated SQL.
+- **Dependencies**: Updated `pyproject.toml` to include `sqlfluff`, `yamllint` and `pre-commit`.
 
 ### Fixed
-- Standardized `adapter.dispatch` calls across all macros to ensure cross-database compatibility layers are correctly structured.
-- Unified error message formatting and logging levels.
+- **Macros**: Fixed `measure_upstream_volume` to correctly handle full-refresh scenarios and missing target relations by skipping High Water Mark calculation.
+- **Macros**: Hardened `get_high_water_mark` and `provision_compute` to safely handle contexts where `this` is undefined (e.g., during `run-operation`).
+- **CI/CD**: Removed GitHub Actions CI in favor of robust local integration testing.
+- Standardized `adapter.dispatch` calls across all macros.
 
 ## [0.1.1-beta.1] - Unreleased
 - Initial beta release with Warehouse Optimiser features.

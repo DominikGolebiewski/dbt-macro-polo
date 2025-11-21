@@ -1,13 +1,13 @@
 {% macro provision_compute(incremental_size, fullrefresh_size=none) %}
     {#
     Provisions compute resources (warehouse) based on the run context.
-    
+
     Args:
         incremental_size (str): Warehouse size for incremental runs.
         fullrefresh_size (str, optional): Warehouse size for full refresh runs. Defaults to incremental_size.
-    
+
     Returns:
-        str: The name of the warehouse to use.
+        str: The full name of the warehouse to use.
     #}
     {{ return(adapter.dispatch('provision_compute', 'dbt_macro_polo')(incremental_size, fullrefresh_size)) }}
 {% endmacro %}
@@ -15,13 +15,14 @@
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
-    {# Handle case where 'this' is not defined (e.g. run-operation) #}
-    {% if this is defined and this %}
-        {% set model_id = this.schema ~ "." ~ this.name %}
-    {% else %}
-        {% set model_id = 'unknown_model' %}
-    {% endif %}
     {% set macro_name = 'provision_compute' %}
+
+    {% if this is not defined or not this %}
+        {% set msg = "Configuration Error: provision_compute macro requires a valid model context. The 'this' variable is not defined. This macro is intended for model/materialisation execution only." %}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name, model_id='unknown_model') }}
+        {{ return(none) }}
+    {% endif %}
+    {% set model_id = this.schema ~ "." ~ this.name %}
 
     {# Validate input parameters #}
     {% if not incremental_size %}
@@ -38,7 +39,7 @@
     {% else %}
         {% set is_relation_exist = false %}
     {% endif %}
-    
+
     {% set materialisation = config.get('materialized', 'undefined') | lower %}
     {% set is_full_refresh = flags.FULL_REFRESH or not is_relation_exist or materialisation == 'table' %}
     {% set size_suffix = fullrefresh if is_full_refresh else incremental %}
@@ -68,13 +69,13 @@
     {# Cache handling #}
     {% set state_key = '_macro_polo_provision_compute_' ~  warehouse_prefix ~ '_' ~ size_suffix %}
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
-    
+
     {% if state_value %}
         {{ dbt_macro_polo.log_event(
-            message="Allocated warehouse from runtime state", 
-            level='DEBUG', 
-            model_id=model_id, 
-            status=state_value | upper, 
+            message="Provisioned warehouse from runtime state",
+            level='DEBUG',
+            model_id=model_id,
+            status=state_value | upper,
             macro_name=macro_name
         ) }}
         {{ return(state_value) }}
@@ -123,17 +124,17 @@
 
     {# Cache and return result #}
     {{ dbt_macro_polo.log_event(
-        message="Saving warehouse '" ~ warehouse_id ~ "' to runtime state with key '" ~ state_key ~ "'", 
-        level='DEBUG', 
+        message="Saving warehouse '" ~ warehouse_id ~ "' to runtime state with key '" ~ state_key ~ "'",
+        level='DEBUG',
         macro_name=macro_name
     ) }}
     {% do macro_polo.get('runtime_state', {}).update({state_key: warehouse_id}) %}
     {{ dbt_macro_polo.log_event(
-        message="Allocated warehouse", 
-        model_id=model_id, 
-        status=warehouse_id | upper, 
+        message="Provisioned warehouse",
+        model_id=model_id,
+        status=warehouse_id | upper,
         macro_name=macro_name
     ) }}
     {{ return(warehouse_id) }}
-    
+
 {% endmacro %}

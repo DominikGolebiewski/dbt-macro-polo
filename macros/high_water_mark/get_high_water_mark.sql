@@ -8,7 +8,7 @@
         predicate (str, optional): SQL where clause filter.
         warehouse_size (str, optional): Warehouse size to use. Defaults to 'xs'.
         model_name (str, optional): The model/relation name. Defaults to this.name.
-    
+
     Returns:
         str: The maximum value wrapped in quotes.
     #}
@@ -32,12 +32,12 @@
         {# Cache handling #}
         {% set state_key = '_macro_polo_hwm_' ~ model_id | replace('.', '_') ~ '_' ~ column_name  ~ ('_' ~ predicate | replace(' ', '_') if predicate is not none else '') %}
         {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
-    
+
         {% if state_value %}
             {{ dbt_macro_polo.log_event(
-                message="Resolved high water mark from runtime state", 
-                model_id=model_id, 
-                status=state_value | upper, 
+                message="Resolved high water mark from runtime state",
+                model_id=model_id,
+                status=state_value | upper,
                 macro_name=macro_name
             ) }}
             {{ return("'" ~ state_value ~ "'") }}
@@ -47,9 +47,9 @@
         {% set warehouse = dbt_macro_polo.provision_compute(warehouse_size) %}
         {% if not warehouse %}
             {{ dbt_macro_polo.log_event(
-                message="Failed to allocate warehouse", 
-                level='ERROR', 
-                model_id=model_id, 
+                message="Failed to allocate warehouse",
+                level='ERROR',
+                model_id=model_id,
                 macro_name=macro_name
             ) }}
         {% endif %}
@@ -61,7 +61,7 @@
         {% else %}
              {% set relation = model_name %}
         {% endif %}
-        
+
         {# If relation is still none, try default 'this' but handle case where 'this' is not defined (e.g. run-operation) #}
         {% if not relation and this is defined %}
              {% set relation = this %}
@@ -69,9 +69,9 @@
 
         {% if not relation %}
             {{ dbt_macro_polo.log_event(
-                message="Relation not found: " ~ model_name, 
-                level='ERROR', 
-                model_id=model_id, 
+                message="Relation not found: " ~ model_name,
+                level='ERROR',
+                model_id=model_id,
                 macro_name=macro_name
             ) }}
         {% endif %}
@@ -94,9 +94,9 @@
 
         {% if not result %}
             {{ dbt_macro_polo.log_event(
-                message="Query execution failed", 
-                level='ERROR', 
-                model_id=model_id, 
+                message="Query execution failed",
+                level='ERROR',
+                model_id=model_id,
                 macro_name=macro_name
             ) }}
         {% endif %}
@@ -105,30 +105,30 @@
         {% set max_value = result.columns[0].values()[0] %}
         {% if max_value is none %}
             {{ dbt_macro_polo.log_event(
-                message="No timestamp value returned", 
-                level='ERROR', 
-                model_id=model_id, 
+                message="No timestamp value returned",
+                level='ERROR',
+                model_id=model_id,
                 macro_name=macro_name
             ) }}
         {% endif %}
 
         {# Cache and return result #}
         {{ dbt_macro_polo.log_event(
-            message="Saving high water mark '" ~ max_value ~ "' to runtime state with key '" ~ state_key ~ "'", 
-            model_id=model_id, 
-            level='DEBUG', 
+            message="Saving high water mark '" ~ max_value ~ "' to runtime state with key '" ~ state_key ~ "'",
+            model_id=model_id,
+            level='DEBUG',
             macro_name=macro_name
         ) }}
-        
+
         {% do macro_polo.get('runtime_state', {}).update({state_key: max_value}) %}
-        
+
         {{ dbt_macro_polo.log_event(
-            message="Resolved high water mark", 
-            model_id=model_id, 
-            status=max_value | upper, 
+            message="Resolved high water mark",
+            model_id=model_id,
+            status=max_value | upper,
             macro_name=macro_name
         ) }}
-        
+
         {{ return("'" ~ max_value ~ "'") }}
 
     {% endif %}

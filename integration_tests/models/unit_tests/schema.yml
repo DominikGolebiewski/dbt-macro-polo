@@ -21,4 +21,3 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref('expect_time_logic')
-

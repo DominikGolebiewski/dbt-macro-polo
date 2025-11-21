@@ -52,7 +52,7 @@ vars:
 
 ```jinja
 {%- raw -%}
-use warehouse {{ dbt_macro_polo.provision_compute(incremental_size='xs', fullrefresh_size='m') }}
+pre-hook: "use warehouse {{ dbt_macro_polo.provision_compute(incremental_size='xs', fullrefresh_size='m') }}"
 {%- endraw -%}
 ```
 
@@ -67,6 +67,5 @@ The macro will raise errors in the following scenarios:
 ## Dependencies
 
 - Requires the `log_event` macro for debug and error logging
-- Requires the `create_macro_context` macro for execution context
 
 {% enddocs %}

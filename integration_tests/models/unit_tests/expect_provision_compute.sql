@@ -7,9 +7,8 @@
 ] %}
 
 {% for size, expected in test_cases %}
-    select 
+    select
         '{{ size }}' as input_size,
         '{{ expected }}' as actual_output
     {% if not loop.last %}union all{% endif %}
 {% endfor %}
-

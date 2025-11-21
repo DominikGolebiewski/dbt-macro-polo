@@ -5,7 +5,7 @@
 {% macro default__create_macro_context(macro_name) %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set logging_level = macro_polo.get('logging_level', 'info') %}
-    
+
     {% set model_id = 'unknown_model' %}
     {% if this %}
         {% set model_id = this.schema | lower ~ '.' ~ this.name | lower %}

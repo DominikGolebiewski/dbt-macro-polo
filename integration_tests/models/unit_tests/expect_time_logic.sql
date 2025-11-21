@@ -8,10 +8,9 @@
 ] %}
 
 {% for case in test_cases %}
-    select 
+    select
         '{{ case.curr }}' as current_time,
         '{{ case.expected }}' as expected_result,
         '{{ case.expected }}' as actual_result
     {% if not loop.last %}union all{% endif %}
 {% endfor %}
-

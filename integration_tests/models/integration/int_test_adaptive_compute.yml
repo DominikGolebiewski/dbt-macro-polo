@@ -7,7 +7,7 @@ models:
       meta:
         adaptive_compute:
           enabled: true
-          volume_monitors: 
+          volume_monitors:
             - seed_dummy_data_initial_run
           execution_strategies:
             full_refresh:
@@ -24,4 +24,3 @@ models:
                 warehouse_size: xs
               append:
                 warehouse_size: xs
-

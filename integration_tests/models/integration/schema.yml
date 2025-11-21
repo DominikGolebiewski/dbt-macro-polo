@@ -12,4 +12,3 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref('expect_measure_upstream_volume')
-

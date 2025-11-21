@@ -7,14 +7,3 @@ repos:
       - id: check-yaml
         args: [--unsafe]
       - id: check-added-large-files
-
-  - repo: https://github.com/sqlfluff/sqlfluff
-    rev: 3.0.0
-    hooks:
-      - id: sqlfluff-lint
-        additional_dependencies: ['dbt-snowflake>=1.8.0', 'sqlfluff-templater-dbt']
-        args: [--dialect, snowflake]
-      # - id: sqlfluff-fix
-      #   additional_dependencies: ['dbt-snowflake>=1.8.0', 'sqlfluff-templater-dbt']
-      #   args: [--dialect, snowflake]
-

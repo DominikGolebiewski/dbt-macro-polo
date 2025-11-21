@@ -9,7 +9,4 @@ clean-targets: ["target", "dbt_packages"]
 macro-paths: ["macros"]
 log-path: "logs"
 
-require-dbt-version: [">=1.8.6", "<1.11.0"]
-
-
-
+require-dbt-version: [">=1.8.6", "<1.12.0"]

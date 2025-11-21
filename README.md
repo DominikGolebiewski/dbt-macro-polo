@@ -46,17 +46,17 @@ dbt deps
 vars:
   macro_polo:
     runtime_state: {} # Required for caching functionality
-    
+
     # Project-level configuration for warehouse optimisation
     adaptive_compute:
       enabled: true # Enable/Disable globally
       baseline_size: 'xs' # Default warehouse size
-    
+
     # Infrastructure definitions (Warehouses)
-    infrastructure_definition: 
+    infrastructure_definition:
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Valid warehouse sizes
       environment_context:
-        prod: 
+        prod:
           resource_prefix: prod_wh # Warehouse name prefix for prod
         dev:
           resource_prefix: dev_wh # Warehouse name prefix for dev
@@ -88,7 +88,7 @@ vars:
 ```yaml
 vars:
   macro_polo:
-    runtime_state: {} 
+    runtime_state: {}
     infrastructure_definition:
       allowed_sizes: ['xs', 's', 'm', 'l', 'xl', '2xl']
       environment_context:

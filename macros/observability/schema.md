@@ -32,9 +32,9 @@ vars:
 ```sql
 {% raw %}
 {{ dbt_macro_polo.log_event(
-    message="Processing completed", 
-    level='INFO', 
-    model_id=this.name, 
+    message="Processing completed",
+    level='INFO',
+    model_id=this.name,
     status='SUCCESS',
     macro_name='my_macro'
 ) }}

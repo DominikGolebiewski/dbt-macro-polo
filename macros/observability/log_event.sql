@@ -15,18 +15,18 @@
 {% macro default__log_event(message, level, model_id, status, macro_name) %}
     {%- if execute -%}
         {%- set level = level | default('INFO') | upper -%}
-        
+
         {# Get global log level #}
         {%- set global_level = var('macro_polo', {}).get('observability', {}).get('log_level', 'INFO') | upper -%}
-        
+
         {%- set levels = {'DEBUG': 0, 'INFO': 1, 'WARN': 2, 'ERROR': 3} -%}
-        
+
         {# Default to INFO(1) if level is unknown #}
         {%- set msg_level_val = levels.get(level, 1) -%}
         {%- set global_level_val = levels.get(global_level, 1) -%}
 
         {%- if msg_level_val >= global_level_val -%}
-            
+
             {# --- Styling Configuration --- #}
             {%- set colors = {
                 'DEBUG': '\033[90m',
@@ -36,17 +36,17 @@
                 'RESET': '\033[0m',
                 'BOLD':  '\033[1m'
             } -%}
-            
+
             {%- set c = colors.get(level, colors['INFO']) -%}
             {%- set r = colors['RESET'] -%}
             {%- set b = colors['BOLD'] -%}
-            
+
             {# --- Message Construction --- #}
             {# Format: [Level] [Macro-Polo] [Model] Message ... [Status] #}
-            
+
             {%- set header = "[" ~ c ~ b ~ level.ljust(5) ~ r ~ "] " -%}
             {%- set package_label = colors['DEBUG'] ~ "Macro-Polo" ~ r -%}
-            
+
             {%- set context_info = [] -%}
             {%- if model_id -%}
                 {%- do context_info.append(colors['DEBUG'] ~ model_id ~ r) -%}

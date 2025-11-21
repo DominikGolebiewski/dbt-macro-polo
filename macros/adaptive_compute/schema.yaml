@@ -7,7 +7,7 @@ macros:
       - name: query_operation
         type: string
         description: The type of operation being performed (ctas, insert, delete)
-    
+
   - name: measure_upstream_volume
     description: '{{ doc("measure_upstream_volume") }}'
     arguments:

@@ -7,9 +7,8 @@
 ] %}
 
 {% for case in test_cases %}
-    select 
+    select
         {{ case.volume }} as input_volume,
         '{{ case.expected }}' as actual_size
     {% if not loop.last %}union all{% endif %}
 {% endfor %}
-

@@ -24,7 +24,7 @@
             );
         {% else %}
             delete from {{ target }}
-            where 
+            where
                 {{ unique_key }} in (
                 select {{ unique_key }}
                 from {{ source }}
@@ -37,7 +37,7 @@
 
         {% endif %}
     {% endif %}
-    
+
     {{ dbt_macro_polo.handle_warehouse_switch('append') }}
     insert into {{ target }} ({{ dest_cols_csv }})
     (
