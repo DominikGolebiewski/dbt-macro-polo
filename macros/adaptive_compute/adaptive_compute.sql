@@ -105,7 +105,7 @@
 
     {% if execute and not is_full_refresh and volume_monitors %}
         {# Ensure volume_monitors is a list #}
-        {% if volume_monitors is not list or volume_monitors is not iterable %}
+        {% if volume_monitors is not iterable or volume_monitors is string %}
             {{ dbt_macro_polo.log_event(
                 message="Configuration Error: volume_monitors must be a list of strings",
                 level='ERROR',

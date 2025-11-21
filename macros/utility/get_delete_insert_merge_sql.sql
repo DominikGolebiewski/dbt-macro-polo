@@ -2,12 +2,16 @@
     {{ return(adapter.dispatch('get_delete_insert_merge_sql', 'dbt_macro_polo')(target, source, unique_key, dest_columns, incremental_predicates)) }}
 {% endmacro %}
 
+-------------------------------------------------------------------------------------------------
+
 {% macro default__get_delete_insert_merge_sql(target, source, unique_key, dest_columns, incremental_predicates) %}
 
     {%- set dest_cols_csv = get_quoted_csv(dest_columns | map(attribute="name")) -%}
 
     {% if unique_key %}
-        {{ dbt_macro_polo.handle_warehouse_switch('prune') }}
+        {% if model.config.get('pre_hook', []).contains('{{ dbt_macro_polo.adaptive_compute() }}') %}
+            {{ dbt_macro_polo.handle_warehouse_switch('prune') }}
+        {% endif %}
         {% if unique_key is sequence and unique_key is not string %}
             delete from {{ target }}
             using {{ source }}
@@ -38,7 +42,9 @@
         {% endif %}
     {% endif %}
 
-    {{ dbt_macro_polo.handle_warehouse_switch('append') }}
+    {% if model.config.get('pre_hook', []).contains('{{ dbt_macro_polo.adaptive_compute() }}') %}
+        {{ dbt_macro_polo.handle_warehouse_switch('append') }}
+    {% endif %}
     insert into {{ target }} ({{ dest_cols_csv }})
     (
         select {{ dest_cols_csv }}
@@ -47,9 +53,13 @@
 
 {% endmacro %}
 
+-------------------------------------------------------------------------------------------------
+
 {% macro handle_warehouse_switch(operation) %}
     {{ return(adapter.dispatch('handle_warehouse_switch', 'dbt_macro_polo')(operation)) }}
 {% endmacro %}
+
+-------------------------------------------------------------------------------------------------
 
 {% macro default__handle_warehouse_switch(operation) %}
     {% set warehouse_stmt = dbt_macro_polo.adaptive_compute(operation) %}
