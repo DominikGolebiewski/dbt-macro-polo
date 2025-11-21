@@ -1,38 +1,16 @@
-#!/bin/bash
-set -euo pipefail
+source .env
+# Install dependencies if not present
+dbt deps --profiles-dir .
 
-# Colors for better visibility
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Load seeds
+dbt seed --profiles-dir .
 
-# Function for error handling
-error_handler() {
-    echo -e "${RED}Error occurred in script at line: $1${NC}"
-    echo -e "${RED}Command that failed: ${BASH_COMMAND}${NC}"
-    exit 1
-}
+# 1. UNIT TESTS (Logic verification)
+echo "Running Unit Tests..."
+dbt run --select unit_tests --profiles-dir .
+dbt test --select unit_tests --profiles-dir .
 
-trap 'error_handler ${LINENO}' ERR
-
-# Load environment variables
-if [ -f .env ]; then
-    echo -e "${BLUE}Loading environment variables...${NC}"
-    set -a
-    source .env
-    set +a
-else
-    echo -e "${RED}Error: .env file not found${NC}"
-    exit 1
-fi
-
-# Install dependencies
-echo -e "${BLUE}Installing dbt dependencies...${NC}"
-poetry run dbt deps
-
-# Run full refresh tests
-echo -e "${BLUE}Running dbt seeds...${NC}"
-poetry run dbt run --fail-fast --target dev
-
-echo -e "${GREEN}All tests completed successfully!${NC}"
+# 2. INTEGRATION TESTS (Database execution verification)
+echo "Running Integration Tests..."
+dbt run --select integration --profiles-dir .
+dbt test --select integration --profiles-dir .

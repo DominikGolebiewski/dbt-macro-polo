@@ -8,12 +8,12 @@ macros:
         type: string
         description: Name of the macro being executed
 
-  - name: get_cache_value
-    description: '{{ doc("get_cache_value") }}'
+  - name: get_runtime_state
+    description: '{{ doc("get_runtime_state") }}'
     arguments:
-      - name: cache_key
+      - name: key
         type: string
-        description: Unique identifier for the cached value
+        description: Unique identifier for the stored value
 
   - name: get_delete_insert_merge_sql
     description: '{{ doc("get_delete_insert_merge_sql") }}'
@@ -36,3 +36,15 @@ macros:
 
   - name: should_full_refresh
     description: '{{ doc("should_full_refresh") }}'
+
+  - name: is_within_time_range
+    description: '{{ doc("is_within_time_range") }}'
+    arguments:
+      - name: schedule_name
+        type: string
+      - name: current_time
+        type: datetime
+      - name: start_time
+        type: string
+      - name: end_time
+        type: string

@@ -1,0 +1,22 @@
+version: 2
+
+macros:
+  - name: adaptive_compute
+    description: '{{ doc("adaptive_compute") }}'
+    arguments:
+      - name: query_operation
+        type: string
+        description: The type of operation being performed (ctas, insert, delete)
+
+  - name: measure_upstream_volume
+    description: '{{ doc("measure_upstream_volume") }}'
+    arguments:
+      - name: model_id
+        type: string
+        description: Identifier of the current model
+      - name: upstream_dependency
+        type: string | list
+        description: List of upstream models to check
+      - name: timestamp_column
+        type: string
+        description: Column used for incremental filtering

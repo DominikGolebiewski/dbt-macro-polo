@@ -2,15 +2,21 @@
     {{ return(adapter.dispatch('get_delete_insert_merge_sql', 'dbt_macro_polo')(target, source, unique_key, dest_columns, incremental_predicates)) }}
 {% endmacro %}
 
+-------------------------------------------------------------------------------------------------
+
 {% macro default__get_delete_insert_merge_sql(target, source, unique_key, dest_columns, incremental_predicates) %}
 
     {%- set dest_cols_csv = get_quoted_csv(dest_columns | map(attribute="name")) -%}
+    {% set adaptive_config = var('macro_polo', {}).get('adaptive_compute', {}) %}
+    {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
+    {% set adaptive_enabled = adaptive_config.get('enabled', false) and model_config.get('enabled', false) %}
 
     {% if unique_key %}
-        {{ dbt_macro_polo.handle_warehouse_switch('delete') }}
+        {% if adaptive_enabled %}
+            {{ dbt_macro_polo.handle_warehouse_switch('prune') }}
+        {% endif %}
         {% if unique_key is sequence and unique_key is not string %}
             delete from {{ target }}
-            -- TODO: Add a comment to the query to indicate that it is a delete operation
             using {{ source }}
             where (
                 {% for key in unique_key %}
@@ -25,7 +31,7 @@
             );
         {% else %}
             delete from {{ target }}
-            where 
+            where
                 {{ unique_key }} in (
                 select {{ unique_key }}
                 from {{ source }}
@@ -38,12 +44,29 @@
 
         {% endif %}
     {% endif %}
-    
-    {{ dbt_macro_polo.handle_warehouse_switch('insert') }}
+
+    {% if adaptive_enabled %}
+        {{ dbt_macro_polo.handle_warehouse_switch('append') }}
+    {% endif %}
     insert into {{ target }} ({{ dest_cols_csv }})
     (
         select {{ dest_cols_csv }}
         from {{ source }}
     )
 
+{% endmacro %}
+
+-------------------------------------------------------------------------------------------------
+
+{% macro handle_warehouse_switch(operation) %}
+    {{ return(adapter.dispatch('handle_warehouse_switch', 'dbt_macro_polo')(operation)) }}
+{% endmacro %}
+
+-------------------------------------------------------------------------------------------------
+
+{% macro default__handle_warehouse_switch(operation) %}
+    {% set warehouse_stmt = dbt_macro_polo.adaptive_compute(operation) %}
+    {% if warehouse_stmt %}
+        {{ warehouse_stmt }};
+    {% endif %}
 {% endmacro %}

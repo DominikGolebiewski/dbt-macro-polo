@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: int_test_adaptive_compute
+    description: "End-to-end integration test for adaptive compute macro."
+    config:
+      meta:
+        adaptive_compute:
+          enabled: true
+          volume_monitors:
+            - seed_dummy_data_initial_run
+          execution_strategies:
+            full_refresh:
+              warehouse_size: xs
+            incremental:
+              build:
+                warehouse_size: xs
+                volume_based_scaling:
+                   enabled: true
+                   thresholds:
+                     - rows: 10
+                       warehouse_size: m
+              prune:
+                warehouse_size: xs
+              append:
+                warehouse_size: xs

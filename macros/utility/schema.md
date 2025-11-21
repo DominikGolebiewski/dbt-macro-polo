@@ -19,7 +19,7 @@ Dictionary containing:
     'model_id': str,             # Schema.model_name in lowercase
     'materialisation': str,      # Current model materialisation
     'logging_level': str,        # Configured logging level
-    'is_warehouse_optimiser_enabled': bool  # Warehouse optimiser status
+    'is_adaptive_compute_enabled': bool  # Adaptive compute status
 }
 ```
 
@@ -28,8 +28,9 @@ Dictionary containing:
 ```yaml
 vars:
   macro_polo:
-    logging_level: 'info'  # Optional, defaults to 'info'
-    warehouse_optimiser:
+    observability:
+      log_level: 'info'  # Optional, defaults to 'info'
+    adaptive_compute:
       enabled: true  # Optional, defaults to false
 ```
 
@@ -44,44 +45,44 @@ vars:
 
 {% enddocs %}
 
-{% docs get_cache_value %}
+{% docs get_runtime_state %}
 
-# get_cache_value ([source](macros/utility/get_cache_value.sql))
+# get_runtime_state ([source](macros/utility/get_runtime_state.sql))
 
-Retrieves values from the macro_polo cache system. Essential for the warehouse optimiser's caching mechanism.
+Retrieves values from the macro_polo runtime state system. Essential for the adaptive compute's state persistence mechanism.
 
 ## Arguments
 
 | Argument | Type | Required | Description |
 |----------|------|----------|-------------|
-| cache_key | string | Yes | Unique identifier for the cached value |
+| key | string | Yes | Unique identifier for the stored value |
 
 ## Returns
 
-Cached value (any type) or empty dict if not found.
+Stored value (any type) or empty dict if not found.
 
 ## Configuration
 
 ```yaml
 vars:
   macro_polo:
-    cache: {}  # Required for caching functionality
+    runtime_state: {}  # Required for state persistence functionality
 ```
 
 ## Usage Example
 
 ```sql
 {% raw %}
-{% set cache_key = '_macro_polo_' ~ this.name %}
-{% set cached_value = dbt_macro_polo.get_cache_value(cache_key) %}
+{% set state_key = '_macro_polo_' ~ this.name %}
+{% set stored_value = dbt_macro_polo.get_runtime_state(state_key) %}
 {% endraw %}
 ```
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
-The cache system is crucial for:
+The runtime state system is crucial for:
 - Storing row counts for warehouse sizing decisions
-- Caching maximum timestamps for incremental processing
+- Persisting maximum timestamps for incremental processing
 - Maintaining warehouse allocation states
 
 {% enddocs %}
@@ -90,12 +91,12 @@ The cache system is crucial for:
 
 # get_delete_insert_merge_sql ([source](macros/utility/get_delete_insert_merge_sql.sql))
 
-Enhanced version of dbt's delete+insert strategy with integrated warehouse optimisation support.
+Enhanced version of dbt's delete+insert strategy with integrated adaptive compute support.
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
 The macro automatically:
-1. Scales warehouse for delete and insert operations
+1. Scales warehouse for prune (delete) and append (insert) operations
 
 ## Configuration Requirements
 
@@ -103,33 +104,33 @@ The macro automatically:
 ```yaml
 config:
   meta:
-    warehouse_optimiser:
+    adaptive_compute:
       enabled: true
-      operation_type:
-        on_run:
-          delete:
+      execution_strategies:
+        incremental:
+          prune:
             warehouse_size: 's'
-            monitoring:
+            volume_based_scaling:
               enabled: true
               thresholds:
                 - rows: 1000000
                   warehouse_size: 'm'
-          insert:
+          append:
             warehouse_size: 's'
-            monitoring:
-                enabled: true
-                thresholds:
+            volume_based_scaling:
+              enabled: true
+              thresholds:
                 - rows: 1000000
-                    warehouse_size: 'm'
+                  warehouse_size: 'm'
 ```
 
 2. **Project Configuration**:
 ```yaml
 vars:
   macro_polo:
-    warehouse_optimiser:
+    adaptive_compute:
       enabled: true
-      default_warehouse_size: 'xs'
+      baseline_size: 'xs'
 ```
 
 ## Usage Example
@@ -141,7 +142,7 @@ vars:
     materialised='incremental',
     incremental_strategy='delete+insert',
     unique_key='order_id',
-    pre_hook=["{{ dbt_macro_polo.warehouse_optimiser() }}"]
+    pre_hook=["{{ dbt_macro_polo.adaptive_compute() }}"]
 ) }}
 
 select * from {{ ref('source_table') }}
@@ -177,11 +178,32 @@ Boolean indicating if full refresh is needed.
 {% endraw %}
 ```
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
-When used with warehouse optimiser, helps determine:
+When used with adaptive compute, helps determine:
 - Whether to use full refresh warehouse sizes
 - When to apply different monitoring thresholds
 - Whether to skip incremental optimisations
+
+{% enddocs %}
+
+{% docs is_within_time_range %}
+
+# is_within_time_range ([source](macros/utility/is_within_time_range.sql))
+
+Helper macro to determine if the current time falls within a scheduled time range.
+
+## Arguments
+
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| schedule_name | string | Yes | Name of the schedule for logging |
+| current_time | datetime | Yes | Current timestamp |
+| start_time | string | Yes | Start time of the range (HH:MM) |
+| end_time | string | Yes | End time of the range (HH:MM) |
+
+## Returns
+
+Boolean indicating if the current time is within the range.
 
 {% enddocs %}
