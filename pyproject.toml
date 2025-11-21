@@ -12,6 +12,12 @@ python = ">=3.11,<3.14"
 dbt-snowflake = ">=1.8,<1.11"
 dbt-core = ">=1.8,<1.11"
 
+[tool.poetry.group.dev.dependencies]
+sqlfluff = "^3.0.0"
+sqlfluff-templater-dbt = "^3.0.0"
+pre-commit = "^3.5.0"
+yamllint = "^1.35.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

@@ -1,4 +1,13 @@
 {% macro get_runtime_state(key) %}
+    {#
+    Retrieves a value from the runtime state (cache).
+    
+    Args:
+        key (str): The key to retrieve.
+    
+    Returns:
+        Any: The cached value or None.
+    #}
     {{ return(adapter.dispatch('get_runtime_state', 'dbt_macro_polo')(key)) }}
 {% endmacro %}
 

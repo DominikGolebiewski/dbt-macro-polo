@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
-> The video demonstrates the package in its alpha version, so the appearance, parameter names, and functionality may differ from the current release.
+> The video demonstrates the package capabilities.
 
 ## 📚 Table of Contents
 
@@ -17,7 +17,6 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
   - [provision_compute](#provision_compute)
   - [get_high_water_mark](#get_high_water_mark)
   - [adaptive_compute](#adaptive_compute)
-<!-- - [Contributing](#contributing-) -->
 - [Resources](#resources-)
 
 
@@ -25,17 +24,8 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
 
 This project aims to:
 - Explore the full potential of dbt macros
-- Experiment with novel solutions
+- Experiment with novel solutions for warehouse optimisation
 - Share sophisticated solutions with the dbt community
-
-
->**⚠️ IMPORTANT**: 
->This repository is actively being developed and some features may not be fully functional or may produce unexpected results in your environment. 
-> 
-> List of known limitations and caveats:
-> - adaptive_compute may produce unexpected results if setup incorrectly
-> - Logging is not yet fully implemented withing adaptive_compute, especially DEBUG level
-> - Compilation and docs generation is taking longer due to timestamp retrieval
 
 ## Installation
 
@@ -55,7 +45,7 @@ dbt deps
 ```yaml
 vars:
   macro_polo:
-    runtime_state: {} # Required for caching functionality (formerly 'cache')
+    runtime_state: {} # Required for caching functionality
     
     # Project-level configuration for warehouse optimisation
     adaptive_compute:
@@ -220,25 +210,6 @@ config:
 
 [View Full Documentation →](/macros/adaptive_compute/schema.md)
 </details>
-
-<!-- #### Contributing 🤝
-
-We welcome contributions! Areas that need attention:
-
-1. **Testing**:
-   - Integration tests
-   - Performance benchmarks
-   - Edge case handling
-
-2. **Documentation**:
-   - Performance tuning guide
-   - Troubleshooting guide
-   - Additional use cases
-
-3. **Features**:
-   - Enhanced monitoring
-   - Advanced scheduling
-   - Custom warehouse parameters -->
 
 #### Resources 📚
 

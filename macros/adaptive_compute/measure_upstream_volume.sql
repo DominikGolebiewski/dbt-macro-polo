@@ -1,4 +1,16 @@
 {% macro measure_upstream_volume(model_id, upstream_dependency, timestamp_column) %}
+    {#
+    Calculates the volume (row count) of upstream dependencies.
+    Used for adaptive compute to scale resources based on incoming data volume.
+
+    Args:
+        model_id (str): The model identifier.
+        upstream_dependency (str or list): One or more upstream model names or source references.
+        timestamp_column (str): The column to filter by (e.g., for incremental loads).
+    
+    Returns:
+        int: The total number of rows to process.
+    #}
     {{ return(adapter.dispatch('measure_upstream_volume', 'dbt_macro_polo')(model_id, upstream_dependency, timestamp_column)) }}
 {% endmacro %}
 
@@ -9,13 +21,24 @@
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
 
     {% if state_value %}
-        {{ dbt_macro_polo.log_event(message="Resolved volume from runtime state", model_id=model_id, status=state_value, level='DEBUG', macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(
+            message="Resolved volume from runtime state", 
+            model_id=model_id, 
+            status=state_value, 
+            level='DEBUG', 
+            macro_name=macro_name
+        ) }}
         {{ return(state_value) }}
     {% endif %}
 
     {% set dependencies = [upstream_dependency] if upstream_dependency is string else upstream_dependency %}
     {% if not dependencies %}
-        {{ dbt_macro_polo.log_event(message="No upstream dependencies provided", level='DEBUG', model_id=model_id, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(
+            message="No upstream dependencies provided", 
+            level='DEBUG', 
+            model_id=model_id, 
+            macro_name=macro_name
+        ) }}
         {{ return(0) }}
     {% endif %}
 
@@ -59,7 +82,13 @@
 
     {# Ensure we log an explicit 0 if value is None or 0 #}
     {% set final_volume = total_rows.value if total_rows.value is not none else 0 %}
-    {{ dbt_macro_polo.log_event(message="Total upstream volume calculated", status=final_volume | int, model_id=model_id, level='DEBUG', macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(
+        message="Total upstream volume calculated", 
+        status=final_volume | int, 
+        model_id=model_id, 
+        level='DEBUG', 
+        macro_name=macro_name
+    ) }}
     
     {# Update: Use runtime_state instead of cache #}
     {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: final_volume}) %}

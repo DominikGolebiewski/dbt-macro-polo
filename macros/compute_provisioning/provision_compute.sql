@@ -1,4 +1,14 @@
 {% macro provision_compute(incremental_size, fullrefresh_size=none) %}
+    {#
+    Provisions compute resources (warehouse) based on the run context.
+    
+    Args:
+        incremental_size (str): Warehouse size for incremental runs.
+        fullrefresh_size (str, optional): Warehouse size for full refresh runs. Defaults to incremental_size.
+    
+    Returns:
+        str: The name of the warehouse to use.
+    #}
     {{ return(adapter.dispatch('provision_compute', 'dbt_macro_polo')(incremental_size, fullrefresh_size)) }}
 {% endmacro %}
 
@@ -50,7 +60,13 @@
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
     
     {% if state_value %}
-        {{ dbt_macro_polo.log_event(message="Allocated warehouse from runtime state", level='DEBUG', model_id=model_id, status=state_value | upper, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(
+            message="Allocated warehouse from runtime state", 
+            level='DEBUG', 
+            model_id=model_id, 
+            status=state_value | upper, 
+            macro_name=macro_name
+        ) }}
         {{ return(state_value) }}
     {% endif %}
 
@@ -96,9 +112,18 @@
     {% endif %}
 
     {# Cache and return result #}
-    {{ dbt_macro_polo.log_event(message="Saving warehouse '" ~ warehouse_id ~ "' to runtime state with key '" ~ state_key ~ "'", level='DEBUG', macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(
+        message="Saving warehouse '" ~ warehouse_id ~ "' to runtime state with key '" ~ state_key ~ "'", 
+        level='DEBUG', 
+        macro_name=macro_name
+    ) }}
     {% do macro_polo.get('runtime_state', {}).update({state_key: warehouse_id}) %}
-    {{ dbt_macro_polo.log_event(message="Allocated warehouse", model_id=model_id, status=warehouse_id | upper, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(
+        message="Allocated warehouse", 
+        model_id=model_id, 
+        status=warehouse_id | upper, 
+        macro_name=macro_name
+    ) }}
     {{ return(warehouse_id) }}
     
 {% endmacro %}
