@@ -38,6 +38,7 @@
             model_id=model_id,
             macro_name=macro_name
         ) }}
+        {{ return(none) }}
     {% endif %}
 
     {% set adaptive_config = macro_polo.get('adaptive_compute', {}) %}
@@ -75,10 +76,11 @@
              model_id=model_id,
              macro_name=macro_name
          ) }}
+         {{ return(none) }}
     {% endif %}
 
     {# 2. Configuration Resolution #}
-    {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
+    {% set is_full_refresh = dbt_macro_polo.should_full_refresh(this, model_id) %}
     {% set strategies_config = model_config.get('execution_strategies', {}) %}
 
     {% if is_full_refresh %}
@@ -96,7 +98,6 @@
             model_id=model_id,
             macro_name=macro_name
         ) }}
-        {{ return(none) }}
     {% endif %}
 
     {# 3. Volume Determination #}
