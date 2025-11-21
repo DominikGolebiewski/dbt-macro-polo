@@ -135,10 +135,9 @@
     {# Sort thresholds descending by rows #}
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
-        {{ dbt_macro_polo.log_event(message="Checking volume threshold: " ~ volume ~ " >= " ~ t.rows, level='DEBUG', status=volume ~ " >= " ~ t.rows, model_id=model_id, macro_name=macro_name) }}
         {% if volume >= t.rows %}
-            {{ return(t.warehouse_size) }}
             {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size, level='DEBUG', status=volume ~ " >= " ~ t.rows, model_id=model_id, macro_name=macro_name) }}
+            {{ return(t.warehouse_size) }}
         {% endif %}
     {% endfor %}
     {{ dbt_macro_polo.log_event(message="No volume threshold matched. Using default warehouse size: " ~ default_size, level='DEBUG', status=volume ~ " < " ~ sorted[0].rows, model_id=model_id, macro_name=macro_name) }}
