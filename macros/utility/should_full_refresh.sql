@@ -1,4 +1,4 @@
-{% macro should_full_refresh() %}
+{% macro should_full_refresh(model, model_id) %}
     {#
     Determines if the current run should be treated as a full refresh.
     Checks the --full-refresh flag, if the relation exists, and materialization type.
@@ -6,7 +6,7 @@
     Returns:
         bool: True if full refresh logic should apply.
     #}
-    {{ return(adapter.dispatch('should_full_refresh', 'dbt_macro_polo')()) }}
+    {{ return(adapter.dispatch('should_full_refresh', 'dbt_macro_polo')(model, model_id)) }}
 {% endmacro %}
 
 {% macro default__should_full_refresh(model, model_id) %}
