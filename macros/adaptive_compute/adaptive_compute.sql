@@ -94,7 +94,7 @@
     {% set volume_monitors = model_config.get('volume_monitors', []) %}
     {% set volume = 0 %}
     
-    {% if execute and not is_full_refresh %}
+    {% if execute and not is_full_refresh and volume_monitors %}
         {% set timestamp_column = model.config.get('timestamp_column') %}
         {% if not timestamp_column %}
              {{ dbt_macro_polo.log_event(
@@ -108,7 +108,8 @@
     {% endif %}
     
     {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
-    {% if volume == 0 and not is_full_refresh %}
+    {# Only apply this fallback if volume monitors were actually configured #}
+    {% if volume == 0 and not is_full_refresh and volume_monitors %}
          {{ dbt_macro_polo.log_event(
              message="Zero upstream volume detected. Using XS warehouse.", 
              level='DEBUG', 

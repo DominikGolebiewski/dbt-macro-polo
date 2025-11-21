@@ -55,7 +55,18 @@
         {% endif %}
 
         {# Get relation with validation #}
-        {% set relation = adapter.get_relation(this.database, this.schema, model_name) if model_name is not none else this %}
+        {# Safe checking of model_name if its just a string #}
+        {% if model_name is string %}
+             {% set relation = adapter.get_relation(this.database, this.schema, model_name) %}
+        {% else %}
+             {% set relation = model_name %}
+        {% endif %}
+        
+        {# If relation is still none, try default 'this' but handle case where 'this' is not defined (e.g. run-operation) #}
+        {% if not relation and this is defined %}
+             {% set relation = this %}
+        {% endif %}
+
         {% if not relation %}
             {{ dbt_macro_polo.log_event(
                 message="Relation not found: " ~ model_name, 

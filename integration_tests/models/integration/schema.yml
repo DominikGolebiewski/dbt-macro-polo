@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: int_test_get_high_water_mark
+    description: "Integration test for high water mark retrieval against seed data."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_get_high_water_mark')
+
+  - name: int_test_measure_upstream_volume
+    description: "Integration test for upstream volume measurement against seed data."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_measure_upstream_volume')
+

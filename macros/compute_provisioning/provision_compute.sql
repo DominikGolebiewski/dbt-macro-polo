@@ -15,7 +15,12 @@
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
-    {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
+    {# Handle case where 'this' is not defined (e.g. run-operation) #}
+    {% if this is defined and this %}
+        {% set model_id = this.schema ~ "." ~ this.name %}
+    {% else %}
+        {% set model_id = 'unknown_model' %}
+    {% endif %}
     {% set macro_name = 'provision_compute' %}
 
     {# Validate input parameters #}
@@ -28,7 +33,12 @@
     {% set fullrefresh = (fullrefresh_size or incremental_size) | trim | lower %}
 
     {# Validate relation and materialisation #}
-    {% set is_relation_exist = load_relation(this) is not none %}
+    {% if this is defined and this %}
+        {% set is_relation_exist = load_relation(this) is not none %}
+    {% else %}
+        {% set is_relation_exist = false %}
+    {% endif %}
+    
     {% set materialisation = config.get('materialized', 'undefined') | lower %}
     {% set is_full_refresh = flags.FULL_REFRESH or not is_relation_exist or materialisation == 'table' %}
     {% set size_suffix = fullrefresh if is_full_refresh else incremental %}

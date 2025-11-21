@@ -1,6 +1,35 @@
-
+# dbt
 target/
 dbt_packages/
+dbt_modules/
 logs/
+macros/dbt_utils/
+integration_tests/.env
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+env/
+venv/
 .venv/
+ENV/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# Environment variables
 .env
+.env*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

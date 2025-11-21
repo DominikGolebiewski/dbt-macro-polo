@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  # ------------------------------------------------------------------------------
+  # Unit Tests: Verify MACRO LOGIC (Input -> Output) without side effects
+  # ------------------------------------------------------------------------------
+  - name: unit_test_provision_compute
+    description: "Tests the warehouse naming logic for different sizes and environments."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_provision_compute')
+
+  - name: unit_test_adaptive_logic
+    description: "Tests the decision making logic (determine_optimal_size) with hardcoded volumes."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_adaptive_logic')
+
+  - name: unit_test_time_logic
+    description: "Tests the is_within_time_range logic."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_time_logic')
+
