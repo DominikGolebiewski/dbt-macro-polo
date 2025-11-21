@@ -29,7 +29,7 @@ Dictionary containing:
 vars:
   macro_polo:
     observability:
-        log_level: 'info'  # Optional, defaults to 'info'
+      log_level: 'info'  # Optional, defaults to 'info'
     adaptive_compute:
       enabled: true  # Optional, defaults to false
 ```
@@ -118,10 +118,10 @@ config:
           append:
             warehouse_size: 's'
             volume_based_scaling:
-                enabled: true
-                thresholds:
+              enabled: true
+              thresholds:
                 - rows: 1000000
-                    warehouse_size: 'm'
+                  warehouse_size: 'm'
 ```
 
 2. **Project Configuration**:
@@ -184,5 +184,26 @@ When used with adaptive compute, helps determine:
 - Whether to use full refresh warehouse sizes
 - When to apply different monitoring thresholds
 - Whether to skip incremental optimisations
+
+{% enddocs %}
+
+{% docs is_within_time_range %}
+
+# is_within_time_range ([source](macros/utility/is_within_time_range.sql))
+
+Helper macro to determine if the current time falls within a scheduled time range.
+
+## Arguments
+
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| schedule_name | string | Yes | Name of the schedule for logging |
+| current_time | datetime | Yes | Current timestamp |
+| start_time | string | Yes | Start time of the range (HH:MM) |
+| end_time | string | Yes | End time of the range (HH:MM) |
+
+## Returns
+
+Boolean indicating if the current time is within the range.
 
 {% enddocs %}

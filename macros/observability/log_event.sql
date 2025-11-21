@@ -1,16 +1,19 @@
-{% macro log_event(message=none, level='INFO', model_id=none, status=none, macro_name=none) %}
+{% macro log_event(message, level='INFO', model_id=none, status=none, macro_name=none) %}
     {{ return(adapter.dispatch('log_event', 'dbt_macro_polo')(message, level, model_id, status, macro_name)) }}
 {% endmacro %}
 
 {% macro default__log_event(message, level, model_id, status, macro_name) %}
-
     {%- if execute -%}
-        {%- set level = level | upper -%}
+        {%- set level = level | default('INFO') | upper -%}
         {# Update: Read from observability.log_level #}
         {%- set global_level = var('macro_polo', {}).get('observability', {}).get('log_level', 'INFO') | upper -%}
         
         {%- set levels = {'DEBUG': 0, 'INFO': 1, 'WARN': 2, 'ERROR': 3} -%}
-        {%- if levels[level] >= levels.get(global_level, 1) -%}
+        {# Default to INFO(1) if level is unknown #}
+        {%- set msg_level_val = levels.get(level, 1) -%}
+        {%- set global_level_val = levels.get(global_level, 1) -%}
+
+        {%- if msg_level_val >= global_level_val -%}
             
             {# --- Styling Configuration --- #}
             {%- set colors = {
@@ -22,7 +25,7 @@
                 'BOLD':  '\033[1m'
             } -%}
             
-            {%- set c = colors[level] -%}
+            {%- set c = colors.get(level, colors['INFO']) -%}
             {%- set r = colors['RESET'] -%}
             {%- set b = colors['BOLD'] -%}
             
@@ -54,6 +57,7 @@
 
             {# --- Output Dispatch --- #}
             {%- if level == 'ERROR' -%}
+                {# For errors, we might want to strip colors if we want clean error messages in UI, but CLI supports it #}
                 {{ exceptions.raise_compiler_error(final_msg) }}
             {%- elif level == 'WARN' -%}
                 {{ exceptions.warn(final_msg) }}

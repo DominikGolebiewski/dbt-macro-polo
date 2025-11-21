@@ -9,7 +9,7 @@ macros:
         description: The type of operation being performed (ctas, insert, delete)
     
   - name: measure_upstream_volume
-    description: 'Internal helper macro to calculate the volume of upstream dependencies.'
+    description: '{{ doc("measure_upstream_volume") }}'
     arguments:
       - name: model_id
         type: string

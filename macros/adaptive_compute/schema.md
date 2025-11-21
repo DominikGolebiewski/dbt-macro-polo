@@ -73,3 +73,23 @@ config:
 - `log_event`: For observability.
 
 {% enddocs %}
+
+{% docs measure_upstream_volume %}
+
+# measure_upstream_volume ([source](macros/adaptive_compute/measure_upstream_volume.sql))
+
+Internal helper macro to calculate the volume of upstream dependencies.
+
+## Arguments
+
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| model_id | string | Yes | Identifier of the current model |
+| upstream_dependency | string or list | Yes | List of upstream models to check |
+| timestamp_column | string | Yes | Column used for incremental filtering |
+
+## Returns
+
+Integer representing the row count of new data since the last high water mark.
+
+{% enddocs %}
