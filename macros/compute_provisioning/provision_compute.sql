@@ -28,6 +28,7 @@
     {% if not incremental_size %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
+        {{ return(none) }}
     {% endif %}
 
     {% set incremental = incremental_size | trim | lower %}

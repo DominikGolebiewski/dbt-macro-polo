@@ -9,6 +9,8 @@
     {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(operation)) }}
 {% endmacro %}
 
+-------------------------------------------------------------------------------------------------
+
 {% macro default__adaptive_compute(operation='build') %}
     {#
     Default implementation of adaptive compute.
@@ -17,9 +19,16 @@
     Args:
         operation (str): The operation being performed.
     #}
-    {% set model_id = this.schema ~ "." ~ this.name if this else 'unknown_model' %}
+
     {% set macro_polo = var('macro_polo', {}) %}
     {% set macro_name = 'adaptive_compute' %}
+
+    {% if this is not defined or not this %}
+        {% set msg = "Configuration Error: provision_compute macro requires a valid model context. The 'this' variable is not defined. This macro is intended for model/materialisation execution only." %}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name, model_id='unknown_model') }}
+        {{ return(none) }}
+    {% endif %}
+    {% set model_id = this.schema ~ "." ~ this.name %}
 
     {# 1. Validation #}
     {% if operation not in ['build', 'append', 'prune'] %}
@@ -40,7 +49,7 @@
         {% if operation == 'build' %}
             {{ dbt_macro_polo.log_event(
                 message="Adaptive Compute disabled",
-                level='DEBUG',
+                level='INFO',
                 model_id=model_id,
                 macro_name=macro_name
             ) }}
@@ -87,7 +96,7 @@
             model_id=model_id,
             macro_name=macro_name
         ) }}
-        {{ return('') }}
+        {{ return(none) }}
     {% endif %}
 
     {# 3. Volume Determination #}
@@ -95,14 +104,25 @@
     {% set volume = 0 %}
 
     {% if execute and not is_full_refresh and volume_monitors %}
+        {# Ensure volume_monitors is a list #}
+        {% if volume_monitors is not list or volume_monitors is not iterable %}
+            {{ dbt_macro_polo.log_event(
+                message="Configuration Error: volume_monitors must be a list of strings",
+                level='ERROR',
+                model_id=model_id,
+                macro_name=macro_name
+            ) }}
+            {{ return(none) }}
+        {% endif %}
         {% set timestamp_column = model.config.get('timestamp_column') %}
         {% if not timestamp_column %}
              {{ dbt_macro_polo.log_event(
-                 message="timestamp_column required for volume monitoring",
+                 message="Configuration Error: timestamp_column in model config is required if volume monitoring is enabled,",
                  level='ERROR',
                  model_id=model_id,
                  macro_name=macro_name
              ) }}
+             {{ return(none) }}
         {% endif %}
         {% set volume = dbt_macro_polo.measure_upstream_volume(model_id, volume_monitors, timestamp_column) %}
     {% endif %}
@@ -135,10 +155,13 @@
 
 {% endmacro %}
 
-{# Snowflake specific implementation #}
+-------------------------------------------------------------------------------------------------
+
 {% macro determine_optimal_size(config, volume, model_id) %}
     {{ return(adapter.dispatch('determine_optimal_size', 'dbt_macro_polo')(config, volume, model_id)) }}
 {% endmacro %}
+
+-------------------------------------------------------------------------------------------------
 
 {% macro default__determine_optimal_size(config, volume, model_id) %}
     {#
@@ -196,9 +219,13 @@
     {{ return(base_size) }}
 {% endmacro %}
 
+-------------------------------------------------------------------------------------------------
+
 {% macro evaluate_thresholds(thresholds, volume, default_size, model_id=none, macro_name=none) %}
     {{ return(adapter.dispatch('evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size, model_id, macro_name)) }}
 {% endmacro %}
+
+-------------------------------------------------------------------------------------------------
 
 {% macro default__evaluate_thresholds(thresholds, volume, default_size, model_id, macro_name) %}
     {#
@@ -227,3 +254,5 @@
     ) }}
     {{ return(default_size) }}
 {% endmacro %}
+
+-------------------------------------------------------------------------------------------------
