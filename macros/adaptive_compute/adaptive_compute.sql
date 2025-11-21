@@ -108,8 +108,6 @@
                     {# Window Specific Volume Scaling #}
                     {% set win_scaling = window.get('volume_based_scaling', {}) %}
 
-
-                    {{ dbt_macro_polo.log_event(message="The win scaling is enabled: " ~ win_scaling.get('enabled'), model_id=model_id, level='DEBUG', macro_name=macro_name) }}
                     {% if win_scaling.get('enabled') %}
                         {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(win_scaling.get('thresholds', []), volume, warehouse_size, model_id, macro_name) %}
                     {% endif %}
@@ -137,6 +135,7 @@
     {# Sort thresholds descending by rows #}
     {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
     {% for t in sorted %}
+        {{ dbt_macro_polo.log_event(message="Checking volume threshold: " ~ volume ~ " >= " ~ t.rows, level='DEBUG', status=volume ~ " >= " ~ t.rows, model_id=model_id, macro_name=macro_name) }}
         {% if volume >= t.rows %}
             {{ return(t.warehouse_size) }}
             {{ dbt_macro_polo.log_event(message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size, level='DEBUG', status=volume ~ " >= " ~ t.rows, model_id=model_id, macro_name=macro_name) }}
