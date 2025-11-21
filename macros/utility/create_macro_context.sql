@@ -16,7 +16,7 @@
         'model_id': model_id,
         'materialisation': config.get('materialized', 'undefined'),
         'logging_level': logging_level,
-        'is_warehouse_optimiser_enabled': macro_polo.get('warehouse_optimiser', {}).get('enabled', false)
+        'is_adaptive_compute_enabled': macro_polo.get('adaptive_compute', {}).get('enabled', false)
      } %}
     {{ return(context) }}
 {% endmacro %}

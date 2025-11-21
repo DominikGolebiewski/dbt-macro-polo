@@ -27,13 +27,14 @@ The macro expects the following configuration in your `dbt_project.yml`:
 ```yaml
 {%- raw -%}
 vars:
-  infrastructure_definition:
-    allowed_sizes: ['xs', 's', 'm', 'l']
-    environment_context:
-        dev:
-            warehouse_name_prefix: dev_wh
-        prod:
-            warehouse_name_prefix: prd_wh
+  macro_polo:
+    infrastructure_definition:
+      allowed_sizes: ['xs', 's', 'm', 'l']
+      environment_context:
+          dev:
+              warehouse_name_prefix: dev_wh
+          prod:
+              warehouse_name_prefix: prd_wh
 {%- endraw -%}
 ```
 

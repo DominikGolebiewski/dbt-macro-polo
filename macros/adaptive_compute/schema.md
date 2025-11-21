@@ -13,7 +13,7 @@ The macro inspects the current model's configuration and run context to determin
 
 ## Configuration Requirements
 
-The macro relies on the `adaptive_compute` project configuration and `compute_provisioning` model configuration.
+The macro relies on the `adaptive_compute` project configuration and `adaptive_compute` model configuration.
 
 ### Project Config (dbt_project.yml)
 ```yaml
@@ -28,7 +28,7 @@ vars:
 ```yaml
 config:
   meta:
-    compute_provisioning:
+    adaptive_compute:
       enabled: true
       execution_strategies:
         incremental:

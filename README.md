@@ -43,7 +43,7 @@ This project aims to:
 ```yaml
 packages:
   - git: "https://github.com/DominikGolebiewski/dbt-macro-polo.git"
-    revision: 0.1.1-beta.1
+    revision: 1.0.0
 ```
 
 2. **Install the package**
@@ -57,7 +57,7 @@ vars:
   macro_polo:
     runtime_state: {} # Required for caching functionality (formerly 'cache')
     
-    # Project-level configuration for warehouse optimization
+    # Project-level configuration for warehouse optimisation
     adaptive_compute:
       enabled: true # Enable/Disable globally
       baseline_size: 'xs' # Default warehouse size
@@ -156,9 +156,7 @@ vars:
 [View Full Documentation →](/macros/high_water_mark/schema.md)
 </details>
 
-### adaptive_compute 
-
-This is a beta version of the warehouse optimiser. It is currently in development and some features may not be fully functional or produce unexpected results.
+### adaptive_compute
 
 > **Snowflake Only** - Advanced warehouse optimisation and load balancing with resource allocation.
 
@@ -187,7 +185,7 @@ In your model:
 In your model property file:
 ```yaml
 config:
-    materialized: 'incremental' 
+    materialized: 'incremental'
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'

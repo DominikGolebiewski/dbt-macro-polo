@@ -19,7 +19,7 @@ Dictionary containing:
     'model_id': str,             # Schema.model_name in lowercase
     'materialisation': str,      # Current model materialisation
     'logging_level': str,        # Configured logging level
-    'is_warehouse_optimiser_enabled': bool  # Warehouse optimiser status
+    'is_adaptive_compute_enabled': bool  # Adaptive compute status
 }
 ```
 
@@ -49,7 +49,7 @@ vars:
 
 # get_runtime_state ([source](macros/utility/get_runtime_state.sql))
 
-Retrieves values from the macro_polo runtime state system. Essential for the warehouse optimiser's state persistence mechanism.
+Retrieves values from the macro_polo runtime state system. Essential for the adaptive compute's state persistence mechanism.
 
 ## Arguments
 
@@ -78,7 +78,7 @@ vars:
 {% endraw %}
 ```
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
 The runtime state system is crucial for:
 - Storing row counts for warehouse sizing decisions
@@ -91,9 +91,9 @@ The runtime state system is crucial for:
 
 # get_delete_insert_merge_sql ([source](macros/utility/get_delete_insert_merge_sql.sql))
 
-Enhanced version of dbt's delete+insert strategy with integrated warehouse optimisation support.
+Enhanced version of dbt's delete+insert strategy with integrated adaptive compute support.
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
 The macro automatically:
 1. Scales warehouse for prune (delete) and append (insert) operations
@@ -104,7 +104,7 @@ The macro automatically:
 ```yaml
 config:
   meta:
-    compute_provisioning:
+    adaptive_compute:
       enabled: true
       execution_strategies:
         incremental:
@@ -142,7 +142,7 @@ vars:
     materialised='incremental',
     incremental_strategy='delete+insert',
     unique_key='order_id',
-    pre_hook=["{{ dbt_macro_polo.optimise_warehouse() }}"]
+    pre_hook=["{{ dbt_macro_polo.adaptive_compute() }}"]
 ) }}
 
 select * from {{ ref('source_table') }}
@@ -178,9 +178,9 @@ Boolean indicating if full refresh is needed.
 {% endraw %}
 ```
 
-## Integration with Warehouse Optimiser
+## Integration with Adaptive Compute
 
-When used with warehouse optimiser, helps determine:
+When used with adaptive compute, helps determine:
 - Whether to use full refresh warehouse sizes
 - When to apply different monitoring thresholds
 - Whether to skip incremental optimisations
