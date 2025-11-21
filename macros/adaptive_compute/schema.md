@@ -39,6 +39,20 @@ config:
                thresholds:
                  - rows: 1000000
                    warehouse_size: 'xl'
+            time_based_overrides:
+              enabled: true
+              windows:
+                - name: 'Morning Rush'
+                  days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+                  time_range:
+                    start: '08:00'
+                    end: '11:00'
+                  warehouse_size: 'l'
+                  volume_based_scaling:
+                    enabled: true
+                    thresholds:
+                      - rows: 2000000
+                        warehouse_size: '2xl'
 ```
 
 ## Logic Flow

@@ -189,6 +189,32 @@ config:
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
     timestamp_column: 'loaded_timestamp'
+    meta:
+      adaptive_compute:
+        enabled: true
+        execution_strategies:
+          incremental:
+            build:
+              warehouse_size: 'm'
+              volume_based_scaling:
+                 enabled: true
+                 thresholds:
+                   - rows: 1000000
+                     warehouse_size: 'xl'
+              time_based_overrides:
+                enabled: true
+                windows:
+                  - name: 'Morning Rush'
+                    days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+                    time_range:
+                      start: '08:00'
+                      end: '11:00'
+                    warehouse_size: 'l'
+                    volume_based_scaling:
+                      enabled: true
+                      thresholds:
+                        - rows: 2000000
+                          warehouse_size: '2xl'
     pre_hook: ['{{ dbt_macro_polo.adaptive_compute() }}']
 ```
 
