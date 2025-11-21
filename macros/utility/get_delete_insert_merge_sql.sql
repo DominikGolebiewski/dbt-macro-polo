@@ -7,9 +7,12 @@
 {% macro default__get_delete_insert_merge_sql(target, source, unique_key, dest_columns, incremental_predicates) %}
 
     {%- set dest_cols_csv = get_quoted_csv(dest_columns | map(attribute="name")) -%}
+    {% set adaptive_config = var('macro_polo', {}).get('adaptive_compute', {}) %}
+    {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
+    {% set adaptive_enabled = adaptive_config.get('enabled', false) and model_config.get('enabled', false) %}
 
     {% if unique_key %}
-        {% if model.config.get('pre_hook', []).contains('{{ dbt_macro_polo.adaptive_compute() }}') %}
+        {% if adaptive_enabled %}
             {{ dbt_macro_polo.handle_warehouse_switch('prune') }}
         {% endif %}
         {% if unique_key is sequence and unique_key is not string %}
@@ -42,7 +45,7 @@
         {% endif %}
     {% endif %}
 
-    {% if model.config.get('pre_hook', []).contains('{{ dbt_macro_polo.adaptive_compute() }}') %}
+    {% if adaptive_enabled %}
         {{ dbt_macro_polo.handle_warehouse_switch('append') }}
     {% endif %}
     insert into {{ target }} ({{ dest_cols_csv }})
