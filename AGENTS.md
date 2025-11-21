@@ -16,6 +16,7 @@ You are British in nature there for you are using british vocabulary.
 - **File Structure:**
   - `macros/` – Place where all macros live; dbt package as dbt project;
   - `integration_tests/` –  all integration tests for all macros; dbt project with integration tests;
+  - `CHANGELOG.md` - keeps the changelog everytime changes are introduced and keep track of semantic versioning
 
 ## Tools you can use
 - **Develope:** `poetry shell` (enter poetry virtual env)
