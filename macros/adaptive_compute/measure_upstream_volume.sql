@@ -18,8 +18,9 @@
 
     {% set macro_name = 'measure_upstream_volume' %}
     {% set state_key = '_macro_polo_upstream_volume_' ~ model_id | replace('.', '_') %}
-    {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
 
+    {# 1. Check Cache #}
+    {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
     {% if state_value %}
         {{ dbt_macro_polo.log_event(
             message="Resolved volume from runtime state",
@@ -31,35 +32,45 @@
         {{ return(state_value) }}
     {% endif %}
 
-    {% set total_rows = namespace(value=0) %}
-    {% set max_value = dbt_macro_polo.get_high_water_mark(column_name=timestamp_column) or 0 %}
-
-    {# Use XS warehouse for counting #}
+    {# 2. Provision Compute for Calculation #}
+    {# Use XS warehouse for metadata-like operations #}
     {% set wh = dbt_macro_polo.provision_compute('xs') %}
+    {% if not wh %}
+         {{ dbt_macro_polo.log_event(message="Failed to allocate warehouse for volume measurement", level='ERROR', model_id=model_id, macro_name=macro_name) }}
+         {{ return(0) }}
+    {% endif %}
 
-    {% for monitor in volume_monitors %}
-        {% set monitor_relation =  ref(monitor) if '.' not in monitor else source(monitor.split('.')[0], monitor.split('.')[1]) %}
+    {# 3. Determine High Water Mark #}
+    {# If max_value is 0 or None, we treat it as '0' for string comparison in query builder #}
+    {% set max_value = dbt_macro_polo.get_high_water_mark(column_name=timestamp_column) or '0' %}
 
-        {% set query %}
-            use warehouse {{ wh }};
-            select count(1)
-            from {{ monitor_relation }}
-            {% if max_value != '0' %}
-            where {{ timestamp_column }} > {{ max_value }}
-            {% endif %}
-        {% endset %}
+    {# 4. Iterate and Sum Volume #}
+    {% set total_rows = namespace(value=0) %}
 
-        {% if execute %}
-            {% set res = run_query(query) %}
+    {# Ensure volume_monitors is a list #}
+    {% set monitors_list = [volume_monitors] if volume_monitors is string else volume_monitors %}
+
+    {% if execute %}
+        {% for monitor in monitors_list %}
+            {# Resolve Relation #}
+            {% set monitor_relation = dbt_macro_polo._resolve_monitor_relation(monitor) %}
+
+            {# Build Query #}
+            {% set query = dbt_macro_polo._build_volume_query(monitor_relation, timestamp_column, max_value) %}
+
+            {# Execute with Safe Warehouse Switch #}
+            {% set res = dbt_macro_polo.execute_query_with_warehouse(query, wh) %}
+
             {% if res and res.rows %}
                 {% set count = res.columns[0].values()[0] %}
-                {% set total_rows.value = total_rows.value + count %}
+                {% set total_rows.value = total_rows.value + (count or 0) %}
             {% endif %}
-        {% endif %}
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
 
-    {# Ensure we log an explicit 0 if value is None or 0 #}
-    {% set final_volume = total_rows.value if total_rows.value is not none else 0 %}
+    {% set final_volume = total_rows.value %}
+
+    {# 5. Log and Cache #}
     {{ dbt_macro_polo.log_event(
         message="Total upstream volume calculated",
         status=final_volume | int,
@@ -68,8 +79,7 @@
         macro_name=macro_name
     ) }}
 
-    {# Update: Use runtime_state instead of cache #}
-    {% do var('macro_polo', {}).get('runtime_state', {}).update({state_key: final_volume}) %}
+    {{ dbt_macro_polo.set_runtime_state(state_key, final_volume, model_id, macro_name) }}
 
     {{ return(final_volume) }}
 

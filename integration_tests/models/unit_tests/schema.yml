@@ -21,3 +21,9 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref('expect_time_logic')
+
+  - name: unit_test_get_high_water_mark
+    description: "Tests the get_high_water_mark macro against seeded data."
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expect_get_high_water_mark')

@@ -1,26 +1,14 @@
 {% macro adaptive_compute(operation='build') %}
     {#
-    Entry point for adaptive compute macro.
-    Dispatches the call to the appropriate adapter implementation.
-
-    Args:
-        operation (str): The operation being performed ('build', 'append', 'prune'). Defaults to 'build'.
+    Entry point for adaptive compute.
+    Adjusts warehouse size based on time schedules and upstream volume.
+    Dispatches to adapter implementation.
     #}
     {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(operation)) }}
 {% endmacro %}
 
--------------------------------------------------------------------------------------------------
-
 {% macro default__adaptive_compute(operation='build') %}
-    {#
-    Default implementation of adaptive compute.
-    Determines the optimal warehouse size based on configuration, volume, and time.
 
-    Args:
-        operation (str): The operation being performed.
-    #}
-
-    {% set macro_polo = var('macro_polo', {}) %}
     {% set macro_name = 'adaptive_compute' %}
 
     {% if this is not defined or not this %}
@@ -30,214 +18,155 @@
     {% endif %}
     {% set model_id = this.schema ~ "." ~ this.name %}
 
-    {# 1. Validation #}
-    {% if operation not in ['build', 'append', 'prune'] %}
-        {{ dbt_macro_polo.log_event(
-            message="Invalid operation type: " ~ operation,
-            level='ERROR',
-            model_id=model_id,
-            macro_name=macro_name
-        ) }}
+    {# 1. Pre-flight Checks #}
+    {% if not dbt_macro_polo._validate_adaptive_inputs(this, operation, macro_name) %}
         {{ return(none) }}
     {% endif %}
 
-    {% set adaptive_config = macro_polo.get('adaptive_compute', {}) %}
-    {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
-
-    {# Check if adaptive compute is enabled globally and at model level #}
-    {% if not (adaptive_config.get('enabled', false) and model_config.get('enabled', false)) %}
-        {# Only log disabled status once during build to reduce noise #}
-        {% if operation == 'build' %}
-            {{ dbt_macro_polo.log_event(
-                message="Adaptive Compute disabled",
-                level='INFO',
-                model_id=model_id,
-                macro_name=macro_name
-            ) }}
-        {% endif %}
+    {# 2. Configuration & Enablement #}
+    {% set model_config = dbt_macro_polo._get_adaptive_config(model, this, operation, macro_name) %}
+    {% if not model_config %}
         {{ return(none) }}
     {% endif %}
 
     {{ dbt_macro_polo.log_event(
-        message="Starting adaptive compute for operation",
+        message="Starting adaptive compute",
         status=operation | upper,
         level='INFO',
         model_id=model_id,
         macro_name=macro_name
     ) }}
 
-    {% set is_incremental = model.config.get('materialized') == 'incremental' %}
-    {% set strategy = model.config.get('incremental_strategy') %}
-
-    {% if not (is_incremental and strategy == 'delete+insert') %}
-         {{ dbt_macro_polo.log_event(
-             message="Adaptive compute requires incremental materialisation with delete+insert strategy",
-             level='ERROR',
-             model_id=model_id,
-             macro_name=macro_name
-         ) }}
-         {{ return(none) }}
-    {% endif %}
-
-    {# 2. Configuration Resolution #}
+    {# 3. Determine Context Configuration #}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh(this, model_id) %}
-    {% set strategies_config = model_config.get('execution_strategies', {}) %}
+    {% set strategies = model_config.get('execution_strategies', {}) %}
 
     {% if is_full_refresh %}
-        {% set active_config = strategies_config.get('full_refresh', {}) %}
-        {% set context_label = 'FULL_REFRESH' %}
+        {% set active_config = strategies.get('full_refresh', {}) %}
     {% else %}
-        {% set active_config = strategies_config.get('incremental', {}).get(operation, {}) %}
-        {% set context_label = operation | upper %}
+        {% set active_config = strategies.get('incremental', {}).get(operation, {}) %}
     {% endif %}
 
     {% if not active_config %}
         {{ dbt_macro_polo.log_event(
-            message="No configuration found for " ~ context_label,
+            message="No configuration found for context execution_strategies.",
             level='WARN',
             model_id=model_id,
             macro_name=macro_name
         ) }}
     {% endif %}
 
-    {# 3. Volume Determination #}
+    {# 4. Measure Volume #}
+    {% set volume = dbt_macro_polo._measure_volume_if_needed(model_config, execute, is_full_refresh, model_id, model, macro_name) %}
+    {% if volume is none %}
+        {{ return(none) }}
+    {% endif %}
+
+    {# 5. Sizing & Allocation #}
     {% set volume_monitors = model_config.get('volume_monitors', []) %}
-    {% set volume = 0 %}
+    {% set target_size = dbt_macro_polo._determine_target_size(active_config, volume, model_id, is_full_refresh, volume_monitors, macro_name) %}
 
-    {% if execute and not is_full_refresh and volume_monitors %}
-        {# Ensure volume_monitors is a list #}
-        {% if volume_monitors is not iterable or volume_monitors is string %}
-            {{ dbt_macro_polo.log_event(
-                message="Configuration Error: volume_monitors must be a list of strings",
-                level='ERROR',
-                model_id=model_id,
-                macro_name=macro_name
-            ) }}
-            {{ return(none) }}
-        {% endif %}
-        {% set timestamp_column = model.config.get('timestamp_column') %}
-        {% if not timestamp_column %}
-             {{ dbt_macro_polo.log_event(
-                 message="Configuration Error: timestamp_column in model config is required if volume monitoring is enabled,",
-                 level='ERROR',
-                 model_id=model_id,
-                 macro_name=macro_name
-             ) }}
-             {{ return(none) }}
-        {% endif %}
-        {% set volume = dbt_macro_polo.measure_upstream_volume(model_id, volume_monitors, timestamp_column) %}
-    {% endif %}
-
-    {# Check if volume is 0 - if so, force XS warehouse and skip other checks #}
-    {# Only apply this fallback if volume monitors were actually configured #}
-    {% if volume == 0 and not is_full_refresh and volume_monitors %}
-         {{ dbt_macro_polo.log_event(
-             message="Zero upstream volume detected. Using XS warehouse.",
-             level='DEBUG',
-             model_id=model_id,
-             macro_name=macro_name
-         ) }}
-         {% set target_size = 'xs' %}
-    {% else %}
-         {# 4. Size Determination #}
-         {% set target_size = dbt_macro_polo.determine_optimal_size(active_config, volume, model_id) %}
-    {% endif %}
-
-    {# 5. Allocation #}
     {% set warehouse = dbt_macro_polo.provision_compute(target_size) %}
+    {% if not warehouse %}
+         {{ dbt_macro_polo.log_event(
+            message="Failed to allocate warehouse",
+            level='ERROR',
+            model_id=model_id,
+            macro_name=macro_name
+         ) }}
+         {{ return(none) }}
+    {% endif %}
 
     {{ dbt_macro_polo.log_event(
         message="Adaptive compute selected warehouse",
-        model_id=model_id,
         status=warehouse | upper,
+        model_id=model_id,
         macro_name=macro_name
     ) }}
     {{ return('use warehouse ' ~ warehouse) }}
 
 {% endmacro %}
 
--------------------------------------------------------------------------------------------------
-
 {% macro determine_optimal_size(config, volume, model_id) %}
     {{ return(adapter.dispatch('determine_optimal_size', 'dbt_macro_polo')(config, volume, model_id)) }}
 {% endmacro %}
 
--------------------------------------------------------------------------------------------------
-
 {% macro default__determine_optimal_size(config, volume, model_id) %}
     {#
-    Determines the optimal warehouse size based on config and volume.
-    Checks time-based overrides and volume-based scaling.
+    Determines warehouse size by checking:
+    1. Time-based overrides (and their specific volume scaling)
+    2. Standard volume-based scaling
+    3. Base configuration
     #}
+    {% set macro_name = 'adaptive_compute' %}
     {% set default_size = var('macro_polo', {}).get('adaptive_compute', {}).get('baseline_size', 'xs') %}
     {% set base_size = config.get('warehouse_size', default_size) %}
-    {% set macro_name = 'adaptive_compute' %}
 
-    {# Check Time Based Overrides #}
+    {# 1. Time-Based Overrides #}
     {% set time_overrides = config.get('time_based_overrides', {}) %}
     {% if time_overrides.get('enabled') %}
-        {% set current_time = modules.datetime.datetime.now() %}
-        {% set current_day = current_time.strftime('%A').lower() %}
+        {% set now = modules.datetime.datetime.now() %}
+        {% set current_day = now.strftime('%A').lower() %}
 
         {% for window in time_overrides.get('windows', []) %}
-            {% if current_day in window.get('days', []) %}
-                {% set time_range = window.get('time_range', {}) %}
-                {% if dbt_macro_polo.is_within_time_range(window.get('name'), current_time, time_range.get('start'), time_range.get('end')) %}
-                    {{ dbt_macro_polo.log_event(
-                        message="Schedule matched: " ~ window.get('name'),
-                        model_id=model_id,
-                        level='DEBUG',
-                        macro_name=macro_name
-                    ) }}
+            {% set time_range = window.get('time_range', {}) %}
 
-                    {% set warehouse_size = window.get('warehouse_size', base_size) %}
+            {% if current_day in window.get('days', []) and dbt_macro_polo.is_within_time_range(window.get('name'), now, time_range.get('start'), time_range.get('end')) %}
 
-                    {# Window Specific Volume Scaling #}
-                    {% set win_scaling = window.get('volume_based_scaling', {}) %}
+                {{ dbt_macro_polo.log_event(
+                    message="Schedule match: " ~ window.get('name'),
+                    level='DEBUG',
+                    model_id=model_id,
+                    macro_name=macro_name
+                ) }}
 
-                    {% if win_scaling.get('enabled') %}
-                        {% set warehouse_size = dbt_macro_polo.evaluate_thresholds(
-                            win_scaling.get('thresholds', []),
-                            volume,
-                            warehouse_size,
-                            model_id,
-                            macro_name
-                        ) %}
-                    {% endif %}
+                {% set size = window.get('warehouse_size', base_size) %}
 
-                    {{ return(warehouse_size) }}
+                {# Apply window-specific volume scaling if enabled #}
+                {% set win_scaling = window.get('volume_based_scaling', {}) %}
+                {% if win_scaling.get('enabled') %}
+                     {% set size = dbt_macro_polo.evaluate_thresholds(
+                        win_scaling.get('thresholds', []),
+                        volume,
+                        size,
+                        model_id,
+                        macro_name
+                    ) %}
                 {% endif %}
+
+                {{ return(size) }}
             {% endif %}
         {% endfor %}
     {% endif %}
 
-    {# Check Base Volume Scaling #}
+    {# 2. Volume-Based Scaling #}
     {% set vol_scaling = config.get('volume_based_scaling', {}) %}
     {% if vol_scaling.get('enabled') %}
-        {{ return(dbt_macro_polo.evaluate_thresholds(vol_scaling.get('thresholds', []), volume, base_size)) }}
+        {{ return(dbt_macro_polo.evaluate_thresholds(
+            vol_scaling.get('thresholds', []),
+            volume,
+            base_size,
+            model_id,
+            macro_name
+        )) }}
     {% endif %}
 
     {{ return(base_size) }}
 {% endmacro %}
 
--------------------------------------------------------------------------------------------------
-
 {% macro evaluate_thresholds(thresholds, volume, default_size, model_id=none, macro_name=none) %}
     {{ return(adapter.dispatch('evaluate_thresholds', 'dbt_macro_polo')(thresholds, volume, default_size, model_id, macro_name)) }}
 {% endmacro %}
 
--------------------------------------------------------------------------------------------------
-
 {% macro default__evaluate_thresholds(thresholds, volume, default_size, model_id, macro_name) %}
     {#
-    Evaluates volume against thresholds to determine warehouse size.
+    Selects warehouse size based on volume thresholds.
+    Thresholds are checked in descending order of rows.
     #}
-    {# Sort thresholds descending by rows #}
-    {% set sorted = thresholds | sort(attribute='rows', reverse=true) %}
-    {% for t in sorted %}
+    {% for t in thresholds | sort(attribute='rows', reverse=true) %}
         {% if volume >= t.rows %}
             {{ dbt_macro_polo.log_event(
-                message="Volume threshold matched. Using warehouse size: " ~ t.warehouse_size,
+                message="Volume threshold matched. Using: " ~ t.warehouse_size,
                 level='DEBUG',
                 status=volume ~ " >= " ~ t.rows,
                 model_id=model_id,
@@ -246,14 +175,13 @@
             {{ return(t.warehouse_size) }}
         {% endif %}
     {% endfor %}
+
     {{ dbt_macro_polo.log_event(
-        message="No volume threshold matched. Using default warehouse size: " ~ default_size,
+        message="No threshold match. Using default: " ~ default_size,
         level='DEBUG',
-        status=volume ~ " < " ~ (sorted[0].rows if sorted else 'N/A'),
+        status=volume ~ " < min",
         model_id=model_id,
         macro_name=macro_name
     ) }}
     {{ return(default_size) }}
 {% endmacro %}
-
--------------------------------------------------------------------------------------------------
