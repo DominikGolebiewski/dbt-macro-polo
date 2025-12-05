@@ -7,7 +7,6 @@
     {% set incremental = incremental_size | trim | lower %}
     {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
 
-
     {#/* We need logic to decide when full refresh size should be use.
         Either relation does not exists, materialistaion is table or we run explicitly with the --full-refresh flag. */#}    
     {% set is_relation_exist = load_relation(this) is not none %}
