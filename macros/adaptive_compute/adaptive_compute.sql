@@ -30,7 +30,7 @@
     ) }}
 
     {# 3. Determine Context Configuration #}
-    {% set is_full_refresh = dbt_macro_polo.should_full_refresh(this, model_id) %}
+    {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set strategies = model_config.get('execution_strategies', {}) %}
 
     {% if is_full_refresh %}
