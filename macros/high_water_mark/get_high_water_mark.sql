@@ -7,12 +7,11 @@
     {{ return(none) if not execute }}
 
     {% set macro_name = 'get_high_water_mark' %}
-    {% set model_id = this.schema ~ "." ~ this.name %}
 
     {#-- 1. Validation --#}
     {% if not column_name %}
         {% set msg = "Configuration Error: column_name is required." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
@@ -40,7 +39,7 @@
     {{ dbt_macro_polo.set_runtime_state(state_key, max_value) }}
 
     {% set msg = "Resolved high water mark" %}
-    {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', model_id=model_id, status=max_value | upper, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message=msg, level='INFO', model_id=this, status=max_value, macro_name=macro_name) }}
 
     {{ return("'" ~ max_value ~ "'") }}
 
