@@ -38,9 +38,13 @@
             {%- set package_label = colors['DEBUG'] ~ "Macro-Polo" ~ r -%}
 
             {%- set context_info = [] -%}
+
+            {#/* -- Breaks the log output when it model_id = this is used as a dictionary in below context
             {%- if model_id -%}
                 {%- do context_info.append(colors['DEBUG'] ~ model_id ~ r) -%}
             {%- endif -%}
+            */#}
+            
             {%- if macro_name -%}
                 {%- do context_info.append(colors['DEBUG'] ~ "(" ~ macro_name ~ ")" ~ r) -%}
             {%- endif -%}
