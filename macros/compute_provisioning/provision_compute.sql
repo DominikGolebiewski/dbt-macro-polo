@@ -15,14 +15,11 @@
         {{ return(none) }}
     {% endif %}
 
-    {#/* Get infrastructure definitions */#}
+    {#/* Get and validate infrastructure definition */#}
     {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
 
-    {# 2. Get and validate environment configuration #}
-    {% set warehouse_prefix = dbt_macro_polo._get_environment_config(infrastructure_definition , model_id, macro_name) %}
-    {% if not warehouse_prefix %}
-        {{ return(none) }}
-    {% endif %}
+    {#/* Get and validate environment configuration */#}
+    {% set warehouse_prefix = infrastructure_definition.environment_context.get(target.name).get('warehouse_name_prefix') %}
 
     {# 3. Determine size suffix based on run context #}
     {% set size_suffix = dbt_macro_polo._determine_compute_size(incremental_size, fullrefresh_size, this) %}
