@@ -10,7 +10,7 @@
     {% set incremental = incremental_size | trim | lower %}
 
     {#/* If fullrefresh size is not provided, use incremental size instead */#}
-    {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental  %}
+    {% set fullrefresh = (fullrefresh_size or incremental_size) | trim | lower %}
 
     {% set invalid_requested_sizes = [] %}
     {% for size, label in [(incremental, 'incremental'), (fullrefresh, 'fullrefresh')] %}
