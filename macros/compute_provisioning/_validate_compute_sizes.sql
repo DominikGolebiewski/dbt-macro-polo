@@ -10,9 +10,7 @@
     {% set incremental = incremental_size | trim | lower %}
 
     {#/* If fullrefresh size is not provided, use incremental size instead */#}
-    {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
-    
-
+    {% set fullrefresh = incremental if fullrefresh_size is none else (fullrefresh_size | trim | lower) %}
 
     {#/* Before validation, convert allowed sizes to a list of lowercase trimmed strings */#}
     {% set normalised_allowed_sizes = allowed_sizes | map('trim') | map('lower') | list %}
