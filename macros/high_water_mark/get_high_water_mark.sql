@@ -8,14 +8,14 @@
 
     {% set macro_name = 'get_high_water_mark' %}
 
-    {#-- 1. Validation --#}
+    {#/* Validation */#}
     {% if not column_name %}
         {% set msg = "Configuration Error: column_name is required." %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
-    {#-- 2. Cache handling --#}
+    {#/* Cache handling */#}
     {#-- Logic for key generation --#}
     {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
     {% set clean_model_id = this | replace('.', '_') %}
@@ -23,26 +23,23 @@
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
     {{ break if state_value }}
 
-    {#-- 3. Warehouse allocation --#}
+    {#/* Warehouse allocation */#}
     {% set warehouse = dbt_macro_polo.provision_compute(warehouse_size) %}
 
-    {#-- 4. Build Query --#}
+    {#/* Build Query */#}
     {% set query = dbt_macro_polo._build_hwm_query(column_name, predicate) %}
 
-    {#-- 5. Execute Query --#}
+    {#/* Execute Query */#}
     {% set result = dbt_macro_polo.execute_query_with_warehouse(query, warehouse) %}
 
-    {#-- 6. Process Result --#}
+    {#/* Process Result */#}
     {% set max_value = result.columns[0].values()[0] %}
 
-    {#-- 7. Update Cache --#}
+    {#/* Update Cache */#}
     {{ dbt_macro_polo.set_runtime_state(state_key, max_value) }}
 
-    {{ dbt_macro_polo.log_event(message="Max value: " ~ max_value, level='DEBUG', model_id='Before this', macro_name=macro_name) }}
-
-    {% set msg = "Resolved high water mark" %}
-    {{ dbt_macro_polo.log_event(message=msg, level='INFO', model_id=this, status=max_value, macro_name=macro_name) }}
-
+    {#/* Log and return Result */#}
+    {{ dbt_macro_polo.log_event(message="Resolved high water mark", level='INFO', model_id=this, status=max_value, macro_name=macro_name) }}
     {{ return("'" ~ max_value ~ "'") }}
 
 {% endmacro %}

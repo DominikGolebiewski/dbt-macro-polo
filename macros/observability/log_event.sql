@@ -40,7 +40,7 @@
             {%- set context_info = [] -%}
 
             {%- if model_id -%}
-                {# Convert relation objects to strings #}
+                {#-- Convert relation object to string otherwsie it breaks the log output when model_id is this is used as a dictionary in below context --#}
                 {%- set model_id_str = model_id | string -%}
                 {%- do context_info.append(colors['DEBUG'] ~ model_id_str ~ r) -%}
             {%- endif -%}
