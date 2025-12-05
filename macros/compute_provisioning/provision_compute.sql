@@ -19,6 +19,10 @@
         {{ return(none) }}
     {% endif %}
 
+    {#/* Normalise sizes */#}
+    {% set incremental = incremental_size | trim | lower %}
+    {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
+
     {#/* Get warehouse prefix */#}
     {% set warehouse_prefix = infrastructure_definition.get('environment_context', {}).get(target.name, {}).get('warehouse_name_prefix', none) %}
 
@@ -30,7 +34,7 @@
 
     {#/* Validate requested sizes */#}
     {% set allowed_sizes = infrastructure_definition.get('allowed_sizes', []) %}
-    {% set invalid_requested_sizes = dbt_macro_polo._validate_compute_sizes(incremental_size, fullrefresh_size, allowed_sizes) %}
+    {% set invalid_requested_sizes = dbt_macro_polo._validate_compute_sizes(incremental, fullrefresh, allowed_sizes) %}
 
     {% if invalid_requested_sizes != [] %}
         {% set msg = "Configuration Error: Requested size(s) not in configured allowed_sizes list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ allowed_sizes %}
@@ -39,7 +43,7 @@
     {% endif %}
 
     {#/* Determine size suffix based on run context */#}
-    {% set size_suffix = dbt_macro_polo._determine_compute_size(incremental_size, fullrefresh_size) %}
+    {% set size_suffix = fullrefresh if dbt_macro_polo.should_full_refresh() else incremental %}
 
     {#/* Cache handling */#}
     {% set state_key = '_macro_polo_provision_compute_' ~  warehouse_prefix ~ '_' ~ size_suffix %}
