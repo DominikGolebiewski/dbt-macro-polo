@@ -20,9 +20,9 @@
     {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
     {% set clean_model_id = this | replace('.', '_') %}
 
-    {{ do macro_polo.log_event(message="Clean model id: " ~ clean_model_id, level='DEBUG', model_id=this, macro_name=macro_name) }}
-    {{ do macro_polo.log_event(message="Clean column name: " ~ column_name, level='DEBUG', model_id=this, macro_name=macro_name) }}
-    {{ do macro_polo.log_event(message="Clean predicate: " ~ clean_predicate, level='DEBUG', model_id=this, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Clean model id: " ~ clean_model_id, level='DEBUG', model_id=this, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Clean column name: " ~ column_name, level='DEBUG', model_id=this, macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Clean predicate: " ~ clean_predicate, level='DEBUG', model_id=this, macro_name=macro_name) }}
 
     {% set state_key = '_macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ clean_predicate %}
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
