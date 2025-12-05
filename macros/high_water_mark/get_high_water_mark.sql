@@ -28,7 +28,7 @@
     {% set warehouse = dbt_macro_polo.provision_compute(warehouse_size) %}
 
     {#-- 4. Build Query --#}
-    {% set query = dbt_macro_polo._build_hwm_query(column_name, relation, predicate) %}
+    {% set query = dbt_macro_polo._build_hwm_query(column_name, predicate) %}
 
     {#-- 5. Execute Query --#}
     {% set result = dbt_macro_polo.execute_query_with_warehouse(query, warehouse) %}
