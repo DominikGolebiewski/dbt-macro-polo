@@ -4,7 +4,8 @@
 
 {% macro default___get_adaptive_config(model, this, operation, macro_name) %}
 
-    {% set model_id = this.schema ~ "." ~ this.name %}
+    {% set macro_name = dbt_macro_polo.validate_macro_polo_var() %}
+
     {% set global_config = var('macro_polo', {}).get('adaptive_compute', {}) %}
     {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
 

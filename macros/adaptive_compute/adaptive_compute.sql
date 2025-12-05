@@ -1,9 +1,4 @@
 {% macro adaptive_compute(operation='build') %}
-    {#
-    Entry point for adaptive compute.
-    Adjusts warehouse size based on time schedules and upstream volume.
-    Dispatches to adapter implementation.
-    #}
     {{ return(adapter.dispatch('adaptive_compute', 'dbt_macro_polo')(operation)) }}
 {% endmacro %}
 
@@ -11,19 +6,14 @@
 
     {% set macro_name = 'adaptive_compute' %}
 
-    {% if this is not defined or not this %}
-        {% set msg = "Configuration Error: provision_compute macro requires a valid model context. The 'this' variable is not defined. This macro is intended for model/materialisation execution only." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name, model_id='unknown_model') }}
-        {{ return(none) }}
-    {% endif %}
-    {% set model_id = this.schema ~ "." ~ this.name %}
-
-    {# 1. Pre-flight Checks #}
-    {% if not dbt_macro_polo._validate_adaptive_inputs(this, operation, macro_name) %}
+    {#/* Validate operation */#}
+    {% if operation not in ['build', 'append', 'prune'] %}
+        {% set msg = "Invalid operation: " ~ operation %}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
-    {# 2. Configuration & Enablement #}
+    {#/* Get adaptive config */#}
     {% set model_config = dbt_macro_polo._get_adaptive_config(model, this, operation, macro_name) %}
     {% if not model_config %}
         {{ return(none) }}

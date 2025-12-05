@@ -5,14 +5,7 @@
 {% macro default___get_infrastructure_config() %}
     
     {% set macro_name = '_get_infrastructure_config' %}
-
-    {% if var('macro_polo', {}) == {} %}
-        {% set msg = "Configuration Error (dbt_project.yml): macro_polo must be defined in project variable." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name) }}
-        {{ return({}) }}
-    {% endif %}
-
-    {% set macro_polo = var('macro_polo', {}) %}
+    {% set macro_polo = dbt_macro_polo.validate_macro_polo_var() %}
     
     {% if 'infrastructure_definition' not in macro_polo %}
         {% set msg = "Configuration Error (dbt_project.yml): infrastructure_definition must be defined in macro_polo project variable." %}
