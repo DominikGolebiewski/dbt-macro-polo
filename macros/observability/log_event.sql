@@ -1,14 +1,4 @@
 {% macro log_event(message, level='INFO', model_id=none, status=none, macro_name=none) %}
-    {#
-    Logs an event to the console/log with formatted output and colors.
-
-    Args:
-        message (str): The message to log.
-        level (str, optional): Log level ('DEBUG', 'INFO', 'WARN', 'ERROR'). Defaults to 'INFO'.
-        model_id (str, optional): Identifier for the model context.
-        status (str, optional): Status string to display right-aligned.
-        macro_name (str, optional): Name of the calling macro.
-    #}
     {{ return(adapter.dispatch('log_event', 'dbt_macro_polo')(message, level, model_id, status, macro_name)) }}
 {% endmacro %}
 
