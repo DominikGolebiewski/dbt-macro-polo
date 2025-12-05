@@ -20,7 +20,7 @@
     {#-- Logic for key generation --#}
     {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
     {% set clean_model_id = model_id | replace('.', '_') %}
-    {% set state_key = 'macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ '_' ~ clean_predicate %}
+    {% set state_key = '_macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ clean_predicate %}
     {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
     {{ break if state_value }}
 
