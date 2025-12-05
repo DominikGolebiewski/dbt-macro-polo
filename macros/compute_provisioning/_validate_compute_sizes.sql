@@ -15,7 +15,7 @@
 
 
     {#/* Before validation, convert allowed sizes to a list of lowercase trimmed strings */#}
-    {% set normalised_allowed_sizes = allowed_sizes | map(attribute='trim') | map(attribute='lower') | list %}
+    {% set normalised_allowed_sizes = allowed_sizes | map('trim') | map('lower') | list %}
 
     {#/* Validate requested sizes against allowed sizes */#}
     {% set invalid_requested_sizes = [] %}
