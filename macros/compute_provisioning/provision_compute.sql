@@ -35,14 +35,6 @@
     {#/* Determine size suffix based on run context */#}
     {% set size_suffix = dbt_macro_polo._determine_compute_size(incremental_size, fullrefresh_size) %}
 
-            {#/* Cache handling */#}
-            {#-- Logic for key generation --#}
-            {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
-            {% set clean_model_id = this | replace('.', '_') %}
-            {% set state_key = '_macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ clean_predicate %}
-            {% set max_value = dbt_macro_polo.get_runtime_state(state_key) %}
-
-
     {#/* Cache handling */#}
     {% set state_key = '_macro_polo_provision_compute_' ~  warehouse_prefix ~ '_' ~ size_suffix %}
     {% set warehouse_id = dbt_macro_polo.get_runtime_state(state_key) %}
