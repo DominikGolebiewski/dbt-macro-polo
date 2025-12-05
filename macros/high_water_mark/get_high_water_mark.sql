@@ -7,6 +7,7 @@
     {{ return(none) if not execute }}
 
     {% set macro_name = 'get_high_water_mark' %}
+    {% set max_value = none %}
 
     {#/* Validation */#}
     {% if not column_name %}
@@ -20,25 +21,27 @@
     {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
     {% set clean_model_id = this | replace('.', '_') %}
     {% set state_key = '_macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ clean_predicate %}
-    {% set state_value = dbt_macro_polo.get_runtime_state(state_key) %}
+    {% set max_value = dbt_macro_polo.get_runtime_state(state_key) %}
     
-    {#/* Return cached value if it exists */#}
-    {{ return("'" ~ state_value ~ "'") if state_value else none }}
+    {#/* Return cached value if it exists else calculate and cache it */#}
+    {% if max_value is none %}
 
-    {#/* Warehouse allocation */#}
-    {% set warehouse = dbt_macro_polo.provision_compute(warehouse_size) %}
+        {#/* Warehouse allocation */#}
+        {% set warehouse = dbt_macro_polo.provision_compute(warehouse_size) %}
 
-    {#/* Build Query */#}
-    {% set query = dbt_macro_polo._build_hwm_query(column_name, predicate) %}
+        {#/* Build Query */#}
+        {% set query = dbt_macro_polo._build_hwm_query(column_name, predicate) %}
 
-    {#/* Execute Query */#}
-    {% set result = dbt_macro_polo.execute_query_with_warehouse(query, warehouse) %}
+        {#/* Execute Query */#}
+        {% set result = dbt_macro_polo.execute_query_with_warehouse(query, warehouse) %}
 
-    {#/* Process Result */#}
-    {% set max_value = result.columns[0].values()[0] %}
+        {#/* Process Result */#}
+        {% set max_value = result.columns[0].values()[0] %}
 
-    {#/* Update Cache */#}
-    {{ dbt_macro_polo.set_runtime_state(state_key, max_value) }}
+        {#/* Update Cache */#}
+        {{ dbt_macro_polo.set_runtime_state(state_key, max_value) }}
+
+    {% endif %}
 
     {#/* Log and return Result */#}
     {{ dbt_macro_polo.log_event(message="Resolved high water mark", level='INFO', model_id=this, status=max_value, macro_name=macro_name) }}
