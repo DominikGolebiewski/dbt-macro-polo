@@ -19,9 +19,9 @@
     {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
 
     {#/* Get and validate environment configuration */#}
-    {% set warehouse_prefix = infrastructure_definition.environment_context.get(target.name).get('warehouse_name_prefix') %}
+    {% set warehouse_prefix = infrastructure_definition.get('environment_context').get(target.name).get('warehouse_name_prefix') %}
 
-    {# 3. Determine size suffix based on run context #}
+    {#/* Determine size suffix based on run context */#}
     {% set size_suffix = dbt_macro_polo._determine_compute_size(incremental_size, fullrefresh_size, this) %}
 
     {# Cache handling #}
