@@ -1,8 +1,8 @@
-{% macro set_runtime_state(key, value, model_id=none, macro_name=none) %}
-  {{ return(adapter.dispatch('set_runtime_state', 'dbt_macro_polo')(key, value, model_id, macro_name)) }}
+{% macro set_runtime_state(key, value) %}
+  {{ return(adapter.dispatch('set_runtime_state', 'dbt_macro_polo')(key, value)) }}
 {% endmacro %}
 
-{% macro default__set_runtime_state(key, value, model_id=none) %}
+{% macro default__set_runtime_state(key, value) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
     {% set macro_name = 'set_runtime_state' %}
