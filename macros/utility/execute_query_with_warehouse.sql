@@ -3,16 +3,7 @@
 {% endmacro %}
 
 {% macro default__execute_query_with_warehouse(query, warehouse_name) %}
-    {#
-    Executes a query using a specific warehouse and resets it afterwards.
 
-    Args:
-        query (str): The SQL query to execute.
-        warehouse_name (str): The name of the warehouse to use.
-
-    Returns:
-        Table: The result of the query.
-    #}
     {% if warehouse_name %}
         {% do run_query('use warehouse ' ~ warehouse_name) %}
     {% endif %}

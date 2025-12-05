@@ -1,36 +1,22 @@
 {% macro get_runtime_state(key) %}
-    {#
-    Retrieves a value from the runtime state (cache).
-
-    Args:
-        key (str): The key to retrieve.
-
-    Returns:
-        Any: The cached value or None.
-    #}
     {{ return(adapter.dispatch('get_runtime_state', 'dbt_macro_polo')(key)) }}
 {% endmacro %}
 
 {% macro default__get_runtime_state(key) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
+    {% set macro_name = 'get_runtime_state' %}
     {% set state = macro_polo.get('runtime_state', {}) %}
     {% set value = state.get(key) %}
 
     {% if value %}
-        {{ dbt_macro_polo.log_event(
-            message="Runtime state hit for key: " ~ key,
-            status=value | upper,
-            level='DEBUG',
-            macro_name='get_runtime_state'
-        ) }}
+        {% set msg = "Runtime state hit for key: " ~ key %}
+        {{ dbt_macro_polo.log_event(message=msg, status=value | upper,level='DEBUG',macro_name=macro_name) }}
     {% else %}
-        {{ dbt_macro_polo.log_event(
-            message="Runtime state miss for key: " ~ key,
-            level='DEBUG',
-            macro_name='get_runtime_state'
-        ) }}
+        {% set msg = "Runtime state miss for key: " ~ key %}
+        {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', macro_name=macro_name) }}
     {% endif %}
 
     {{ return(value) }}
+
 {% endmacro %}

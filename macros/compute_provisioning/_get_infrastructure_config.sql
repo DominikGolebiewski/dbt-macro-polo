@@ -5,6 +5,7 @@
 {% macro default___get_infrastructure_config(model_id, macro_name) %}
 
     {% set macro_polo = var('macro_polo', {}) %}
+    {% set macro_name = '_get_infrastructure_config' %}
     {% set infrastructure_def = macro_polo.get('infrastructure_definition', {}) %}
 
     {% if not infrastructure_def %}

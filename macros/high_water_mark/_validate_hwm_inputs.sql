@@ -3,6 +3,7 @@
 {% endmacro %}
 
 {% macro default___validate_hwm_inputs(column_name, model_id, macro_name) %}
+
     {% if not column_name %}
         {% set msg = "Configuration Error: column_name is required." %}
         {{ dbt_macro_polo.log_event(
@@ -13,5 +14,7 @@
             ) }}
         {{ return(false) }}
     {% endif %}
+
     {{ return(true) }}
+
 {% endmacro %}

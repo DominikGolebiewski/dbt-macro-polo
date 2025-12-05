@@ -3,16 +3,7 @@
 {% endmacro %}
 
 {% macro default__resolve_relation(model_name, context_relation=none) %}
-    {#
-    Resolves a relation object from a string or existing relation.
 
-    Args:
-        model_name (str or Relation): The model name or relation object.
-        context_relation (Relation, optional): The context relation (usually 'this') to use for database/schema defaults or fallback.
-
-    Returns:
-        Relation: The resolved relation object or None.
-    #}
     {% set relation = none %}
 
     {% if model_name is string %}

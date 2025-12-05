@@ -4,24 +4,18 @@
 
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
-    {% set macro_name = 'provision_compute' %}
     {% set macro_polo = var('macro_polo', {}) %}
-
-    {% if this is not defined or not this %}
-        {% set msg = "Configuration Error: provision_compute macro requires a valid model context. The 'this' variable is not defined." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name, model_id='unknown_model') }}
-        {{ return(none) }}
-    {% endif %}
+    {% set macro_name = 'provision_compute' %}
     {% set model_id = this.schema ~ "." ~ this.name %}
 
-    {# Validate input parameters #}
+    {#-- Validate input parameters --#}
     {% if not incremental_size %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
-    {# 1. Get and validate infrastructure configuration #}
+    {#-- 1. Get and validate infrastructure configuration --#}
     {% set infrastructure_def = dbt_macro_polo._get_infrastructure_config(model_id, macro_name) %}
     {% if not infrastructure_def %}
         {{ return(none) }}
