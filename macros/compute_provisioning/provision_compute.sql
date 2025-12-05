@@ -41,6 +41,7 @@
 
     {% if warehouse_id is none %}
 
+        {% set warehouse_id = warehouse_prefix ~ '_' ~ size_suffix %}
         {#/* Cache and return result */#}
         {% set msg = "Saving warehouse '" ~ warehouse_id ~ "' to runtime state with key '" ~ state_key ~ "'" %}
         {{ dbt_macro_polo.log_event(message=msg,level='DEBUG',macro_name=macro_name) }}
