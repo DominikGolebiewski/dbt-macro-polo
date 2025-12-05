@@ -39,11 +39,11 @@
 
             {%- set context_info = [] -%}
 
-            {#/* -- Breaks the log output when it model_id = this is used as a dictionary in below context
             {%- if model_id -%}
-                {%- do context_info.append(colors['DEBUG'] ~ model_id ~ r) -%}
+                {# Convert relation objects to strings #}
+                {%- set model_id_str = model_id | string -%}
+                {%- do context_info.append(colors['DEBUG'] ~ model_id_str ~ r) -%}
             {%- endif -%}
-            */#}
             
             {%- if macro_name -%}
                 {%- do context_info.append(colors['DEBUG'] ~ "(" ~ macro_name ~ ")" ~ r) -%}
@@ -55,7 +55,8 @@
             {# --- Right Aligned Status (Optional) --- #}
             {%- if status is not none -%}
                 {# Simple padding approximation #}
-                {%- set padding = 80 - (message | length) - (model_id | length if model_id else 0) - 25 -%}
+                {%- set model_id_len = model_id_str | length if model_id else 0 -%}
+                {%- set padding = 80 - (message | length) - model_id_len - 25 -%}
                 {%- set padding = padding if padding > 0 else 5 -%}
                 {%- set dots = colors['DEBUG'] ~ ('.' * padding) ~ r -%}
                 {%- set final_msg = final_msg ~ " " ~ dots ~ " [" ~ c ~ b ~ status ~ r ~ "]" -%}
