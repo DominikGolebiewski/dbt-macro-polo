@@ -45,6 +45,6 @@
 
     {#/* Log and return Result */#}
     {{ dbt_macro_polo.log_event(message="Resolved high water mark", level='INFO', model_id=this, status=max_value, macro_name=macro_name) }}
-    {{ return("'" ~ max_value ~ "'") }}
+    {{ return(max_value) }}
 
 {% endmacro %}

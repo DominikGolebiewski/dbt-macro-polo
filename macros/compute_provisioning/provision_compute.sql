@@ -8,21 +8,18 @@
     {% set macro_name = 'provision_compute' %}
     {% set model_id = this.schema ~ "." ~ this.name %}
 
-    {#-- Validate input parameters --#}
+    {#/* Validation */#}
     {% if not incremental_size %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=model_id, macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
-    {#-- 1. Get and validate infrastructure configuration --#}
-    {% set infrastructure_def = dbt_macro_polo._get_infrastructure_config(model_id, macro_name) %}
-    {% if not infrastructure_def %}
-        {{ return(none) }}
-    {% endif %}
+    {#/* Get infrastructure definitions */#}
+    {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
 
     {# 2. Get and validate environment configuration #}
-    {% set warehouse_prefix = dbt_macro_polo._get_environment_config(infrastructure_def, model_id, macro_name) %}
+    {% set warehouse_prefix = dbt_macro_polo._get_environment_config(infrastructure_definition , model_id, macro_name) %}
     {% if not warehouse_prefix %}
         {{ return(none) }}
     {% endif %}
@@ -46,7 +43,7 @@
     {% endif %}
 
     {# 4. Validate requested sizes #}
-    {% set allowed_sizes = infrastructure_def.get('allowed_sizes') %}
+    {% set allowed_sizes = infrastructure_definition.get('allowed_sizes') %}
     {% set is_valid_sizes = dbt_macro_polo._validate_compute_sizes(incremental_size, fullrefresh_size, allowed_sizes, model_id, macro_name) %}
     {% if not is_valid_sizes %}
         {{ return(none) }}
