@@ -11,7 +11,7 @@
 
     {#/* Validate requested sizes against allowed sizes */#}
     {% set invalid_requested_sizes = [] %}
-    {% for size, label in [(incremental, 'incremental'), (fullrefresh, 'fullrefresh')] %}
+    {% for size, label in [(incremental_size, 'incremental'), (fullrefresh_size, 'fullrefresh')] %}
         {% if size not in normalised_allowed_sizes %}
             {% do invalid_requested_sizes.append(label ~ ': ' ~ size) %}
         {% endif %}
