@@ -7,7 +7,7 @@
     {#/* Get and validate infrastructure definition */#}
     {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
 
-    {% set macro_polo = var('macro_polo', {}) %}
+    {% set macro_polo = dbt_macro_polo.validate_macro_polo_var() %}
     {% set macro_name = 'provision_compute' %}
     {% set model_id = this.schema ~ "." ~ this.name %}
     {% set warehouse_id = none %}
@@ -21,7 +21,7 @@
 
     {#/* Normalise sizes */#}
     {% set incremental = incremental_size | trim | lower %}
-    {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
+    {% set fullrefresh = incremental if fullrefresh_size is none else (fullrefresh_size | trim | lower)  %}
 
     {#/* Get warehouse prefix */#}
     {% set warehouse_prefix = infrastructure_definition.get('environment_context', {}).get(target.name, {}).get('warehouse_name_prefix', none) %}
@@ -42,7 +42,7 @@
         {{ return([]) }}
     {% endif %}
 
-    {#/* Determine size suffix based on run context */#}
+    {#/* Determine size suffix based on incremental or fullrefresh mode */#}
     {% set size_suffix = fullrefresh if dbt_macro_polo.should_full_refresh() else incremental %}
 
     {#/* Cache handling */#}
