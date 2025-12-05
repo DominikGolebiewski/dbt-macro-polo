@@ -11,7 +11,7 @@
 
     {% if value %}
         {% set msg = "Runtime state hit for key: " ~ key %}
-        {{ dbt_macro_polo.log_event(message=msg, status=value | upper,level='DEBUG',macro_name=macro_name) }}
+        {{ dbt_macro_polo.log_event(message=msg, status=value | upper, level='DEBUG', macro_name=macro_name) }}
     {% else %}
         {% set msg = "Runtime state miss for key: " ~ key %}
         {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', macro_name=macro_name) }}
