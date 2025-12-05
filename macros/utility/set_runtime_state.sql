@@ -9,6 +9,6 @@
     {% do macro_polo.get('runtime_state', {}).update({key: value}) %}
 
     {% set msg = "Saving value '" ~ value ~ "' to runtime state with key '" ~ key ~ "'" %}
-    {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', model_id='dupa', macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', model_id=this, macro_name=macro_name) }}
 
 {% endmacro %}
