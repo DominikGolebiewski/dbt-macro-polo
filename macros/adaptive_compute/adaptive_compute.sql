@@ -14,10 +14,12 @@
     {% endif %}
 
     {#/* Get adaptive config */#}
-    {% set model_config = dbt_macro_polo._get_adaptive_config(model, this, operation, macro_name) %}
-    {% if not model_config %}
+    {% set model_config = dbt_macro_polo._get_adaptive_config(operation) %}
+
+    
+    {#/* {% if not model_config %}
         {{ return(none) }}
-    {% endif %}
+    {% endif %} */#}
 
     {{ dbt_macro_polo.log_event(
         message="Starting adaptive compute",
