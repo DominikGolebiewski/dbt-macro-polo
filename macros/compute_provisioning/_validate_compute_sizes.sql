@@ -11,16 +11,18 @@
 
     {#/* If fullrefresh size is not provided, use incremental size instead */#}
     {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
+    
 
-    {#/* Validate requested sizes against allowed sizes. To make it case insensitive, itterate over both lists and compare 
-         each size to each other so that the trim and lower filters can be use. These filter are not allowed on lists or sets. */#}
+
+    {#/* Before validation, convert allowed sizes to a list of lowercase trimmed strings */#}
+    {% set normalised_allowed_sizes = allowed_sizes | map(attribute='trim') | map(attribute='lower') | list %}
+
+    {#/* Validate requested sizes against allowed sizes */#}
     {% set invalid_requested_sizes = [] %}
     {% for size, label in [(incremental, 'incremental'), (fullrefresh, 'fullrefresh')] %}
-        {% for allowed_size in allowed_sizes %}
-            {% if size  == allowed_size | trim | lower %}
-                {% do invalid_requested_sizes.append(label ~ ': ' ~ size) %}
-            {% endif %}
-        {% endfor %}
+        {% if size not in normalised_allowed_sizes %}
+            {% do invalid_requested_sizes.append(label ~ ': ' ~ size) %}
+        {% endif %}
     {% endfor %}
 
     {{ return(invalid_requested_sizes) }}
