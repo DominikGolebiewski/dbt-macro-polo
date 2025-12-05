@@ -10,21 +10,19 @@
     {% set incremental = incremental_size | trim | lower %}
 
     {#/* If fullrefresh size is not provided, use incremental size instead */#}
-    {% set fullrefresh = (fullrefresh_size or incremental_size) | trim | lower %}
+    {% set fullrefresh = (fullrefresh_size | trim | lower) or incremental %}
 
+    {#/* Validate requested sizes against allowed sizes. To make it case insensitive, itterate over both lists and compare 
+         each size to each other so that the trim and lower filters can be use. These filter are not allowed on lists or sets. */#}
     {% set invalid_requested_sizes = [] %}
     {% for size, label in [(incremental, 'incremental'), (fullrefresh, 'fullrefresh')] %}
-        {% if size not in allowed_sizes %}
-            {% do invalid_requested_sizes.append(label ~ ': ' ~ size) %}
-        {% endif %}
+        {% for allowed_size in allowed_sizes %}
+            {% if size  == allowed_size | trim | lower %}
+                {% do invalid_requested_sizes.append(label ~ ': ' ~ size) %}
+            {% endif %}
+        {% endfor %}
     {% endfor %}
 
-    {% if invalid_requested_sizes != [] %}
-        {% set msg = "Configuration Error: Requested size(s) not in configured allowed_sizes list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ allowed_sizes %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
-        {{ return(false) }}
-    {% endif %}
-
-    {{ return(true) }}
+    {{ return(invalid_requested_sizes) }}
 
 {% endmacro %}
