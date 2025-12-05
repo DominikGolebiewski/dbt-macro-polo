@@ -4,20 +4,20 @@
 
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
+    {#/* Get and validate infrastructure definition */#}
+    {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
+
     {% set macro_polo = var('macro_polo', {}) %}
     {% set macro_name = 'provision_compute' %}
     {% set model_id = this.schema ~ "." ~ this.name %}
     {% set warehouse_id = none %}
 
     {#/* Parameters validation */#}
-    {% if not incremental_size %}
+    {% if incremental_size is none or incremental_size == '' %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
-
-    {#/* Get and validate infrastructure definition */#}
-    {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
 
     {#/* Get warehouse prefix */#}
     {% set warehouse_prefix = dbt_macro_polo._get_warehouse_prefix(infrastructure_definition) %}
