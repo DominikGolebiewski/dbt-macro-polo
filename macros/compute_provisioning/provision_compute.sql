@@ -41,7 +41,7 @@
 
     {# 4. Validate requested sizes #}
     {% set allowed_sizes = infrastructure_definition.get('allowed_sizes') %}
-    {% set is_valid_sizes = dbt_macro_polo._validate_compute_sizes(incremental_size, fullrefresh_size, allowed_sizes, model_id, macro_name) %}
+    {% set is_valid_sizes = dbt_macro_polo._validate_compute_sizes(incremental_size, fullrefresh_size, allowed_sizes) %}
     {% if not is_valid_sizes %}
         {{ return(none) }}
     {% endif %}
