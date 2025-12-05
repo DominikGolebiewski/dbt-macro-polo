@@ -37,7 +37,7 @@
     {% set max_value = result.columns[0].values()[0] %}
 
     {#-- 7. Update Cache --#}
-    {{ dbt_macro_polo.set_runtime_state(state_key, max_value, model_id, macro_name) }}
+    {{ dbt_macro_polo.set_runtime_state(state_key, max_value) }}
 
     {% set msg = "Resolved high water mark" %}
     {{ dbt_macro_polo.log_event(message=msg, level='DEBUG', model_id=model_id, status=max_value | upper, macro_name=macro_name) }}
