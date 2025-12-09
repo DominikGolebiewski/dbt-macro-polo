@@ -21,15 +21,9 @@
         {{ return(none) }}
     {% endif %} */#}
 
-    {{ dbt_macro_polo.log_event(
-        message="Starting adaptive compute",
-        status=operation | upper,
-        level='INFO',
-        model_id=model_id,
-        macro_name=macro_name
-    ) }}
+    {{ dbt_macro_polo.log_event(message="Starting adaptive compute", level='INFO', model_id=this, status=operation | upper, macro_name=macro_name) }}
 
-    {# 3. Determine Context Configuration #}
+    {#/* Determine Context Configuration */#}
     {% set is_full_refresh = dbt_macro_polo.should_full_refresh() %}
     {% set strategies = model_config.get('execution_strategies', {}) %}
 
@@ -40,12 +34,8 @@
     {% endif %}
 
     {% if not active_config %}
-        {{ dbt_macro_polo.log_event(
-            message="No configuration found for context execution_strategies.",
-            level='WARN',
-            model_id=model_id,
-            macro_name=macro_name
-        ) }}
+        {% set msg = "No configuration found for context execution_strategies." %}
+        {{ dbt_macro_polo.log_event(message=msg, level='WARN', model_id=this, macro_name=macro_name) }}
     {% endif %}
 
     {# 4. Measure Volume #}
