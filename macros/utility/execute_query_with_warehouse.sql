@@ -1,16 +1,16 @@
-{% macro execute_query_with_warehouse(query, warehouse_name) %}
+{% macro execute_query_with_warehouse(query, warehouse_nam=none) %}
   {{ return(adapter.dispatch('execute_query_with_warehouse', 'dbt_macro_polo')(query, warehouse_name)) }}
 {% endmacro %}
 
-{% macro default__execute_query_with_warehouse(query, warehouse_name) %}
+{% macro default__execute_query_with_warehouse(query, warehouse_name=none) %}
 
-    {% if warehouse_name %}
+    {% if warehouse_name is not none %}
         {% do run_query('use warehouse ' ~ warehouse_name) %}
     {% endif %}
 
     {% set result = run_query(query) %}
 
-    {% if warehouse_name %}
+    {% if warehouse_name is not none %}
         {% do run_query('use warehouse ' ~ target.warehouse) %}
     {% endif %}
 

@@ -17,7 +17,6 @@
     {% endif %}
 
     {#/* Cache handling */#}
-    {#-- Logic for key generation --#}
     {% set clean_predicate = '_' ~ predicate | replace(' ', '_') if predicate is not none else '' %}
     {% set clean_model_id = this | replace('.', '_') %}
     {% set state_key = '_macro_polo_hwm_' ~ clean_model_id ~ '_' ~ column_name ~ clean_predicate %}
