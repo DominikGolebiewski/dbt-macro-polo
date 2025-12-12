@@ -16,11 +16,6 @@
     {#/* Get adaptive config */#}
     {% set model_config = dbt_macro_polo._get_adaptive_config(operation) %}
 
-
-    {#/* {% if not model_config %}
-        {{ return(none) }}
-    {% endif %} */#}
-
     {{ dbt_macro_polo.log_event(message="Starting adaptive compute", level='INFO', model_id=this, status=operation | upper, macro_name=macro_name) }}
 
     {#/* Determine Context Configuration */#}
@@ -39,16 +34,22 @@
     {% endif %}
 
     {#/* Measure Volume */#}
-
     {% set volume_monitors = model_config.get('volume_monitors', []) %}
-    
-    {% set volume = dbt_macro_polo._measure_volume_if_needed(volume_monitors, is_full_refresh) %}
-    {% if volume is none %}
+    {% set timestamp_column = model.config.get('timestamp_column', none) %}
+
+    {% if timestamp_column is none %}
+        {{ dbt_macro_polo.log_event(message="timestamp_column required for volume monitoring", level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
+    {% if volume_monitors is string or volume_monitors is not iterable or volume_monitors == [] %}
+        {{ dbt_macro_polo.log_event(message="volume_monitors must be a list. Got: " ~ volume_monitors, level='ERROR', model_id=this, macro_name=macro_name) }}
+        {{ return(none) }}
+    {% endif %}
+
+    {% set volume = dbt_macro_polo.measure_upstream_volume(volume_monitors, timestamp_column) %}
+
     {# 5. Sizing & Allocation #}
-    {% set volume_monitors = model_config.get('volume_monitors', []) %}
     {% set target_size = dbt_macro_polo._determine_target_size(active_config, volume, model_id, is_full_refresh, volume_monitors, macro_name) %}
 
     {% set warehouse = dbt_macro_polo.provision_compute(target_size) %}
