@@ -23,11 +23,13 @@
     {#/* Normalise sizes and set fullrefresh size if not provided */#}
     {% set incremental = incremental_size | trim | lower %}
     {% set fullrefresh = incremental if fullrefresh_size is none else (fullrefresh_size | trim | lower)  %}
+
+    {#/* Determine if fullrefresh mode is needed but only if fullrefresh size is provided and is different from incremental size */#}
     {% set is_fullrefresh = dbt_macro_polo.should_full_refresh() if (fullrefresh_size is not none and fullrefresh != incremental) else false %}
 
     {#/* Validate requested sizes */#}
     {% set allowed_sizes = infrastructure_definition.get('allowed_sizes', []) %}
-    {{ dbt_macro_polo._validate_compute_sizes(incremental, fullrefresh, allowed_sizes) }}
+    {% set is_valid_sizes = dbt_macro_polo._validate_compute_sizes(incremental, fullrefresh, allowed_sizes) %}
 
     {#/* Determine size suffix based on incremental or fullrefresh mode */#}
     {% set size_suffix = fullrefresh if is_fullrefresh else incremental %}

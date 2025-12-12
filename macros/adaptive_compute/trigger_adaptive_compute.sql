@@ -7,11 +7,17 @@
     {% set adaptive_config = var('macro_polo', {}).get('adaptive_compute', {}) %}
     {% set model_config = model.config.get('meta', {}).get('adaptive_compute', {}) %}
 
-    {% if adaptive_config.get('enabled', false) and model_config.get('enabled', false) %}
+    {% if not adaptive_config.get('enabled', false) %}
+        {{ dbt_macro_polo.log_event(message="Global adaptive compute not enabled", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
+        {{ return('disabled') }}
+    {% elif not model_config.get('enabled', false) %}
+        {{ dbt_macro_polo.log_event(message="Model adaptive compute not enabled", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
+        {{ return('disabled') }}
+    {% else %}
         {{ dbt_macro_polo.log_event(message="Triggering adaptive compute", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
         {{ dbt_macro_polo.adaptive_compute() }}
-    {% else %}
-        {{ dbt_macro_polo.log_event(message="Adaptive compute not enabled", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
     {% endif %}
+
+    {{ return('enabled') }}
     
 {% endmacro %}
