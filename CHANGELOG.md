@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Refactor**: Redesigned `provision_compute` macro set with 50% less code
+  - Consolidated `_get_infrastructure_config` and `_validate_compute_sizes` into single `_resolve_warehouse` private macro
+  - Implemented schema-driven configuration validation (declarative, DRY)
+  - Adopted fail-fast pattern with clear error messages
+  - Leveraged existing `set_runtime_state` utility for memoisation
+  - Improved code documentation with design principles
+
+### Removed
+- **Macros**: Removed `_get_infrastructure_config` (merged into `_resolve_warehouse`)
+- **Macros**: Removed `_validate_compute_sizes` (merged into `_resolve_warehouse`)
+
 ## [1.0.0] - 2025-11-21
 
 ### Added
