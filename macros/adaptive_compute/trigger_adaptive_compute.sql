@@ -9,15 +9,11 @@
 
     {% if not adaptive_config.get('enabled', false) %}
         {{ dbt_macro_polo.log_event(message="Global adaptive compute not enabled", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
-        {{ return('disabled') }}
     {% elif not model_config.get('enabled', false) %}
         {{ dbt_macro_polo.log_event(message="Model adaptive compute not enabled", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
-        {{ return('disabled') }}
     {% else %}
         {{ dbt_macro_polo.log_event(message="Triggering adaptive compute", level='INFO', model_id=this, macro_name='trigger_adaptive_compute') }}
         {{ dbt_macro_polo.adaptive_compute() }}
     {% endif %}
 
-    {{ return('enabled') }}
-    
 {% endmacro %}
