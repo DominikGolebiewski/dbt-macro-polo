@@ -42,6 +42,12 @@
         {{ return(none) }}
     {% endif %}
 
+    {% if environment_config.get('warehouse_name_prefix') is none or environment_config.get('warehouse_name_prefix') == '' %}
+        {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix value cannot be none or empty for environment: " ~ target.name %}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name) }}
+        {{ return(none) }}
+    {% endif %}
+
     {{ return(infrastructure_definition) }}
 
 {% endmacro %}

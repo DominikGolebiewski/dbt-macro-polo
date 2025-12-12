@@ -17,6 +17,12 @@
         {% endif %}
     {% endfor %}
 
-    {{ return(invalid_requested_sizes) }}
+    {% if invalid_requested_sizes != [] %}
+        {% set msg = "Configuration Error: Requested size(s) not in configured allowed_sizes list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ allowed_sizes %}
+        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
+        {{ return(false) }}
+    {% endif %}
+
+    {{ return(true) }}
 
 {% endmacro %}

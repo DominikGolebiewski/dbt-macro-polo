@@ -4,46 +4,36 @@
 
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
-    {#/* Get and validate infrastructure definition */#}
-    {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
-
-    {% set macro_polo = dbt_macro_polo.validate_macro_polo_var() %}
+    {#/* Set variables */#}
     {% set macro_name = 'provision_compute' %}
-    {% set model_id = this.schema ~ "." ~ this.name %}
     {% set warehouse_id = none %}
 
-    {#/* Parameters validation */#}
+    {#/* Get and validate infrastructure definition and validate macro_polo variable */#}
+    {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}
+    {% set macro_polo = dbt_macro_polo.validate_macro_polo_var() %}
+
+    {#/* Arguments validation */#}
+    {#/* Incremental size is the only required argument and cannot be empty or none */#}
     {% if incremental_size is none or incremental_size == '' %}
         {% set msg = "Configuration Error: incremental_size parameter is required" %}
         {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
         {{ return(none) }}
     {% endif %}
 
-    {#/* Normalise sizes */#}
+    {#/* Normalise sizes and set fullrefresh size if not provided */#}
     {% set incremental = incremental_size | trim | lower %}
     {% set fullrefresh = incremental if fullrefresh_size is none else (fullrefresh_size | trim | lower)  %}
-
-    {#/* Get warehouse prefix */#}
-    {% set warehouse_prefix = infrastructure_definition.get('environment_context', {}).get(target.name, {}).get('warehouse_name_prefix', none) %}
-
-    {% if warehouse_prefix is none or warehouse_prefix == '' %}
-        {% set msg = "Configuration Error (dbt_project.yml): warehouse_name_prefix value cannot be none or empty for environment: " ~ target.name %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name) }}
-        {{ return(none) }}
-    {% endif %}
+    {% set is_fullrefresh = dbt_macro_polo.should_full_refresh() if (fullrefresh_size is not none and fullrefresh != incremental) else false %}
 
     {#/* Validate requested sizes */#}
     {% set allowed_sizes = infrastructure_definition.get('allowed_sizes', []) %}
-    {% set invalid_requested_sizes = dbt_macro_polo._validate_compute_sizes(incremental, fullrefresh, allowed_sizes) %}
-
-    {% if invalid_requested_sizes != [] %}
-        {% set msg = "Configuration Error: Requested size(s) not in configured allowed_sizes list: " ~ invalid_requested_sizes ~ ". Configured sizes: " ~ allowed_sizes %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
-        {{ return([]) }}
-    {% endif %}
+    {{ dbt_macro_polo._validate_compute_sizes(incremental, fullrefresh, allowed_sizes) }}
 
     {#/* Determine size suffix based on incremental or fullrefresh mode */#}
-    {% set size_suffix = fullrefresh if dbt_macro_polo.should_full_refresh() else incremental %}
+    {% set size_suffix = fullrefresh if is_fullrefresh else incremental %}
+
+    {#/* Get warehouse prefix */#}
+    {% set warehouse_prefix = infrastructure_definition.get('environment_context', {}).get(target.name, {}).get('warehouse_name_prefix', none) %}
 
     {#/* Cache handling */#}
     {% set state_key = '_macro_polo_provision_compute_' ~  warehouse_prefix ~ '_' ~ size_suffix %}
@@ -60,7 +50,8 @@
     {% endif %}
 
     {#/* Log and return Result */#}
-    {{ dbt_macro_polo.log_event(message="Provisioned warehouse",model_id=this,status=warehouse_id | upper,macro_name=macro_name) }}
+    {{ dbt_macro_polo.log_event(message="Provisioned warehouse", model_id=this, status=warehouse_id | upper, macro_name=macro_name) }}
+    
     {{ return(warehouse_id) }}
 
 {% endmacro %}
