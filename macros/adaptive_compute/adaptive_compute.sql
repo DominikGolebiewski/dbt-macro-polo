@@ -38,8 +38,11 @@
         {{ dbt_macro_polo.log_event(message=msg, level='WARN', model_id=this, macro_name=macro_name) }}
     {% endif %}
 
-    {# 4. Measure Volume #}
-    {% set volume = dbt_macro_polo._measure_volume_if_needed(model_config, execute, is_full_refresh, model_id, model, macro_name) %}
+    {#/* Measure Volume */#}
+
+    {% set volume_monitors = model_config.get('volume_monitors', []) %}
+    
+    {% set volume = dbt_macro_polo._measure_volume_if_needed(volume_monitors, is_full_refresh) %}
     {% if volume is none %}
         {{ return(none) }}
     {% endif %}
