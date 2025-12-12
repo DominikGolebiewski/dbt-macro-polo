@@ -5,14 +5,6 @@
 {% macro default__adaptive_compute(operation='build') %}
 
     {% set macro_name = 'adaptive_compute' %}
-
-    {#/* Validate operation - Should this error out or just warn and continue ? Should probably move it down a bit */#}
-    {% if operation not in ['build', 'append', 'prune'] %}
-        {% set msg = "Invalid operation: " ~ operation %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
-        {{ return(none) }}
-    {% endif %}
-
     {#/* Get adaptive config */#}
     {% set model_config = dbt_macro_polo._get_adaptive_config(operation) %}
 

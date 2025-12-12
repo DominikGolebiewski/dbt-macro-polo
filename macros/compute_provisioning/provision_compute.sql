@@ -6,7 +6,6 @@
 
     {#/* Set variables */#}
     {% set macro_name = 'provision_compute' %}
-    {% set warehouse_id = none %}
 
     {#/* Get and validate infrastructure definition and validate macro_polo variable */#}
     {% set infrastructure_definition = dbt_macro_polo._get_infrastructure_config() %}

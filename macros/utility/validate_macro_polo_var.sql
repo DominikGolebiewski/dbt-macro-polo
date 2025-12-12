@@ -8,8 +8,8 @@
     {% set macro_polo = var('macro_polo', {}) %}
 
     {% if macro_polo == {} %}
-        {% set msg = "Configuration Error (dbt_project.yml): macro_polo must be defined in project variable." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', macro_name=macro_name) }}
+        {% set msg = "Configuration Error (dbt_project.yml): macro_polo must be defined in project variable. Macro Polo is disabled." %}
+        {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
         {{ return({}) }}
     {% endif %}
 
