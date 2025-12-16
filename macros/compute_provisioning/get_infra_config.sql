@@ -5,6 +5,7 @@
 {% macro default__get_infra_config(config_root) %}
 
     {% set macro_name = 'get_infra_config' %}
+    {% set main_config = {} %}
 
     {% if 'infrastructure_definition' in config_root %}
         {% set infra_definition = config_root.get('infrastructure_definition', {}) %}
@@ -15,7 +16,7 @@
             {% if target.name in env_ctx %}
                 {% set target_env = env_ctx.get(target.name, {}) %}
             {% else %}
-                {{ dbt_macro_polo.log_error("environment '" ~ target.name ~ "' not found in environment_context", macro_name) }}
+                {{ dbt_macro_polo.log_event("environment '" ~ target.name ~ "' not found in environment_context", macro_name,) }}
             {% endif %}
 
         {% else %}
