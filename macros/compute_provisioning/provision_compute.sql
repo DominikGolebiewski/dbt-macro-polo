@@ -16,6 +16,8 @@
     {% set inc_size = (incremental_size | trim | lower | default(config.defaults.incremental)) %}
     {% set fr_size  = (fullrefresh_size | trim | lower | default(config.defaults.full_refresh)) %}
 
+    {{ dbt_macro_polo.log_error("incremental_size: " ~ inc_size ~ ". fullrefresh_size: " ~ fr_size, macro_name) }}
+
     {% set allowed = config.allowed_sizes | map('lower') | map('trim') | list %}
     {% if inc_size not in allowed %}
         {{ dbt_macro_polo.log_error("Invalid incremental_size: " ~ inc_size ~ ". Allowed: " ~ allowed | join(', '), macro_name) }}
@@ -27,12 +29,7 @@
     {% set target_size = fr_size if (fr_size != inc_size and dbt_macro_polo.should_full_refresh()) else inc_size %}
     {% set warehouse_id = config.prefix ~ '_' ~ target_size %}
 
-    {{ dbt_macro_polo.log_event(
-        message="Provisioned warehouse",
-        status=warehouse_id | upper,
-        model_id=this,
-        macro_name=macro_name
-    ) }}
+    {{ dbt_macro_polo.log_event(message="Provisioned warehouse", status=warehouse_id | upper, model_id=this, macro_name=macro_name) }}
 
     {{ return(warehouse_id) }}
 
