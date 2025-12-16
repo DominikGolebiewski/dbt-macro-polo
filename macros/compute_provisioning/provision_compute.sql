@@ -8,7 +8,7 @@
     {% set config_root = dbt_macro_polo.validate_macro_polo_var() %}
 
     {% if config_root == {} %}
-        {% set msg = "macro_polo not defined in dbt_project.yml. Using target.warehouse for provisioning." %}
+        {% set msg = "macro_polo not defined. Using target.warehouse: " ~ target.warehouse %}
         {{ dbt_macro_polo.log_event(message=msg, level='WARN', model_id=this, macro_name=macro_name) }}
         {{ return(target.warehouse) }}
     {% endif %}
