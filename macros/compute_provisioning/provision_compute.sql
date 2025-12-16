@@ -6,17 +6,10 @@
 
     {% set macro_name = 'provision_compute' %}
     {% set config_root = dbt_macro_polo.validate_macro_polo_var() %}
-
-    {% if config_root == {} %}
-        {% set msg = "macro_polo not configured correctly. Using target.warehouse: " ~ target.warehouse %}
-        {{ dbt_macro_polo.log_event(message=msg, level='WARN', model_id=this, macro_name=macro_name) }}
-        {{ return(target.warehouse) }}
-    {% endif %}
-
     {% set config = dbt_macro_polo.get_infra_config(config_root) %}
 
-    {% if config == {} %}
-        {% set msg = "infrastructure_definition not configured correctly. Using target.warehouse: " ~ target.warehouse %}
+    {% if config_root == {} or config == {} %}
+        {% set msg = "macro_polo not configured correctly. Using target.warehouse: " ~ target.warehouse %}
         {{ dbt_macro_polo.log_event(message=msg, level='WARN', model_id=this, macro_name=macro_name) }}
         {{ return(target.warehouse) }}
     {% endif %}
