@@ -7,7 +7,7 @@
     {% set macro_name = 'get_infra_config' %}
     {% set message_prefix = "Configuration Warning (dbt_project.yml): " %}
 
-    {% set infra = dbt_macro_polo.require(config_root.get('infrastructure_definition'), message_prefix ~ "Provide 'infrastructure_definition' in macro_polo", macro_name) %}
+    {% set infra = dbt_macro_polo.require(config_root.get('infrastructure_definition'), message_prefix ~ "'infrastructure_definition' must be defined in macro_polo", macro_name) %}
     {{ return({}) if not infra }}
 
     {% set env_ctx = dbt_macro_polo.require(infra.get('environment_context'), message_prefix ~ "environment_context missing in infrastructure_definition", macro_name) %}
