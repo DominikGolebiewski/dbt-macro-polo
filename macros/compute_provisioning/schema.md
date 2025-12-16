@@ -2,27 +2,49 @@
 
 # provision_compute
 
-This macro dynamically allocates a Snowflake warehouse based on specified size parameters and environment configuration. It includes caching functionality to optimise warehouse allocation across multiple calls.
+A production-ready macro that provisions Snowflake warehouses with intelligent size selection and load balancing based on execution mode and environment context.
 
 ## Overview
 
-The macro determines the appropriate warehouse size based on whether the model is running in incremental or full-refresh mode, and constructs a warehouse identifier using environment-specific prefixes.
+Dynamically allocates compute resources by determining the appropriate warehouse size for incremental vs. full-refresh operations. Supports advanced load balancing strategies to distribute workload across multiple warehouses.
 
 ## Arguments
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| incremental_size | Yes | The warehouse size to use for incremental runs. Must be one of the configured available sizes (typically xs, s, m, l) |
-| fullrefresh_size | No | The warehouse size to use for full-refresh runs. If not specified, defaults to the incremental_size value |
+| incremental_size | Yes | Warehouse size for incremental runs (e.g., 'xs', 's', 'm', 'l'). Must be in configured allowed_sizes |
+| fullrefresh_size | No | Warehouse size for full-refresh runs. Defaults to configured `full_refresh` default, otherwise `incremental_size` |
 
 ## Returns
 
-Returns a string containing the fully qualified warehouse identifier (e.g., "DEV_WH_XS", "PROD_WH_L").
+Fully qualified warehouse identifier string (e.g., `dev_wh_xs`, `prd_wh_l`, `dev_wh_xs_1`).
 
-## Configuration Requirements
+## Configuration
 
-The macro expects the following configuration in your `dbt_project.yml`:
+Add to your `dbt_project.yml` variable `macro_polo`.
 
+### Modern Configuration (Recommended)
+
+```yaml
+{%- raw -%}
+vars:
+  macro_polo:
+    compute:
+      environment: dev
+      allowed_sizes: ['xs', 's', 'm', 'l', 'xl']
+      # Optional: Intelligent Load Balancing
+      # Map sizes to pools of warehouses
+      warehouses:
+        xs: ['dev_wh_xs_1', 'dev_wh_xs_2']
+        s:  ['dev_wh_s']
+      # Optional: Default Strategy is 'prefix' if warehouses map is empty
+      defaults:
+        incremental: xs
+        full_refresh: s
+{%- endraw -%}
+```
+
+### Legacy Configuration (Supported)
 
 ```yaml
 {%- raw -%}
@@ -31,41 +53,27 @@ vars:
     infrastructure_definition:
       allowed_sizes: ['xs', 's', 'm', 'l']
       environment_context:
-          dev:
-              warehouse_name_prefix: dev_wh
-          prod:
-              warehouse_name_prefix: prd_wh
+        dev:
+          warehouse_name_prefix: dev_wh
 {%- endraw -%}
 ```
 
 ## Features
 
-- **Caching**: Implements caching to avoid redundant warehouse allocation calculations
-- **Environment Awareness**: Uses environment-specific configurations
-- **Size Validation**: Validates warehouse sizes against configured available options
-- **Logging**: Comprehensive logging for debugging and monitoring
-- **Full-refresh Detection**: Automatically detects full-refresh runs
+- **Intelligent Load Balancing**: Automatically distributes queries across a pool of warehouses if configured.
+- **Fail-Fast Validation**: Early parameter and configuration validation.
+- **Environment Isolation**: Target-specific warehouse allocation.
+- **Execution Mode Detection**: Automatic full-refresh detection with size switching and sensible defaults.
+- **Backwards Compatibility**: Supports legacy `infrastructure_definition` config.
 
-## Usage Example
-
-### Example Usage
+## Usage
 
 ```jinja
 {%- raw -%}
-pre-hook: "use warehouse {{ dbt_macro_polo.provision_compute(incremental_size='xs', fullrefresh_size='m') }}"
+{{ config(
+    pre_hook="use warehouse {{ dbt_macro_polo.provision_compute('xs', 'm') }}"
+) }}
 {%- endraw -%}
 ```
-
-## Error Handling
-
-The macro will raise errors in the following scenarios:
-- Missing incremental_size parameter
-- Invalid warehouse sizes specified
-- Missing or invalid environment configuration
-- Missing warehouse prefix configuration
-
-## Dependencies
-
-- Requires the `log_event` macro for debug and error logging
 
 {% enddocs %}
