@@ -3,50 +3,35 @@
 {% endmacro %}
 
 {% macro default__get_infra_config(config_root) %}
-
+    
     {% set macro_name = 'get_infra_config' %}
-    {% set main_config = {} %}
+    {% set message_prefix = "Configuration Warning (dbt_project.yml): " %}
 
-    {% if 'infrastructure_definition' in config_root %}
-        {% set infra_definition = config_root.get('infrastructure_definition', {}) %}
+    {% set infra = dbt_macro_polo._require(config_root.get('infrastructure_definition'), message_prefix ~ "Provide 'infrastructure_definition' in macro_polo", macro_name) %}
+    {{ return({}) if not infra }}
 
-        {% if 'environment_context' in infra_definition %}
-            {% set env_ctx = infra_definition.get('environment_context', {}) %}
+    {% set env_ctx = _require(infra.get('environment_context'), message_prefix ~ "environment_context missing in infrastructure_definition", macro_name) %}
+    {{ return({}) if not env_ctx }}
 
-            {% if target.name in env_ctx %}
-                {% set target_env = env_ctx.get(target.name, {}) %}
-            {% else %}
-                {% set msg = "Configuration Warning (dbt_project.yml): environment '" ~ target.name ~ "' not found in environment_context" %}
-                {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
-                {{ return({}) }}
-            {% endif %}
+    {% set target_env = dbt_macro_polo._require(env_ctx.get(target.name), message_prefix ~ "environment '" ~ target.name ~ "' not found in environment_context", macro_name) %}
+    {{ return({}) if not target_env }}
 
-        {% else %}
-            {% set msg = "Configuration Warning (dbt_project.yml): environment_context missing in infrastructure_definition" %}
-            {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
-            {{ return({}) }}
-        {% endif %}
+    {% set prefix = dbt_macro_polo._require(target_env.get('warehouse_name_prefix'), message_prefix ~ "warehouse_name_prefix missing for environment '" ~ target.name ~ "'", macro_name) %}
+    {{ return({}) if not prefix }}
 
-        {% set prefix = target_env.get('warehouse_name_prefix') %}
+    {{ return({
+        'environment': target.name,
+        'allowed_sizes': infra.get('allowed_sizes', ['xs', 's', 'm', 'l']),
+        'default_size': 'xs',
+        'prefix': prefix
+    }) }}
+{% endmacro %}
 
-        {% if not prefix %}
-            {% set msg = "Configuration Warning (dbt_project.yml): warehouse_name_prefix missing for environment '" ~ target.name ~ "'" %}
-            {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
-            {{ return({}) }}
-        {% endif %}
-
-        {% set main_config = {
-            'environment': target.name,
-            'allowed_sizes': infra_definition.get('allowed_sizes', ['xs', 's', 'm', 'l']),
-            'default_size': 'xs', 
-            'prefix': prefix
-        } %}
+{% macro _require(value, message, macro_name) %}
+    {% if value %}
+        {{ return(value) }}
     {% else %}
-        {% set msg = "Configuration Warning (dbt_project.yml): Provide 'infrastructure_definition' in macro_polo" %}
-        {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
-        {{ return({}) }}
+        {{ dbt_macro_polo.log_event(message=message, level='WARN', macro_name=macro_name) }}
+        {{ return(none) }}
     {% endif %}
-
-    {{ return(main_config) }}
-
 {% endmacro %}
