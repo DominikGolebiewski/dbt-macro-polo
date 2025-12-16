@@ -1,17 +1,16 @@
-{% macro _get_compute_config() %}
-    {{ return(adapter.dispatch('_get_compute_config', 'dbt_macro_polo')()) }}
+{% macro get_infra_config(config_root) %}
+    {{ return(adapter.dispatch('get_infra_config', 'dbt_macro_polo')(config_root)) }}
 {% endmacro %}
 
-{% macro default___get_compute_config() %}
+{% macro default__get_infra_config(config_root) %}
 
-    {% set macro_name = '_get_compute_config' %}
-    {% set config_root = dbt_macro_polo.validate_macro_polo_var() %}
+    {% set macro_name = 'get_infra_config' %}
 
     {% if 'infrastructure_definition' in config_root %}
-        {% set infra_config = config_root.get('infrastructure_definition', {}) %}
+        {% set infra_definition = config_root.get('infrastructure_definition', {}) %}
 
-        {% if 'environment_context' in infra_config %}
-            {% set env_ctx = infra_config.get('environment_context', {}) %}
+        {% if 'environment_context' in infra_definition %}
+            {% set env_ctx = infra_definition.get('environment_context', {}) %}
 
             {% if target.name in env_ctx %}
                 {% set target_env = env_ctx.get(target.name, {}) %}
@@ -31,7 +30,7 @@
 
         {% set main_config = {
             'environment': target.name,
-            'allowed_sizes': infra_config.get('allowed_sizes', ['xs', 's', 'm', 'l']),
+            'allowed_sizes': infra_definition.get('allowed_sizes', ['xs', 's', 'm', 'l']),
             'default_size': 'xs', 
             'prefix': prefix
         } %}

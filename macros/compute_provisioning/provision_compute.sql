@@ -5,7 +5,8 @@
 {% macro snowflake__provision_compute(incremental_size, fullrefresh_size=none) %}
 
     {% set macro_name = 'provision_compute' %}
-    {% set config = dbt_macro_polo._get_compute_config() %}
+    {% set config_root = dbt_macro_polo.validate_macro_polo_var() %}
+    {% set config = dbt_macro_polo.get_infra_config(config_root) %}
 
     {% if not incremental_size %}
         {% set msg = "incremental_size not defined. Defualting to: " ~ config.default_size ~ " for environment: " ~ target.name %}
