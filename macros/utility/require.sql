@@ -1,5 +1,5 @@
-{% macro _require(value, message, macro_name) %}
-    {{ return(adapter.dispatch('_require', 'dbt_macro_polo')(value, message, macro_name)) }}
+{% macro require(value, message, macro_name) %}
+    {{ return(adapter.dispatch('require', 'dbt_macro_polo')(value, message, macro_name)) }}
 {% endmacro %}
 
 {% macro default__require(value, message, macro_name) %}
