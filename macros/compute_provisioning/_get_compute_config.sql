@@ -32,7 +32,7 @@
         {% set main_config = {
             'environment': target.name,
             'allowed_sizes': infra_config.get('allowed_sizes', ['xs', 's', 'm', 'l']),
-            'defaults': {'incremental': 'xs', 'full_refresh': 'xs'}, 
+            'default_size': 'xs', 
             'prefix': prefix
         } %}
     {% else %}
@@ -40,5 +40,5 @@
     {% endif %}
 
     {{ return(main_config) }}
-    
+
 {% endmacro %}
