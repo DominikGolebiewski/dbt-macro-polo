@@ -6,7 +6,7 @@
 
     {% set macro_name = 'provision_compute' %}
     {% set config_root = dbt_macro_polo.validate_macro_polo_var() %}
-    {% set config = dbt_macro_polo.get_infra_config(config_root) %}
+    {% set config = dbt_macro_polo._get_infra_config(config_root) %}
 
     {% if config_root == {} or config == {} %}
         {% set msg = "macro_polo not configured correctly. Using target.warehouse: " ~ target.warehouse %}

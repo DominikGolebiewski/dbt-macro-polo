@@ -5,14 +5,7 @@
 {% macro default__validate_macro_polo_var() %}
 
     {% set macro_name = 'validate_macro_polo_var' %}
-    {% set macro_polo = var('macro_polo', {}) %}
-
-    {% if macro_polo == {} %}
-        {% set msg = "Configuration Warning (dbt_project.yml): macro_polo must be defined in project variable. Macro Polo is disabled." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='WARN', macro_name=macro_name) }}
-        {{ return({}) }}
-    {% endif %}
-
+    {% set macro_polo = dbt_macro_polo.require(var('macro_polo', {}), "macro_polo must be defined in project variable. Macro Polo is disabled.", macro_name) %}
     {{ return(macro_polo) }}
 
 {% endmacro %}
