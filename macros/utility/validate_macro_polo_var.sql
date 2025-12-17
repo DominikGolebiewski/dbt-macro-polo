@@ -6,6 +6,6 @@
 
     {% set macro_name = 'validate_macro_polo_var' %}
     {% set macro_polo = dbt_macro_polo.require(var('macro_polo'), "macro_polo must be defined in project variable. Macro Polo is disabled.", macro_name) %}
-    {{ return(macro_polo if macro_polo is not none else {}) }}
+    {{ return(macro_polo | default({})) }}
 
 {% endmacro %}
