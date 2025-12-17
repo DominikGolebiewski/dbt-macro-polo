@@ -12,7 +12,7 @@
     {% set env_ctx = dbt_macro_polo.require(infra.get('environment_context'), message_prefix ~ "environment_context missing in infrastructure_definition", macro_name) if infra %}
     {% set allowed_sizes = dbt_macro_polo.require(infra.get('allowed_sizes'), message_prefix ~ "allowed_sizes must be defined in infrastructure_definition", macro_name) if infra %}
     {% set target_env = dbt_macro_polo.require(env_ctx.get(target.name), message_prefix ~ "environment '" ~ target.name ~ "' not found in environment_context", macro_name) if env_ctx %}
-    {% set prefix = dbt_macro_polo.require(target_env.get('warehouse_name_prefix'), message_prefix ~ "warehouse_name_prefix must be defined for environment '" ~ target.name ~ "'", macro_name) if target_env %}
+    {% set prefix = dbt_macro_polo.require(target_env.get('warehouse_name_prefix'), message_prefix ~ "warehouse_name_prefix not defined or empty for environment '" ~ target.name ~ "'", macro_name) if target_env %}
 
     {#-- Return empty dict if any validation failed, otherwise return proper config #}
     {% if not infra or not env_ctx or not allowed_sizes or not target_env or not prefix %}

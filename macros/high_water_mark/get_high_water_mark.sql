@@ -9,11 +9,9 @@
     {% set macro_name = 'get_high_water_mark' %}
     {% set max_value = none %}
 
-    {#/* Validation */#}
+    {#-- Validation #}
     {% if not column_name %}
-        {% set msg = "Configuration Error: column_name is required." %}
-        {{ dbt_macro_polo.log_event(message=msg, level='ERROR', model_id=this, macro_name=macro_name) }}
-        {{ return(none) }}
+        {{ dbt_macro_polo.log_event(message="Configuration Error: column_name is required.", level='ERROR', model_id=this, macro_name=macro_name) }}
     {% endif %}
 
     {#/* Cache handling */#}
