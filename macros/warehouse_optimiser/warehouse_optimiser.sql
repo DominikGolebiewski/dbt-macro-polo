@@ -27,7 +27,7 @@
             model_id="\n\n In model: " ~ model_id, 
             level='WARN'
         ) }}
-        {{ return(false) }}
+        {{ return('') }}
     {% endif %}
 
     {# Get and validate configurations #}
