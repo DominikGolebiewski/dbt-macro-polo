@@ -25,7 +25,7 @@
             ~ "\n\n Received: \n   materialized: " ~ model.config.get('materialized', 'undefined') 
             ~ "\n   incremental_strategy: " ~ model.config.get('incremental_strategy', 'undefined'),
             model_id="\n\n In model: " ~ model_id, 
-            level='ERROR'
+            level='WARN'
         ) }}
         {{ return(false) }}
     {% endif %}
