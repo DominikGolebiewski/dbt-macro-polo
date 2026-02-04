@@ -94,7 +94,11 @@
             select count(*) as row_count
             from {{ upstream_relation }}
             {% if target_exists and timestamp_column %}
-                where {{ timestamp_column }} > {{ maximum_timestamp }}
+                {% if var('selective_refresh', false) == false %}
+                    where {{ timestamp_column }} > {{ maximum_timestamp }}
+                {% else %}
+                    where {{ aa_utils.selective_refresh_filter() }}
+                {% endif %}
             {% endif %}
         )
         select 
