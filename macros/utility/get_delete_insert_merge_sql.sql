@@ -8,9 +8,17 @@
 
     {% if unique_key %}
         {{ dbt_macro_polo.handle_warehouse_switch('delete') }}
-        {% if unique_key is sequence and unique_key is not string %}
+        {% if var('selective_refresh', false) == true %}
+            {#--
+                Parameter-driven delete: the WHERE expression is built from CLI
+                vars by the project-provided filter macro, not from a join against
+                source. This makes the delete window equal to the reprocess window
+                even when upstream removed rows that source no longer covers.
+            --#}
             delete from {{ target }}
-            -- TODO: Add a comment to the query to indicate that it is a delete operation
+            where {{ dbt_macro_polo.polo_selective_refresh_filter() }};
+        {% elif unique_key is sequence and unique_key is not string %}
+            delete from {{ target }}
             using {{ source }}
             where (
                 {% for key in unique_key %}
