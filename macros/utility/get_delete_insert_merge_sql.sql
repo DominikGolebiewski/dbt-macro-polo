@@ -8,8 +8,7 @@
 
     {% if unique_key %}
         {{ dbt_macro_polo.handle_warehouse_switch('delete') }}
-        {% if var('selective_refresh', false) == true
-              and config.get('meta', {}).get('selective_refresh_enabled', false) == true %}
+        {% if dbt_macro_polo.polo_is_selective_refresh() %}
             {#--
                 Parameter-driven delete: the WHERE expression is built from CLI
                 vars by the project-provided filter macro, not from a join against

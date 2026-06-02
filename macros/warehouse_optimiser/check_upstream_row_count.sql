@@ -102,7 +102,7 @@
             select count(*) as row_count
             from {{ upstream_relation }}
             {% if target_exists and timestamp_column %}
-                {% if var('selective_refresh', false) == false %}
+                {% if not dbt_macro_polo.polo_is_selective_refresh() %}
                     where {{ timestamp_column }} > {{ maximum_timestamp }}
                 {% else %}
                     where {{ dbt_macro_polo.polo_selective_refresh_filter(keys=keys, relation=upstream_name) }}
