@@ -19,6 +19,11 @@
                 opted in fall through to the standard sequence-key / in-clause
                 delete — protects against a global --vars selective_refresh=true
                 accidentally wiping rectangles in non-fact tables.
+
+                Gated on `meta.selective_refresh_enabled` so models that havent
+                opted in fall through to the standard sequence-key / in-clause
+                delete — protects against a global --vars selective_refresh=true
+                accidentally wiping rectangles in non-fact tables.
             --#}
             delete from {{ target }}
             where {{ dbt_macro_polo.polo_selective_refresh_filter() }};
