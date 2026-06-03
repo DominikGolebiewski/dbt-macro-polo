@@ -46,8 +46,14 @@
 
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
-            {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dependency, timestamp_column, warehouse, maximum_timestamp) -%}
-            {{ dbt_macro_polo.logging(message="Row count for " ~ dependency, model_id=model_id, status=rows) }}
+            {#-- Each entry is either a plain name (uses the model's default keys) or a
+                 mapping {name, keys} for per-upstream key resolution — needed when the
+                 upstreams mix business-key (e.g. staging) and surrogate-key (e.g.
+                 intermediary) tables, so each is counted with the keys it actually holds. --#}
+            {%- set dep_name = dependency.get('name') if dependency is mapping else dependency -%}
+            {%- set dep_keys = dependency.get('keys') if dependency is mapping else none -%}
+            {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dep_name, timestamp_column, warehouse, maximum_timestamp, dep_keys) -%}
+            {{ dbt_macro_polo.logging(message="Row count for " ~ dep_name ~ (" [keys=" ~ dep_keys ~ "]" if dep_keys else ""), model_id=model_id, status=rows) }}
             {%- set row_count.value = row_count.value + rows -%}
         {%- endfor -%}
         
@@ -63,11 +69,11 @@
     {{ return(row_count.value) }}
 {%- endmacro -%}
 
-{% macro check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp) %}
-    {{ return(adapter.dispatch('check_upstream_row_count', 'dbt_macro_polo')(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp)) }}
+{% macro check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none) %}
+    {{ return(adapter.dispatch('check_upstream_row_count', 'dbt_macro_polo')(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys)) }}
 {% endmacro %}
 
-{% macro default__check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp) %}
+{% macro default__check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none) %}
 
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('check_upstream_row_count') %}
@@ -78,7 +84,9 @@
     {%- set optimiser_config = var('warehouse_optimiser', {}) -%}
     {%- set global_optimisation_enabled = optimiser_config.get('enabled', false) -%}
 
-    {# Resolve upstream relation #}
+    {# Resolve upstream relation (keep the original name so the consumer can infer
+       this upstream's key type from its layer, e.g. stg_/int_/fact_ convention) #}
+    {%- set upstream_name = upstream_relation -%}
 
     {%- if '.' in upstream_relation -%}
         {%- set upstream_relation = source(upstream_relation.split('.')[0], upstream_relation.split('.')[1]) -%}
@@ -94,10 +102,10 @@
             select count(*) as row_count
             from {{ upstream_relation }}
             {% if target_exists and timestamp_column %}
-                {% if var('selective_refresh', false) == false %}
+                {% if not dbt_macro_polo.polo_is_selective_refresh() %}
                     where {{ timestamp_column }} > {{ maximum_timestamp }}
                 {% else %}
-                    where {{ aa_utils.selective_refresh_filter() }}
+                    where {{ dbt_macro_polo.polo_selective_refresh_filter(keys=keys, relation=upstream_name) }}
                 {% endif %}
             {% endif %}
         )
