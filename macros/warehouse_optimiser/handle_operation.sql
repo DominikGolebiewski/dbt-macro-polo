@@ -31,6 +31,14 @@
         {{ return('xs') }}
     {%- endif -%}
 
+    {# Adaptive ML recommendation. Precedence: full refresh > zero rows > adaptive > monitoring/scheduling > default.
+       Returns '' whenever adaptive mode is disabled or cannot decide, so the existing chain below is the fallback #}
+    {% set adaptive_size = dbt_macro_polo.handle_adaptive(model_id, query_operation, row_count) %}
+    {% if adaptive_size %}
+        {{ dbt_macro_polo.logging(message="Adaptive warehouse recommendation applied", model_id=model_id, status=adaptive_size | upper) }}
+        {{ return(adaptive_size) }}
+    {% endif %}
+
     {# Handle scheduling if configured #}
     {%- if operation_config and operation_config is mapping -%}
         {% set current_time = current_time or modules.datetime.datetime.now() %}

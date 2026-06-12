@@ -17,6 +17,7 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
   - [allocate_warehouse](#allocate_warehouse)
   - [get_max_timestamp](#get_max_timestamp)
   - [warehouse_optimiser](#warehouse_optimiser)
+  - [adaptive mode (ML)](#warehouse_optimiser--adaptive-mode-ml)
 <!-- - [Contributing](#contributing-) -->
 - [Resources](#resources-)
 
@@ -191,6 +192,46 @@ config:
 ```
 
 [View Full Documentation →](/macros/warehouse_optimiser/schema.md)
+</details>
+
+### warehouse_optimiser — adaptive mode (ML)
+
+This is a beta feature. Adaptive mode adds machine-learning based warehouse sizing to the warehouse_optimiser.
+
+> **Snowflake Only** - Learns from past runs (data volume, join/query complexity, execution outcomes) via a built-in telemetry table enriched with `account_usage.query_history`, trains a Snowflake Cortex ML classifier, and sizes the warehouse adaptively for each incoming batch.
+
+<details>
+<summary><b>Click to expand configuration & usage details</b></summary>
+
+#### Key Features
+- Telemetry capture of query parameters from every optimiser-enabled model run
+- SQL-only training via `SNOWFLAKE.ML.CLASSIFICATION` (`dbt run-operation polo_train_warehouse_model`)
+- Hybrid inference: precomputed per-model recommendations, optional live `!PREDICT` for deviating batches
+- Strictly additive precedence: `full refresh > zero rows > adaptive (ML) > monitoring thresholds > scheduling > default`
+- Never fails a run: any cold start, low confidence or error falls back to the existing configuration
+
+#### Basic Usage
+In your `dbt_project.yml`:
+```yaml
+on-run-end: [ "{{ dbt_macro_polo.polo_log_telemetry(results) }}" ]
+
+vars:
+  macro_polo:
+    warehouse_optimiser:
+      enabled: true
+      adaptive:
+        enabled: true
+```
+
+Then, once enough history has been collected:
+```bash
+dbt run-operation polo_train_warehouse_model --args '{dry_run: true}'  # inspect training data
+dbt run-operation polo_train_warehouse_model                          # train + publish recommendations
+```
+
+Subsequent runs of models with the `warehouse_optimiser()` pre-hook are sized adaptively.
+
+[View Full Documentation →](/macros/warehouse_optimiser/adaptive/schema.md)
 </details>
 
 <!-- #### Contributing 🤝

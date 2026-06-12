@@ -96,6 +96,10 @@
     
         {# Determine and allocate warehouse #}
         {% set warehouse_size = dbt_macro_polo.handle_operation(model_id, query_operation, active_config, has_on_dry_run_config, row_count) %}
+
+        {# Record the selected size per operation phase for adaptive telemetry (polo_log_telemetry) #}
+        {% do macro_polo.get('cache', {}).update({'_polo_selected_size_' ~ query_operation ~ '_' ~ model_id | replace('.', '_'): warehouse_size}) %}
+
         {% set warehouse = dbt_macro_polo.allocate_warehouse(warehouse_size) %}
 
         {{ dbt_macro_polo.logging(message="Final warehouse selection for " ~ query_operation | upper, model_id=model_id, status=warehouse | upper) }}

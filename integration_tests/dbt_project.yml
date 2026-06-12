@@ -22,17 +22,24 @@ dispatch:
   - macro_namespace: dbt
     search_order: [ 'dbt_macro_polo_integration_tests','dbt_macro_polo', 'dbt' ]
 
+# Exercises the adaptive telemetry write end to end in CI
+on-run-end: [ "{{ dbt_macro_polo.polo_log_telemetry(results) }}" ]
+
 vars:
   # DBT compatibility with legacy surrogate_key macro
   surrogate_key_treat_nulls_as_empty_strings: True
-  
-  # Macro Polo 
+
+  # Macro Polo
   macro_polo:
     cache: {}
     logging_level: debug
     warehouse_optimiser:
       enabled: true
       default_warehouse_size: xs
+      adaptive:
+        enabled: true
+        audit_schema: polo_audit_ci
+        live_predict_enabled: false
     warehouse_config:
       warehouse_size: [ 'xs', 's', 'm', 'l', 'xl', '2xl' ]
       environment:

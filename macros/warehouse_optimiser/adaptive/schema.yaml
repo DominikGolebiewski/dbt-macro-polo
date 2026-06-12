@@ -1,0 +1,84 @@
+version: 2
+
+macros:
+  - name: handle_adaptive
+    description: '{{ doc("warehouse_optimiser_adaptive") }}'
+    arguments:
+      - name: model_id
+        type: string
+        description: Unique identifier for the model (schema.name)
+      - name: query_operation
+        type: string
+        description: Type of operation being performed ('ctas', 'insert', 'delete')
+      - name: row_count
+        type: int
+        description: Incoming batch row count from upstream probing
+
+  - name: get_adaptive_config
+    description: >
+      Merges adaptive mode defaults with project-level vars and (optionally) model-level
+      meta overrides into a single configuration dictionary.
+    arguments:
+      - name: include_model_meta
+        type: boolean
+        description: Whether to apply model meta overrides (false outside node context, e.g. hooks and run-operations)
+
+  - name: extract_compile_features
+    description: >
+      Extracts compile-time query complexity features (join, CTE, union and window
+      function counts, query length, upstream count) from a model's raw SQL. Shared by
+      telemetry capture and live prediction so training and inference features match.
+    arguments:
+      - name: raw_code
+        type: string
+        description: The model's raw SQL (model.raw_code / node.raw_code)
+      - name: upstream_count
+        type: int
+        description: Number of upstream nodes (depends_on.nodes | length)
+
+  - name: load_adaptive_recommendations
+    description: >
+      Loads the per-model recommendations table produced by polo_train_warehouse_model,
+      once per dbt invocation (cached). Returns none when unavailable (cold start).
+    arguments:
+      - name: adaptive_config
+        type: dict
+        description: Adaptive configuration from get_adaptive_config
+
+  - name: predict_warehouse_size
+    description: >
+      Calls the trained SNOWFLAKE.ML.CLASSIFICATION model's !PREDICT function with the
+      current batch's features, wrapped in an exception-safe Snowflake Scripting block.
+      Returns {'size', 'confidence'} or none.
+    arguments:
+      - name: adaptive_config
+        type: dict
+        description: Adaptive configuration from get_adaptive_config
+      - name: features
+        type: dict
+        description: Feature values matching the training view columns
+
+  - name: polo_ensure_audit_table
+    description: >
+      Lazily creates the adaptive telemetry schema and audit table (idempotent, once per
+      invocation). Returns the fully qualified table name, or false when unavailable.
+
+  - name: polo_log_telemetry
+    description: >
+      on-run-end hook that writes one telemetry row per optimiser-enabled model (run
+      features, selected warehouse sizes, execution outcome) as a single batched,
+      exception-safe insert into the audit table.
+    arguments:
+      - name: results
+        type: list
+        description: The dbt on-run-end results context variable
+
+  - name: polo_train_warehouse_model
+    description: >
+      Run-operation that builds the labelled training view (telemetry joined to
+      account_usage.query_history), trains the Cortex ML classification model and
+      materialises the per-model recommendations table used by handle_adaptive.
+    arguments:
+      - name: dry_run
+        type: boolean
+        description: Build and report on the training view without training the model

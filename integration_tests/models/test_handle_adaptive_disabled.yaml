@@ -1,0 +1,12 @@
+version: 2
+
+models:
+- name: test_handle_adaptive_disabled
+  description: ""
+
+  config:
+    meta:
+      warehouse_optimiser:
+        enabled: true
+        adaptive:
+          enabled: false
