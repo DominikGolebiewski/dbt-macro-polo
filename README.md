@@ -205,6 +205,7 @@ This is a beta feature. Adaptive mode adds machine-learning based warehouse sizi
 
 #### Key Features
 - Telemetry capture of query parameters from every optimiser-enabled model run
+- Trains from your **existing production history** too: `training_source: telemetry | query_history | auto` — the `query_history` source mines past dbt runs straight from `account_usage.query_history` (via dbt's default query comment), so no telemetry warm-up is required
 - SQL-only training via `SNOWFLAKE.ML.CLASSIFICATION` (`dbt run-operation polo_train_warehouse_model`)
 - Hybrid inference: precomputed per-model recommendations, optional live `!PREDICT` for deviating batches
 - Strictly additive precedence: `full refresh > zero rows > adaptive (ML) > monitoring thresholds > scheduling > default`

@@ -75,10 +75,18 @@ macros:
 
   - name: polo_train_warehouse_model
     description: >
-      Run-operation that builds the labelled training view (telemetry joined to
-      account_usage.query_history), trains the Cortex ML classification model and
-      materialises the per-model recommendations table used by handle_adaptive.
+      Run-operation that builds the labelled training view from the configured
+      training_source (package telemetry, historical dbt runs mined from
+      account_usage.query_history via dbt's query comment, or both), trains the
+      Cortex ML classification model and materialises the per-model recommendations
+      table used by handle_adaptive.
     arguments:
       - name: dry_run
         type: boolean
         description: Build and report on the training view without training the model
+
+  - name: polo_get_graph_model_features
+    description: >
+      Collects compile-time complexity features and identity (node_id, model_id,
+      database/schema/alias) for every optimiser-enabled model in the current graph.
+      Used by the query_history training source to map historical runs onto models.

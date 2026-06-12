@@ -13,6 +13,7 @@
         'audit_table': 'warehouse_optimiser_runs',
         'recommendations_table': 'warehouse_optimiser_recommendations',
         'model_name': 'polo_warehouse_classifier',
+        'training_source': 'auto',
         'target_duration_seconds': 300,
         'confidence_threshold': 0.7,
         'deviation_threshold': 0.25,

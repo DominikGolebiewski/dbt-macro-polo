@@ -22,7 +22,13 @@ Adaptive mode is strictly additive: whenever it is disabled, untrained (cold sta
    - The `polo_log_telemetry(results)` on-run-end hook writes one row per optimiser-enabled model into `{database}.{audit_schema}.{audit_table}`: upstream/incoming row count, selected warehouse sizes per phase (ctas/delete/insert), compile-time complexity features (`join_count`, `cte_count`, `union_count`, `window_fn_count`, `query_length`, `upstream_count`, `column_count`), run status and execution time. The write is a single batched insert wrapped in an exception-safe block.
 
 2. **Training** (operator-invoked, scheduled e.g. weekly)
-   - `dbt run-operation polo_train_warehouse_model` joins the telemetry table to `account_usage.query_history` via the query tag and derives the **optimal size label** per run: upsize when the run spilled to storage or breached `target_duration_seconds`; downsize when it finished in under 25% of the target without spilling; otherwise keep the size used.
+   - `dbt run-operation polo_train_warehouse_model` builds a labelled training set and derives the **optimal size label** per run: upsize when the run spilled to storage or breached `target_duration_seconds`; downsize when it finished in under 25% of the target without spilling; otherwise keep the size used.
+   - **Training data sources** (`adaptive.training_source`):
+     - `telemetry` — only the package's audit table joined to `account_usage.query_history` via the JSON query tag. Exact features, but requires telemetry to have been collecting.
+     - `query_history` — **no telemetry needed**: historical dbt runs are mined directly from `account_usage.query_history` using dbt's default JSON query comment (`"node_id": "model...."`, enabled by default in dbt for years), so existing production history is usable immediately. Batch volume is proxied by `rows_inserted + rows_updated`, complexity features come from the current project graph, and column counts from `account_usage.columns`. Runs are grouped per model per session (one session covers the ctas/delete/insert phases of a run).
+     - `auto` (default) — both sources unioned; history rows already captured by telemetry (query tag `app=dbt_macro_polo`) are excluded so nothing is double counted. Telemetry naturally takes over as it accumulates.
+   - To leverage years of production history, raise `account_usage_lookback_days` (ACCOUNT_USAGE retains 365 days) and run the training operation against the same target environment that produced the history (the graph supplies each model's database/schema mapping).
+   - Caveat for the `query_history` source: it requires dbt query comments (on by default — only absent if your project sets `query-comment: null`), and models renamed since the historical runs won't match their old `node_id`.
    - A `SNOWFLAKE.ML.CLASSIFICATION` model is trained on the labelled view (`model_id` is included as a categorical feature so predictions are model-aware).
    - A per-model recommendations table is materialised with the predicted size, its confidence, and the p10/p50/p90 of the trained row-count range.
    - Use `--args '{dry_run: true}'` to build and inspect the training view and label distribution without training.
@@ -60,6 +66,7 @@ vars:
         audit_table: warehouse_optimiser_runs
         recommendations_table: warehouse_optimiser_recommendations
         model_name: polo_warehouse_classifier
+        training_source: auto           # telemetry | query_history | auto (default)
         target_duration_seconds: 300    # SLA used to label the optimal size
         confidence_threshold: 0.7       # minimum predicted-class probability
         deviation_threshold: 0.25       # widening of the trained p10-p90 row-count band
@@ -84,8 +91,10 @@ config:
 
 #### Rollout
 
-1. Set `adaptive.enabled: true` and add the `on-run-end` hook. Runs behave exactly as before while telemetry accumulates (inference falls back until trained).
-2. After `min_training_samples` runs have settled in `account_usage` (allow for latency), run `dbt run-operation polo_train_warehouse_model --args '{dry_run: true}'` and inspect the training view and label distribution.
+**Fast path (existing production history):** with `training_source: auto` (or `query_history`) you can train immediately from past runs — set `account_usage_lookback_days` to cover the period you want to learn from, run the dry-run to inspect the training set, then train. No telemetry warm-up needed.
+
+1. Set `adaptive.enabled: true` and add the `on-run-end` hook. Runs behave exactly as before; telemetry starts accumulating alongside any mined history.
+2. Run `dbt run-operation polo_train_warehouse_model --args '{dry_run: true}'` and inspect the training view, sample counts and label distribution. If you have no usable history, keep collecting telemetry until `min_training_samples` runs have settled in `account_usage` (allow for latency).
 3. Run `dbt run-operation polo_train_warehouse_model`. Subsequent dbt runs log `Adaptive warehouse size selected` / `Adaptive warehouse recommendation applied` and size warehouses from the model.
 4. Re-train on a schedule (e.g. weekly) from your orchestrator so recommendations track drift.
 
