@@ -53,14 +53,17 @@
     {% endif %}
 
     {# Hybrid deviation check: use the precomputed recommendation while the incoming
-       batch looks like the batches the model was trained on #}
+       batch looks like the batches the model was trained on. Coerce to float first -
+       Snowflake numerics arrive as decimal.Decimal, which cannot be multiplied by a
+       Python float (deviation_threshold) and would raise mid-hook. #}
     {% set ns = namespace(candidate='') %}
-    {% set deviation = adaptive_config.deviation_threshold %}
+    {% set deviation = adaptive_config.deviation_threshold | float %}
     {% set in_range = true %}
     {% if rec.p10 is not none and rec.p90 is not none %}
-        {% set lower_bound = rec.p10 * (1 - deviation) %}
-        {% set upper_bound = rec.p90 * (1 + deviation) %}
-        {% set in_range = row_count >= lower_bound and row_count <= upper_bound %}
+        {% set lower_bound = (rec.p10 | float) * (1.0 - deviation) %}
+        {% set upper_bound = (rec.p90 | float) * (1.0 + deviation) %}
+        {% set rc = row_count | float %}
+        {% set in_range = rc >= lower_bound and rc <= upper_bound %}
     {% endif %}
 
     {% if in_range %}
