@@ -216,7 +216,10 @@
                     + coalesce(bytes_spilled_to_remote_storage, 0)) as spill_bytes,
                 {{ used_ordinal_case }} as used_ordinal,
                 sum(coalesce(rows_inserted, 0) + coalesce(rows_updated, 0)) as rows_processed,
-                boolor_agg(query_type = 'CREATE_TABLE_AS_SELECT') as is_full_refresh
+                {# A bare CTAS is NOT a full refresh: dbt's delete+insert and merge
+                   incremental strategies build a temp table via CREATE_TABLE_AS_SELECT too.
+                   The reliable signal is incremental DML - a full rebuild has none. #}
+                not boolor_agg(query_type in ('DELETE', 'INSERT', 'MERGE')) as is_full_refresh
             from snowflake.account_usage.query_history
             where start_time >= dateadd(day, -{{ lookback }}, current_timestamp())
               and execution_status = 'SUCCESS'
