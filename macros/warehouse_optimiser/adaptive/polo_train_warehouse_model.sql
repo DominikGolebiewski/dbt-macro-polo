@@ -11,11 +11,13 @@
    - 'telemetry':      package audit table joined to account_usage.query_history via
                        the JSON query_tag (exact features captured at run time)
    - 'query_history':  historical dbt runs mined directly from
-                       account_usage.query_history via dbt's default JSON query
-                       comment ("node_id": ...) - no telemetry required. Batch volume
-                       is proxied by rows_inserted/rows_updated; complexity features
-                       come from the current graph; column counts from
-                       account_usage.columns
+                        account_usage.query_history via dbt's default JSON query
+                        comment ("node_id": ...) - no telemetry required. If that
+                        comment is unavailable (e.g. a project overrides query-comment),
+                        set adaptive.history_query_tag_pattern to map runs back via the
+                        session query_tag instead. Batch volume is proxied by
+                        rows_inserted/rows_updated; complexity features come from the
+                        current graph; column counts from account_usage.columns
    - 'auto' (default): both, unioned. Runs already captured by telemetry (tagged with
                        app=dbt_macro_polo) are excluded from the history source so
                        nothing is double counted
@@ -109,6 +111,16 @@
     {% set fast_duration = target_duration * 0.25 %}
     {% set max_ordinal = ordered_sizes | length %}
 
+    {# Optional query_tag fallback for the history source. When dbt's default JSON
+       query comment (node_id) is unavailable (e.g. a project overrides query-comment),
+       historical runs can still be mapped to models via a conventional session
+       query_tag. history_query_tag_pattern is rendered per model with the placeholders
+       {database} {schema} {identifier} (lowercased graph values) to reconstruct the tag
+       each run carried, then matched exactly. Off (none) preserves comment-only mapping. #}
+    {% set tag_pattern = adaptive_config.history_query_tag_pattern %}
+    {% set use_tag_fallback = ns.use_history and tag_pattern is not none and (tag_pattern | string | trim) != '' %}
+    {% set tag_prefix = (tag_pattern | string).split('{')[0] if use_tag_fallback else '' %}
+
     {# Shared SQL fragments: query_history size name -> ordinal, label heuristic
        (upsize on spilling or SLA breach, downsize when comfortably fast) #}
     {% set used_ordinal_case %}
@@ -136,7 +148,8 @@
         with
         {% if ns.use_history %}
         graph_features (node_id, model_id, join_count, cte_count, union_count, window_fn_count,
-                        query_length, upstream_count, table_catalog, table_schema, table_name) as (
+                        query_length, upstream_count, table_catalog, table_schema, table_name
+                        {%- if use_tag_fallback %}, expected_tag{% endif %}) as (
             select * from values
             {%- for entry in graph_features %}
             ('{{ entry.node_id | replace("'", "''") }}',
@@ -145,7 +158,11 @@
              {{ entry.features.window_fn_count }}, {{ entry.features.query_length }}, {{ entry.features.upstream_count }},
              upper('{{ entry.database | replace("'", "''") }}'),
              upper('{{ entry.schema | replace("'", "''") }}'),
-             upper('{{ entry.alias | replace("'", "''") }}')){{ ',' if not loop.last }}
+             upper('{{ entry.alias | replace("'", "''") }}')
+             {%- if use_tag_fallback -%}
+             , '{{ (tag_pattern | string | replace('{database}', entry.database | lower) | replace('{schema}', entry.schema | lower) | replace('{identifier}', entry.alias | lower)) | replace("'", "''") }}'
+             {%- endif -%}
+             ){{ ',' if not loop.last }}
             {%- endfor %}
         ),
         column_counts as (
@@ -155,12 +172,20 @@
               and table_catalog in ({{ "'" ~ model_databases | join("', '") ~ "'" }})
             group by 1, 2, 3
         ),
-        {# Historical dbt runs identified by dbt's default JSON query comment.
+        {# Historical dbt runs mapped to a model by dbt's default JSON query comment
+           ("node_id": ...) or, when use_tag_fallback is on, by the session query_tag.
+           run_key holds whichever identifier was found; its value space is disjoint
+           (a node unique_id vs a reconstructed tag) so it doubles as the grouping key.
            One training row per model per session (a session groups the ctas/delete/
            insert phases of one run). Batch volume proxied by rows inserted/updated. #}
         history_runs as (
             select
-                regexp_substr(query_text, '"node_id"\\s*:\\s*"([^"]+)"', 1, 1, 'e', 1) as node_id,
+                coalesce(
+                    regexp_substr(query_text, '"node_id"\\s*:\\s*"([^"]+)"', 1, 1, 'e', 1)
+                    {%- if use_tag_fallback %},
+                    nullif(query_tag, '')
+                    {%- endif %}
+                ) as run_key,
                 session_id,
                 sum(total_elapsed_time) / 1000 as elapsed_s,
                 sum(coalesce(bytes_spilled_to_local_storage, 0)
@@ -172,12 +197,12 @@
             where start_time >= dateadd(day, -{{ lookback }}, current_timestamp())
               and execution_status = 'SUCCESS'
               and query_type in ('CREATE_TABLE_AS_SELECT', 'INSERT', 'DELETE', 'MERGE')
-              and query_text like '%"node_id"%'
+              and (query_text like '%"node_id"%'{% if use_tag_fallback %} or query_tag like '{{ tag_prefix | replace("'", "''") }}%'{% endif %})
               {% if ns.use_telemetry %}
               and try_parse_json(query_tag):app::varchar is distinct from 'dbt_macro_polo'
               {% endif %}
             group by 1, 2
-            having node_id is not null and used_ordinal is not null
+            having run_key is not null and used_ordinal is not null
         ),
         history_labelled as (
             select
@@ -196,7 +221,8 @@
                 h.used_ordinal
             from history_runs h
             inner join graph_features f
-                on f.node_id = h.node_id
+                on (f.node_id = h.run_key
+                {%- if use_tag_fallback %} or f.expected_tag = h.run_key{% endif %})
             left join column_counts c
                 on c.table_catalog = f.table_catalog
                and c.table_schema = f.table_schema
