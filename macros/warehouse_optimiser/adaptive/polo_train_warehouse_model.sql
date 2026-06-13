@@ -93,6 +93,30 @@
     {% endif %}
 
     {% set graph_features = dbt_macro_polo.polo_get_graph_model_features() %}
+
+    {# Optional testing filter: restrict training to specific model names (the dbt model
+       name / file name, e.g. 'fact_daysku'). Empty list trains on every optimiser-enabled
+       model. Narrowing the graph here also shrinks the history scan and join. #}
+    {% set training_models = adaptive_config.training_models or [] %}
+    {% if training_models %}
+        {% set wanted_models = training_models | map('string') | map('trim') | map('lower') | list %}
+        {% set ns_filter = namespace(kept=[]) %}
+        {% for entry in graph_features %}
+            {% if entry.model_id.split('.')[-1] in wanted_models %}
+                {% do ns_filter.kept.append(entry) %}
+            {% endif %}
+        {% endfor %}
+        {% set graph_features = ns_filter.kept %}
+        {% if graph_features | length == 0 %}
+            {{ dbt_macro_polo.logging(message="adaptive.training_models " ~ training_models
+                ~ " matched no optimiser-enabled models. Use the dbt model name (file name),"
+                ~ " e.g. 'fact_daysku'.", level='ERROR') }}
+            {{ return('') }}
+        {% endif %}
+        {{ dbt_macro_polo.logging(message="Training restricted to (adaptive.training_models): "
+            ~ graph_features | map(attribute='model_id') | join(', '), status=(graph_features | length)) }}
+    {% endif %}
+
     {% if ns.use_history and graph_features | length == 0 %}
         {% if ns.use_telemetry %}
             {{ dbt_macro_polo.logging(message="No optimiser-enabled models found in the current graph,"
@@ -307,6 +331,9 @@
                 {%- endfor %}
             end as optimal_size
         from labelled
+        {%- if training_models %}
+        where model_id in ('{{ graph_features | map(attribute='model_id') | join("', '") }}')
+        {%- endif %}
     {% endset %}
 
     {% set active_sources = (['telemetry'] if ns.use_telemetry else []) + (['query_history'] if ns.use_history else []) %}

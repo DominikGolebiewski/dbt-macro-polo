@@ -15,6 +15,7 @@
         'model_name': 'polo_warehouse_classifier',
         'training_source': 'auto',
         'history_query_tag_pattern': none,
+        'training_models': [],
         'target_duration_seconds': 300,
         'confidence_threshold': 0.7,
         'deviation_threshold': 0.25,
