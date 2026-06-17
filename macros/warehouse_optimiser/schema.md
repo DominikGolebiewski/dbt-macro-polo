@@ -41,6 +41,13 @@ vars:
     warehouse_optimiser: # Required for warehouse optimiser functionality
       enabled: true # Enable warehouse optimiser in your project - global setting
       default_warehouse_size: 'xs' # Default warehouse size to use if no specific settings are provided
+      default_monitoring: # Optional: project-wide fallback monitoring applied to every model that has no per-operation `monitoring` block
+        enabled: true
+        thresholds:
+          - rows: 250000000
+            warehouse_size: xl # Size used when the upstream row count meets this threshold
+          - rows: 500000000
+            warehouse_size: 2xl
     warehouse_config: # Required for warehouse config functionality
       warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Explicit list of available warehouse sizes in your project
       environment:
@@ -105,6 +112,7 @@ config:
 - **Intelligent Monitoring**:
   - Row count-based thresholds
   - Automatic warehouse scaling
+  - Project-wide default via `vars.macro_polo.warehouse_optimiser.default_monitoring`, applied to any operation (`ctas`/`delete`/`insert`) that does not define its own `monitoring` block. Precedence: per-schedule `monitoring` > per-operation `monitoring` (model meta) > project `default_monitoring`. Set a per-operation `monitoring: { enabled: false }` to opt a model out.
 
 - **Flexible Scheduling**:
   - Time-based warehouse allocation
