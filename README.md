@@ -59,6 +59,13 @@ vars:
     warehouse_optimiser: # Required for warehouse optimiser functionality
       enabled: true # Enable warehouse optimiser in your project - global setting
       default_warehouse_size: 'xs' # Default warehouse size to use if no specific settings are provided
+      default_monitoring: # Optional: project-wide fallback monitoring for any model without its own per-operation `monitoring` block
+        enabled: true
+        thresholds:
+          - rows: 250000000
+            warehouse_size: xl
+          - rows: 500000000
+            warehouse_size: 2xl
     warehouse_config: # Required for warehouse config functionality
       warehouse_size: ['xs', 's', 'm', 'l', 'xl', '2xl'] # Explicit list of available warehouse sizes in your project
       environment:

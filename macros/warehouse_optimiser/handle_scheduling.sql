@@ -17,7 +17,22 @@
     {# Get scheduling configuration #}
     {% set scheduling_config = operation_config.get('scheduling', {}) %}
     {% set scheduling_enabled = scheduling_config.get('enabled', false) %}
-    {% set monitoring_enabled = operation_config.get('monitoring', {}).get('enabled', false) %}
+
+    {#
+        Resolve the effective monitoring config for this operation.
+        Precedence:
+          1. The operation's own `monitoring` block (model meta) wins when present,
+             including an explicit `enabled: false` to opt a model out.
+          2. Project-wide `vars.macro_polo.warehouse_optimiser.default_monitoring` is the
+             global fallback, so a single threshold set can apply to every model without
+             repeating it per model. dbt shallow-merges `meta` (MergeBehavior.Update), so a
+             model's own `meta.warehouse_optimiser` clobbers any project-level one; this
+             fallback therefore has to live in the macro, not in dbt_project.yml meta.
+    #}
+    {% set default_monitoring = var('macro_polo', {}).get('warehouse_optimiser', {}).get('default_monitoring', {}) %}
+    {% set effective_monitoring = operation_config.get('monitoring') if operation_config.get('monitoring') is not none else default_monitoring %}
+    {% set monitoring_enabled = effective_monitoring.get('enabled', false) %}
+    {% set monitoring_thresholds = effective_monitoring.get('thresholds', []) %}
     {% set final_size = namespace(value=default_warehouse_size) %}
 
     {# Check if scheduling is enabled #}
@@ -66,7 +81,7 @@
                 {% set final_size.value = dbt_macro_polo.handle_monitoring(
                     operation_config,
                     row_count,
-                    operation_config.get('monitoring', {}).get('thresholds', []),
+                    monitoring_thresholds,
                     operation_config.get('warehouse_size', default_warehouse_size)
                 ) %}
             {% else %}
@@ -81,7 +96,7 @@
             {% set final_size.value = dbt_macro_polo.handle_monitoring(
                 operation_config,
                 row_count,
-                operation_config.get('monitoring', {}).get('thresholds', []),
+                monitoring_thresholds,
                 operation_config.get('warehouse_size', default_warehouse_size)
             ) %}
         {% else %}
