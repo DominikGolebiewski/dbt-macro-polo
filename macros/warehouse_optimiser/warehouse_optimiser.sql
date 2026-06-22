@@ -20,7 +20,7 @@
         {{ return('') }}
     {% endif %}
 
-    {% if not (is_incremental and (is_delete_insert or is_dynamic_table)) %}
+    {% if not ((is_incremental and is_delete_insert) or (is_incremental and is_dynamic_table)) %}
         {{ dbt_macro_polo.logging(message="Warehouse Optimiser is only supported for incremental models with delete+insert or dynamic_table strategy."
             ~ "\n\n Expected: \n   materialized: incremental \n   incremental_strategy: delete+insert"
             ~ "\n\n Received: \n   materialized: " ~ model.config.get('materialized', 'undefined') 
