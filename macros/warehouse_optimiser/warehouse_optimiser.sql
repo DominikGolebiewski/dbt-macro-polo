@@ -11,7 +11,7 @@
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
     {% set is_delete_insert = model.config.get('incremental_strategy', 'undefined') == 'delete+insert' %}
-    {% set is_dynamic_table = model.config.get('incremental_strategy', 'undefined') == 'dynamic_table' %}
+    {% set is_dynamic_table = model.config.get('materialized', 'undefined') == 'dynamic_table' %}
     
     {# Validate query operation #}
     {% if query_operation not in ['ctas', 'insert', 'delete'] %}
@@ -20,9 +20,10 @@
         {{ return('') }}
     {% endif %}
 
-    {% if not ((is_incremental and is_delete_insert) or (is_incremental and is_dynamic_table)) %}
-        {{ dbt_macro_polo.logging(message="Warehouse Optimiser is only supported for incremental models with delete+insert or dynamic_table strategy."
+    {% if not ((is_incremental and is_delete_insert) or is_dynamic_table) %}
+        {{ dbt_macro_polo.logging(message="Warehouse Optimiser is only supported for incremental models with delete+insert strategy, or dynamic_table materialisation."
             ~ "\n\n Expected: \n   materialized: incremental \n   incremental_strategy: delete+insert"
+            ~ "\n   or materialized: dynamic_table"
             ~ "\n\n Received: \n   materialized: " ~ model.config.get('materialized', 'undefined') 
             ~ "\n   incremental_strategy: " ~ model.config.get('incremental_strategy', 'undefined'),
             model_id="\n\n In model: " ~ model_id, 
