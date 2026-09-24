@@ -52,11 +52,14 @@
                  intermediary) tables, or when a surrogate upstream aliases its key column
                  (columns='source'). polo passes keys/columns through opaquely. --#}
             {%- set dep_name = dependency.get('name') if dependency is mapping else dependency -%}
+            {%- if dep_name -%}
             {%- set dep_keys = dependency.get('keys') if dependency is mapping else none -%}
             {%- set dep_columns = dependency.get('columns') if dependency is mapping else none -%}
-            {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dep_name, timestamp_column, warehouse, maximum_timestamp, dep_keys, dep_columns) -%}
+            {%- set dep_predicate = dependency.get('predicate') if dependency is mapping else none -%}
+            {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dep_name, timestamp_column, warehouse, maximum_timestamp, dep_keys, dep_columns, dep_predicate) -%}
             {{ dbt_macro_polo.logging(message="Row count for " ~ dep_name ~ (" [keys=" ~ dep_keys ~ "]" if dep_keys else ""), model_id=model_id, status=rows) }}
             {%- set row_count.value = row_count.value + rows -%}
+            {%- endif -%}
         {%- endfor -%}
         
         {{ dbt_macro_polo.logging(message="Total upstream row count", model_id=model_id, status=row_count.value) }}
@@ -71,11 +74,11 @@
     {{ return(row_count.value) }}
 {%- endmacro -%}
 
-{% macro check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none, columns=none) %}
-    {{ return(adapter.dispatch('check_upstream_row_count', 'dbt_macro_polo')(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys, columns)) }}
+{% macro check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none, columns=none, predicate=none) %}
+    {{ return(adapter.dispatch('check_upstream_row_count', 'dbt_macro_polo')(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys, columns, predicate)) }}
 {% endmacro %}
 
-{% macro default__check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none, columns=none) %}
+{% macro default__check_upstream_row_count(target_exists, upstream_relation, timestamp_column, warehouse, maximum_timestamp, keys=none, columns=none, predicate=none) %}
 
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('check_upstream_row_count') %}
@@ -97,18 +100,29 @@
     {%- endif -%}
     {{ dbt_macro_polo.logging(macro_name, "Resolved upstream relation: " ~ upstream_relation, model_id=model_id, level='DEBUG') }}
 
+    {#-- Timestamp (or selective-refresh) filter, plus an optional per-upstream predicate.
+         The predicate is opaque SQL from the dependency entry, so a consumer can scope a
+         shared upstream to the current tenant without polo knowing the column. --#}
+    {%- set row_filters = [] -%}
+    {%- if target_exists and timestamp_column -%}
+        {%- if not dbt_macro_polo.polo_is_selective_refresh() -%}
+            {%- do row_filters.append(timestamp_column ~ ' > ' ~ maximum_timestamp) -%}
+        {%- else -%}
+            {%- do row_filters.append(dbt_macro_polo.polo_selective_refresh_filter(keys=keys, relation=upstream_name, columns=columns)) -%}
+        {%- endif -%}
+    {%- endif -%}
+    {%- if predicate -%}
+        {%- do row_filters.append('(' ~ predicate ~ ')') -%}
+    {%- endif -%}
+
     {% set query %}
         use warehouse {{ warehouse }};
         
         with source_data as (
             select count(*) as row_count
             from {{ upstream_relation }}
-            {% if target_exists and timestamp_column %}
-                {% if not dbt_macro_polo.polo_is_selective_refresh() %}
-                    where {{ timestamp_column }} > {{ maximum_timestamp }}
-                {% else %}
-                    where {{ dbt_macro_polo.polo_selective_refresh_filter(keys=keys, relation=upstream_name, columns=columns) }}
-                {% endif %}
+            {% if row_filters | length > 0 %}
+                where {{ row_filters | join(' and ') }}
             {% endif %}
         )
         select 
