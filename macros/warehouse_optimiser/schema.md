@@ -95,11 +95,27 @@ config:
             insert:
               warehouse_size: xs
           on_dry_run: # Upstream dependencies for dry run operations
-            upstream_dependency: # List of upstream models to monitor for row count
+            upstream_dependency: # Each entry is a name, or a mapping
               - model1
               - model2
+              - name: analytics.fct_orders # schema.table resolves with source()
+                predicate: "account_id in (select account_id from analytics.dim_account)"
+              - name: int_orders # plain name resolves with ref()
+                keys: surrogate # passed through to the selective-refresh filter
+                columns: source
 {% endraw %}
 ```
+
+`upstream_dependency` accepts a single name or a list. A list entry is either a name or a mapping:
+
+| Field | Required | Effect |
+|-------|----------|--------|
+| `name` | Yes, on a mapping | Model name (`ref`) or `schema.identifier` (`source`). An empty rendered name is skipped. |
+| `keys` | No | Passed through to the selective-refresh filter. Omitted entries use the model's default keys. |
+| `columns` | No | Passed through to the selective-refresh filter. |
+| `predicate` | No | SQL condition ANDed onto the row-count probe, after the timestamp or selective-refresh filter. Polo does not interpret it. An empty value is ignored. |
+
+A plain string entry is equivalent to a mapping that sets only `name`.
 
 #### Core Features 🎯
 

@@ -47,10 +47,9 @@
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
             {#-- Each entry is either a plain name (uses the model's default keys) or a
-                 mapping {name, keys, columns} for per-upstream resolution — needed when
-                 the upstreams mix business-key (e.g. staging) and surrogate-key (e.g.
-                 intermediary) tables, or when a surrogate upstream aliases its key column
-                 (columns='source'). polo passes keys/columns through opaquely. --#}
+                 mapping {name, keys, columns, predicate}. keys/columns are passed through
+                 to the selective-refresh filter. predicate is optional SQL ANDed onto
+                 the probe. An empty name is skipped. --#}
             {%- set dep_name = dependency.get('name') if dependency is mapping else dependency -%}
             {%- if dep_name -%}
             {%- set dep_keys = dependency.get('keys') if dependency is mapping else none -%}
@@ -101,8 +100,8 @@
     {{ dbt_macro_polo.logging(macro_name, "Resolved upstream relation: " ~ upstream_relation, model_id=model_id, level='DEBUG') }}
 
     {#-- Timestamp (or selective-refresh) filter, plus an optional per-upstream predicate.
-         The predicate is opaque SQL from the dependency entry, so a consumer can scope a
-         shared upstream to the current tenant without polo knowing the column. --#}
+         The predicate is opaque SQL from the dependency entry, so a consumer can limit
+         the probe to a subset of rows without polo knowing the column. --#}
     {%- set row_filters = [] -%}
     {%- if target_exists and timestamp_column -%}
         {%- if not dbt_macro_polo.polo_is_selective_refresh() -%}

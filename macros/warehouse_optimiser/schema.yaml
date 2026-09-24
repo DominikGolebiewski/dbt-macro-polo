@@ -17,11 +17,49 @@ macros:
         type: string
         description: Unique identifier for the model
       - name: upstream_dependency
-        type: Union[string, List[string]]
-        description: Single or list of upstream model/source references
+        type: string | list
+        description: >
+          One upstream, or a list of upstreams, whose row counts size the warehouse.
+          A list entry is either a name or a mapping. A name that contains a dot is
+          resolved with source(); any other name with ref(). A single string is treated
+          as a one-item list. A mapping accepts name (required), keys and columns
+          (optional, passed through to the selective-refresh filter), and predicate
+          (optional SQL ANDed onto the probe). An empty rendered name is skipped.
+          An empty predicate is ignored.
       - name: timestamp_column
         type: string
         description: Column used for incremental filtering
+
+  - name: check_upstream_row_count
+    description: >
+      Counts rows in one upstream relation. When the target exists and a timestamp
+      column is set, the count keeps rows newer than the watermark, or the
+      selective-refresh filter. An optional predicate is ANDed on top.
+    arguments:
+      - name: target_exists
+        type: boolean
+        description: Whether the model's target relation already exists
+      - name: upstream_relation
+        type: string
+        description: Model name, or schema.identifier for a source
+      - name: timestamp_column
+        type: string
+        description: Column used for the incremental watermark filter
+      - name: warehouse
+        type: string
+        description: Warehouse used to run the count
+      - name: maximum_timestamp
+        type: string
+        description: SQL expression for the current watermark
+      - name: keys
+        type: string
+        description: Optional key type passed through to the selective-refresh filter
+      - name: columns
+        type: string
+        description: Optional column set passed through to the selective-refresh filter
+      - name: predicate
+        type: string
+        description: Optional SQL condition ANDed onto the count. Empty values are ignored.
 
   - name: handle_monitoring
     description: >
