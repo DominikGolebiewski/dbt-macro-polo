@@ -100,6 +100,9 @@ config:
               - model2
               - name: analytics.fct_orders # schema.table resolves with source()
                 predicate: "account_id in (select account_id from analytics.dim_account)"
+              - name: int_new_client_history
+                ignore_timestamp: true # Probe scoped historical rows instead of only the target delta
+                predicate: "account_id in (select account_id from control.pending_clients)"
               - name: int_orders # plain name resolves with ref()
                 keys: surrogate # passed through to the selective-refresh filter
                 columns: source
@@ -114,6 +117,7 @@ config:
 | `keys` | No | Passed through to the selective-refresh filter. Omitted entries use the model's default keys. |
 | `columns` | No | Passed through to the selective-refresh filter. |
 | `predicate` | No | SQL condition ANDed onto the row-count probe, after the timestamp or selective-refresh filter. Polo does not interpret it. An empty value is ignored. |
+| `ignore_timestamp` | No | Defaults to `false`. When `true`, the probe uses a low timestamp sentinel for this dependency so a selective predicate can count historical refill rows instead of only rows newer than the target watermark. |
 
 A plain string entry is equivalent to a mapping that sets only `name`.
 
