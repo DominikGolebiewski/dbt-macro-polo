@@ -1,5 +1,5 @@
-{% macro get_upstream_row_count(model_id, upstream_dependency, timestamp_column) %}
-    {{ return(adapter.dispatch('get_upstream_row_count', 'dbt_macro_polo')(model_id, upstream_dependency, timestamp_column)) }}
+{% macro get_upstream_row_count(model_id, upstream_dependency, timestamp_column, warehouse_size='xs') %}
+    {{ return(adapter.dispatch('get_upstream_row_count', 'dbt_macro_polo')(model_id, upstream_dependency, timestamp_column, warehouse_size)) }}
 {% endmacro %}
 
 {% macro get_upstream_dependency_maximum_timestamp(maximum_timestamp, ignore_timestamp=false) %}
@@ -9,7 +9,22 @@
     {{ return(maximum_timestamp) }}
 {% endmacro %}
 
-{% macro default__get_upstream_row_count(model_id, upstream_dependency, timestamp_column) %}
+{% macro get_upstream_dependency_predicate(model_name, upstream_dependency) %}
+    {{ return(adapter.dispatch('get_upstream_dependency_predicate', 'dbt_macro_polo')(model_name, upstream_dependency)) }}
+{% endmacro %}
+
+{% macro default__get_upstream_dependency_predicate(model_name, upstream_dependency) %}
+    {% if upstream_dependency is mapping and upstream_dependency.get('predicate_provider') %}
+        {{ exceptions.raise_compiler_error(
+            "upstream_dependency for " ~ model_name ~ " declares predicate_provider, "
+            ~ "but no consumer implementation of default__get_upstream_dependency_predicate is configured."
+        ) }}
+    {% endif %}
+    {% set predicate = upstream_dependency.get('predicate') if upstream_dependency is mapping else none %}
+    {{ return(predicate) }}
+{% endmacro %}
+
+{% macro default__get_upstream_row_count(model_id, upstream_dependency, timestamp_column, warehouse_size='xs') %}
 
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('get_upstream_row_count') %}
@@ -37,9 +52,9 @@
         {% set target_exists = load_relation(this) is not none %}
         {{ dbt_macro_polo.logging(macro_name, "Target relation exists: " ~ target_exists, model_id=model_id, level='DEBUG') }}
 
-        {# Fetch environment-specific XS warehouse name #}
-        {{ dbt_macro_polo.logging(macro_name, "Allocating warehouse", model_id=model_id, level='DEBUG') }}
-        {%- set warehouse = dbt_macro_polo.allocate_warehouse('xs') -%}
+        {# Fetch environment-specific probe warehouse name #}
+        {{ dbt_macro_polo.logging(message="Allocating upstream probe warehouse", model_id=model_id, status=warehouse_size | upper) }}
+        {%- set warehouse = dbt_macro_polo.allocate_warehouse(warehouse_size) -%}
 
         {# Get maximum timestamp for incremental scan #}
         {% set maximum_timestamp = dbt_macro_polo.get_max_timestamp(timestamp_column=timestamp_column) %}
@@ -53,17 +68,15 @@
 
         {# Get total row count from upstream models #}
         {%- for dependency in upstream_dependency -%}
-            {#-- Each entry is either a plain name (uses the model's default keys) or a
-                 mapping {name, keys, columns, predicate, ignore_timestamp}. keys/columns
-                 are passed through to the selective-refresh filter. predicate is optional
-                 SQL ANDed onto the probe. ignore_timestamp counts the scoped source history
-                 from the low sentinel instead of using the target's current watermark.
-                 An empty name is skipped. --#}
+            {#-- Each entry is a plain name or a mapping. keys/columns are passed through
+                 to the selective-refresh filter; predicate_provider lets the consumer
+                 generate SQL at probe time. ignore_timestamp counts historical rows for
+                 this dependency. An empty name is skipped. --#}
             {%- set dep_name = dependency.get('name') if dependency is mapping else dependency -%}
             {%- if dep_name -%}
             {%- set dep_keys = dependency.get('keys') if dependency is mapping else none -%}
             {%- set dep_columns = dependency.get('columns') if dependency is mapping else none -%}
-            {%- set dep_predicate = dependency.get('predicate') if dependency is mapping else none -%}
+            {%- set dep_predicate = dbt_macro_polo.get_upstream_dependency_predicate(model.name, dependency) -%}
             {%- set dep_ignore_timestamp = dependency.get('ignore_timestamp', false) if dependency is mapping else false -%}
             {%- set dep_maximum_timestamp = dbt_macro_polo.get_upstream_dependency_maximum_timestamp(maximum_timestamp, dep_ignore_timestamp) -%}
             {%- set rows = dbt_macro_polo.check_upstream_row_count(target_exists, dep_name, timestamp_column, warehouse, dep_maximum_timestamp, dep_keys, dep_columns, dep_predicate) -%}

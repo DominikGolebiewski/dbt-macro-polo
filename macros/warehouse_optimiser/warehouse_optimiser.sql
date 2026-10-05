@@ -91,7 +91,8 @@
         {# Get row count for CTAS operations #}
         {% set row_count = macro_polo.get('cache', {}).get('_upstream_row_count_' ~ model_id | replace('.', '_'), 0) %}
         {% if query_operation == 'ctas' and not is_full_refresh and has_on_dry_run_config %}
-            {% set row_count = dbt_macro_polo.get_upstream_row_count(model_id, upstream_dependency, timestamp_column) %}
+            {% set probe_warehouse_size = on_dry_run_config.get('warehouse_size', 'xs') %}
+            {% set row_count = dbt_macro_polo.get_upstream_row_count(model_id, upstream_dependency, timestamp_column, probe_warehouse_size) %}
         {% endif %}
     
         {# Determine and allocate warehouse #}

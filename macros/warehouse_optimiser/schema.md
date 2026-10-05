@@ -95,6 +95,7 @@ config:
             insert:
               warehouse_size: xs
           on_dry_run: # Upstream dependencies for dry run operations
+            warehouse_size: xs # Optional: warehouse size for the row-count probe (default xs)
             upstream_dependency: # Each entry is a name, or a mapping
               - model1
               - model2
@@ -117,9 +118,12 @@ config:
 | `keys` | No | Passed through to the selective-refresh filter. Omitted entries use the model's default keys. |
 | `columns` | No | Passed through to the selective-refresh filter. |
 | `predicate` | No | SQL condition ANDed onto the row-count probe, after the timestamp or selective-refresh filter. Polo does not interpret it. An empty value is ignored. |
+| `predicate_provider` | No | Consumer-defined provider key. Resolved at probe time through `default__get_upstream_dependency_predicate`; its SQL replaces the literal `predicate`. |
 | `ignore_timestamp` | No | Defaults to `false`. When `true`, the probe uses a low timestamp sentinel for this dependency so a selective predicate can count historical refill rows instead of only rows newer than the target watermark. |
 
 A plain string entry is equivalent to a mapping that sets only `name`.
+
+`on_dry_run.warehouse_size` sets the warehouse that runs the row-count probe. It defaults to `xs`; set it larger (for example `l`) when the probe scans a large or historical scope. It must be one of `warehouse_config.warehouse_size`.
 
 #### Core Features 🎯
 
