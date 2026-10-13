@@ -215,5 +215,65 @@ class UpstreamDependencyWatermarkTests(unittest.TestCase):
             )
 
 
+class UpstreamRowCountDispatchTests(unittest.TestCase):
+    """get_upstream_row_count keeps its original three-argument dispatch by default."""
+
+    def dispatched_arguments(self, *call_arguments):
+        environment = Environment(extensions=["jinja2.ext.do"])
+        macro_path = (
+            Path(__file__).resolve().parents[1]
+            / "macros"
+            / "warehouse_optimiser"
+            / "check_upstream_row_count.sql"
+        )
+        macro_node = next(
+            node
+            for node in environment.parse(macro_path.read_text()).body
+            if isinstance(node, nodes.Macro) and node.name == "get_upstream_row_count"
+        )
+        received = []
+
+        def implementation(*args):
+            received.append(args)
+            return 7
+
+        class Returned(Exception):
+            def __init__(self, value):
+                super().__init__(value)
+                self.value = value
+
+        def dbt_return(value):
+            raise Returned(value)
+
+        module = environment.from_string(nodes.Template([macro_node])).make_module(
+            {
+                "adapter": SimpleNamespace(dispatch=lambda name, namespace: implementation),
+                "return": dbt_return,
+            }
+        )
+        try:
+            module.get_upstream_row_count("model.id", ["upstream"], "runstartedtime", *call_arguments)
+        except Returned as returned:
+            self.assertEqual(returned.value, 7)
+        return received[0]
+
+    def test_default_probe_size_dispatches_the_original_three_arguments(self):
+        # A consumer override written before warehouse_size existed keeps working.
+        self.assertEqual(
+            self.dispatched_arguments(), ("model.id", ["upstream"], "runstartedtime")
+        )
+        self.assertEqual(
+            self.dispatched_arguments("xs"), ("model.id", ["upstream"], "runstartedtime")
+        )
+        self.assertEqual(
+            self.dispatched_arguments("XS"), ("model.id", ["upstream"], "runstartedtime")
+        )
+
+    def test_a_requested_probe_size_is_passed_to_the_implementation(self):
+        self.assertEqual(
+            self.dispatched_arguments("l"), ("model.id", ["upstream"], "runstartedtime", "l")
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

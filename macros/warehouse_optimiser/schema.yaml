@@ -35,7 +35,9 @@ macros:
         type: string
         description: >
           Warehouse size that runs the probe. Defaults to xs. warehouse_optimiser passes
-          the model's on_dry_run.warehouse_size.
+          the model's on_dry_run.warehouse_size. The default size dispatches the original
+          three arguments, so an existing override of get_upstream_row_count keeps
+          working; an override must accept this argument to receive any other size.
 
   - name: get_upstream_dependency_maximum_timestamp
     description: >

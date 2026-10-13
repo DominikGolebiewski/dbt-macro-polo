@@ -1,5 +1,12 @@
 {% macro get_upstream_row_count(model_id, upstream_dependency, timestamp_column, warehouse_size='xs') %}
-    {{ return(adapter.dispatch('get_upstream_row_count', 'dbt_macro_polo')(model_id, upstream_dependency, timestamp_column, warehouse_size)) }}
+    {# The default probe size dispatches the original three arguments, so a consumer
+       override written before warehouse_size existed keeps working. The size is passed
+       only when another one is requested, and that override must then accept it. #}
+    {% set implementation = adapter.dispatch('get_upstream_row_count', 'dbt_macro_polo') %}
+    {% if (warehouse_size | string | lower) == 'xs' %}
+        {{ return(implementation(model_id, upstream_dependency, timestamp_column)) }}
+    {% endif %}
+    {{ return(implementation(model_id, upstream_dependency, timestamp_column, warehouse_size)) }}
 {% endmacro %}
 
 {% macro get_upstream_dependency_maximum_timestamp(maximum_timestamp, ignore_timestamp=false) %}

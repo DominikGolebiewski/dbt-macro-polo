@@ -24,12 +24,14 @@
 {% endmacro %}
 
 {% macro default__get_column_config(name, default=none, required=false) %}
-    {%- set unset = '__macro_polo_unset__' -%}
+    {# A fresh object marks "absent" and is compared by identity, so no configured value
+       can be mistaken for it. #}
+    {%- set unset = [] -%}
     {%- set value = default -%}
     {%- if execute -%}
         {%- set top_level = config.get(name, unset) -%}
         {%- set meta_columns = (config.get('meta') or {}).get('columns') or {} -%}
-        {%- if top_level != unset -%}
+        {%- if top_level is not sameas unset -%}
             {%- set value = top_level -%}
         {%- elif name in meta_columns -%}
             {%- set value = meta_columns[name] -%}

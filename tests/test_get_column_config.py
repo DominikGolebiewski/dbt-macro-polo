@@ -104,6 +104,14 @@ class GetColumnConfigTests(unittest.TestCase):
                 config = {"timestamp_column": empty, "meta": {"columns": {"timestamp_column": "nested"}}}
                 self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), empty)
 
+    def test_a_top_level_value_equal_to_any_internal_marker_is_still_a_set_value(self):
+        # The "absent" marker is an object compared by identity, so no configured string,
+        # including the former literal marker, can be mistaken for an absent key.
+        for value in ("__macro_polo_unset__", "unset", "None"):
+            with self.subTest(value=value):
+                config = {"timestamp_column": value, "meta": {"columns": {"timestamp_column": "nested"}}}
+                self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), value)
+
     def test_only_meta_columns_is_read_under_meta(self):
         config = {"meta": {"timestamp_column": "not_read"}}
         self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), "loaded_timestamp")
