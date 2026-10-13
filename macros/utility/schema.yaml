@@ -8,6 +8,19 @@ macros:
         type: string
         description: Name of the macro being executed
 
+  - name: get_column_config
+    description: '{{ doc("get_column_config") }}'
+    arguments:
+      - name: name
+        type: string
+        description: Column config key, for example timestamp_column or date_column
+      - name: default
+        type: any
+        description: Value returned when neither config layout sets the key
+      - name: required
+        type: bool
+        description: Raise a compiler error at execution time unless the key is configured and non-empty; a default does not satisfy it or empty
+
   - name: get_cache_value
     description: '{{ doc("get_cache_value") }}'
     arguments:

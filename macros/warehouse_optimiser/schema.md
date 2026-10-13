@@ -66,7 +66,7 @@ config:
     materialized: 'incremental'
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
-    timestamp_column: 'loaded_timestamp'
+    timestamp_column: 'loaded_timestamp' # or meta.columns.timestamp_column; the top level wins
     pre_hook: ["{{ dbt_macro_polo.warehouse_optimiser() }}"]
     
     meta:
@@ -95,11 +95,15 @@ config:
             insert:
               warehouse_size: xs
           on_dry_run: # Upstream dependencies for dry run operations
+            warehouse_size: xs # Optional: warehouse size for the row-count probe (default xs)
             upstream_dependency: # Each entry is a name, or a mapping
               - model1
               - model2
               - name: analytics.fct_orders # schema.table resolves with source()
                 predicate: "account_id in (select account_id from analytics.dim_account)"
+              - name: int_new_client_history
+                ignore_timestamp: true # Probe scoped historical rows instead of only the target delta
+                predicate: "account_id in (select account_id from control.pending_clients)"
               - name: int_orders # plain name resolves with ref()
                 keys: surrogate # passed through to the selective-refresh filter
                 columns: source
@@ -114,8 +118,12 @@ config:
 | `keys` | No | Passed through to the selective-refresh filter. Omitted entries use the model's default keys. |
 | `columns` | No | Passed through to the selective-refresh filter. |
 | `predicate` | No | SQL condition ANDed onto the row-count probe, after the timestamp or selective-refresh filter. Polo does not interpret it. An empty value is ignored. |
+| `predicate_provider` | No | Consumer-defined provider key. Resolved at probe time through `default__get_upstream_dependency_predicate`; its SQL replaces the literal `predicate`. |
+| `ignore_timestamp` | No | Defaults to `false`. When `true`, the probe uses a low timestamp sentinel for this dependency so a selective predicate can count historical refill rows instead of only rows newer than the target watermark. |
 
 A plain string entry is equivalent to a mapping that sets only `name`.
+
+`on_dry_run.warehouse_size` sets the warehouse that runs the row-count probe. It defaults to `xs`; set it larger (for example `l`) when the probe scans a large or historical scope. It must be one of `warehouse_config.warehouse_size`.
 
 #### Core Features 🎯
 
