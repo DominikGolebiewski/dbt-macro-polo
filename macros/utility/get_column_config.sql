@@ -15,8 +15,9 @@
     resolve exactly as before. Under meta only meta.columns.<key> is read.
 
     Returns `default` when neither layout sets the key, and always while parsing:
-    dbt's parse-time config returns '' for every key. With required=true a missing
-    or empty key raises at execution time; parsing never raises.
+    dbt's parse-time config returns '' for every key. With required=true the key must
+    be configured, non-empty, in one of the layouts, otherwise execution raises; a
+    `default` does not satisfy it. Parsing never raises.
 --#}
 
 {% macro get_column_config(name, default=none, required=false) %}
@@ -27,20 +28,21 @@
     {# A fresh object marks "absent" and is compared by identity, so no configured value
        can be mistaken for it. #}
     {%- set unset = [] -%}
-    {%- set value = default -%}
+    {%- set configured = unset -%}
     {%- if execute -%}
         {%- set top_level = config.get(name, unset) -%}
         {%- set meta_columns = (config.get('meta') or {}).get('columns') or {} -%}
         {%- if top_level is not sameas unset -%}
-            {%- set value = top_level -%}
+            {%- set configured = top_level -%}
         {%- elif name in meta_columns -%}
-            {%- set value = meta_columns[name] -%}
+            {%- set configured = meta_columns[name] -%}
         {%- endif -%}
     {%- endif -%}
-    {%- if required and not value and execute -%}
+    {# required checks the configuration itself: a default does not satisfy it. #}
+    {%- if required and execute and (configured is sameas unset or not configured) -%}
         {{ exceptions.raise_compiler_error(
             "Macro Polo: " ~ name ~ " must be set in config or config.meta.columns for " ~ model.unique_id
         ) }}
     {%- endif -%}
-    {{ return(value) }}
+    {{ return(default if configured is sameas unset else configured) }}
 {% endmacro %}

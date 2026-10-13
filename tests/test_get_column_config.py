@@ -104,6 +104,30 @@ class GetColumnConfigTests(unittest.TestCase):
                 config = {"timestamp_column": empty, "meta": {"columns": {"timestamp_column": "nested"}}}
                 self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), empty)
 
+    def test_required_is_not_satisfied_by_a_default(self):
+        # A key must be configured in one of the layouts; a fallback value does not count.
+        for config in ({}, {"timestamp_column": ""}, {"meta": {"columns": {"timestamp_column": ""}}}):
+            with self.subTest(config=config):
+                with self.assertRaisesRegex(ValueError, "timestamp_column must be set"):
+                    column_config(config)("timestamp_column", "loaded_timestamp", required=True)
+
+    def test_required_returns_the_configured_value_not_the_default(self):
+        for config in (
+            {"timestamp_column": "runstartedtime"},
+            {"meta": {"columns": {"timestamp_column": "runstartedtime"}}},
+        ):
+            with self.subTest(config=config):
+                self.assertEqual(
+                    column_config(config)("timestamp_column", "loaded_timestamp", required=True),
+                    "runstartedtime",
+                )
+
+    def test_required_default_is_ignored_while_parsing(self):
+        self.assertEqual(
+            column_config({}, execute=False)("timestamp_column", "loaded_timestamp", required=True),
+            "loaded_timestamp",
+        )
+
     def test_a_top_level_value_equal_to_any_internal_marker_is_still_a_set_value(self):
         # The "absent" marker is an object compared by identity, so no configured string,
         # including the former literal marker, can be mistaken for an absent key.

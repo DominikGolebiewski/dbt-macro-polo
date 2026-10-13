@@ -57,8 +57,9 @@ dbt deprecates custom top-level config keys; this lets models move the keys unde
 
 - `name`: the config key, for example `timestamp_column`
 - `default` (optional): returned when neither layout sets the key
-- `required` (optional, default `false`): raise a compiler error at execution time when
-  the key is missing or empty. Parsing never raises.
+- `required` (optional, default `false`): raise a compiler error at execution time unless
+  the key is configured and non-empty in one of the layouts. A `default` does not satisfy
+  it. Parsing never raises.
 
 ## Resolution order
 
