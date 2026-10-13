@@ -66,7 +66,7 @@ config:
     materialized: 'incremental'
     incremental_strategy: 'delete+insert'
     unique_key: 'unique_key'
-    timestamp_column: 'loaded_timestamp'
+    timestamp_column: 'loaded_timestamp' # or meta.columns.timestamp_column; the top level wins
     pre_hook: ["{{ dbt_macro_polo.warehouse_optimiser() }}"]
     
     meta:

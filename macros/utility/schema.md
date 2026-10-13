@@ -44,6 +44,54 @@ vars:
 
 {% enddocs %}
 
+{% docs get_column_config %}
+
+# get_column_config ([source](macros/utility/get_column_config.sql))
+
+Resolves a model's column attribute (`timestamp_column`, `date_column`, `retailer_column`,
+`supplier_column`, `product_column` or any other column key) from either config layout.
+dbt deprecates custom top-level config keys; this lets models move the keys under
+`meta.columns` without any reader changing.
+
+## Arguments
+
+- `name`: the config key, for example `timestamp_column`
+- `default` (optional): returned when neither layout sets the key
+- `required` (optional, default `false`): raise a compiler error at execution time when
+  the key is missing. Parsing never raises.
+
+## Resolution order
+
+1. `config.<name>` (top level)
+2. `config.meta.columns.<name>`
+3. `default`
+
+The top level wins when both are set, so existing models resolve exactly as before.
+
+## Usage Example
+
+```yaml
+{% raw %}
+config:
+  timestamp_column: loaded_timestamp        # either here
+  meta:
+    columns:
+      timestamp_column: loaded_timestamp    # or here
+      date_column: day_date
+{% endraw %}
+```
+
+```sql
+{% raw %}
+{% set date_column = dbt_macro_polo.get_column_config('date_column', 'day_date') %}
+{% set timestamp_column = dbt_macro_polo.get_column_config('timestamp_column', required=true) %}
+{% endraw %}
+```
+
+`warehouse_optimiser` reads `timestamp_column` through this macro.
+
+{% enddocs %}
+
 {% docs get_cache_value %}
 
 # get_cache_value ([source](macros/utility/get_cache_value.sql))

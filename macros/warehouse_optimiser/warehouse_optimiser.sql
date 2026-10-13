@@ -7,7 +7,8 @@
     {# Initialise macro context #}
     {% set macro_ctx = dbt_macro_polo.create_macro_context('warehouse_optimiser') %}
     {% set model_id = macro_ctx.model_id %}
-    {% set timestamp_column = model.config.get('timestamp_column', 'loaded_timestamp') %}
+    {# Top-level timestamp_column or meta.columns.timestamp_column. #}
+    {% set timestamp_column = dbt_macro_polo.get_column_config('timestamp_column', 'loaded_timestamp') %}
     {% set macro_polo = var('macro_polo', {}) %}
     {% set is_incremental = model.config.get('materialized', 'undefined') == 'incremental' %}
     {% set is_delete_insert = model.config.get('incremental_strategy', 'undefined') == 'delete+insert' %}

@@ -15,6 +15,7 @@ https://github.com/user-attachments/assets/bc16e27f-84f4-4ec5-b9a0-c0cf2944201f
 - [Installation](#installation)
 - [Macro Collection](#macro-collection)
   - [allocate_warehouse](#allocate_warehouse)
+  - [get_column_config](#get_column_config)
   - [get_max_timestamp](#get_max_timestamp)
   - [warehouse_optimiser](#warehouse_optimiser)
 <!-- - [Contributing](#contributing-) -->
@@ -131,6 +132,31 @@ config:
 ```
 
 [View Full Documentation →](/macros/allocate_warehouse/schema.md)
+</details>
+
+### get_column_config
+
+> Reads a model's column attribute (`timestamp_column`, `date_column`, `retailer_column`, ...) from the top-level config or from `config.meta.columns`, so models can move these keys under `meta`. The top level wins when both are set.
+
+<details>
+<summary><b>Click to expand configuration & usage details</b></summary>
+
+#### Configuration
+```yaml
+config:
+  meta:
+    columns:
+      timestamp_column: loaded_timestamp  # or config.timestamp_column
+      date_column: day_date
+```
+
+#### Usage
+```sql
+{% set date_column = dbt_macro_polo.get_column_config('date_column', 'day_date') %}
+{% set timestamp_column = dbt_macro_polo.get_column_config('timestamp_column', required=true) %}
+```
+
+[View Full Documentation →](/macros/utility/schema.md)
 </details>
 
 ### get_max_timestamp
