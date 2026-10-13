@@ -10,12 +10,13 @@
               timestamp_column: loaded_timestamp   # nested under meta.columns
 
     dbt deprecates custom top-level config keys, so models can move these keys
-    under meta.columns without any reader changing. The top level wins when both
-    are set, so existing models resolve exactly as before.
+    under meta.columns without any reader changing. A top-level key that is set,
+    even to an empty value, wins and is returned as set, so existing models
+    resolve exactly as before. Under meta only meta.columns.<key> is read.
 
-    Returns `default` when neither layout sets the key. With required=true a
-    missing key raises at execution time; parsing never raises, because dbt has
-    not merged the model's YAML config into it yet.
+    Returns `default` when neither layout sets the key, and always while parsing:
+    dbt's parse-time config returns '' for every key. With required=true a missing
+    or empty key raises at execution time; parsing never raises.
 --#}
 
 {% macro get_column_config(name, default=none, required=false) %}
@@ -23,8 +24,17 @@
 {% endmacro %}
 
 {% macro default__get_column_config(name, default=none, required=false) %}
-    {%- set meta_columns = (config.get('meta') or {}).get('columns') or {} -%}
-    {%- set value = config.get(name) or meta_columns.get(name) or default -%}
+    {%- set unset = '__macro_polo_unset__' -%}
+    {%- set value = default -%}
+    {%- if execute -%}
+        {%- set top_level = config.get(name, unset) -%}
+        {%- set meta_columns = (config.get('meta') or {}).get('columns') or {} -%}
+        {%- if top_level != unset -%}
+            {%- set value = top_level -%}
+        {%- elif name in meta_columns -%}
+            {%- set value = meta_columns[name] -%}
+        {%- endif -%}
+    {%- endif -%}
     {%- if required and not value and execute -%}
         {{ exceptions.raise_compiler_error(
             "Macro Polo: " ~ name ~ " must be set in config or config.meta.columns for " ~ model.unique_id

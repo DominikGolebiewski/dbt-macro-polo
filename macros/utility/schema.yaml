@@ -18,8 +18,8 @@ macros:
         type: any
         description: Value returned when neither config layout sets the key
       - name: required
-        type: boolean
-        description: Raise a compiler error at execution time when the key is missing
+        type: bool
+        description: Raise a compiler error at execution time when the key is missing or empty
 
   - name: get_cache_value
     description: '{{ doc("get_cache_value") }}'

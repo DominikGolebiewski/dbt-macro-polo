@@ -96,6 +96,23 @@ class GetColumnConfigTests(unittest.TestCase):
                 self.assertIsNone(resolve("date_column"))
                 self.assertEqual(resolve("date_column", "day_date"), "day_date")
 
+    def test_a_set_top_level_key_is_returned_as_set_even_when_empty(self):
+        # Parity with the former model.config.get(key, default): a key that is present
+        # is not replaced by meta.columns or by the default.
+        for empty in ("", None):
+            with self.subTest(value=empty):
+                config = {"timestamp_column": empty, "meta": {"columns": {"timestamp_column": "nested"}}}
+                self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), empty)
+
+    def test_only_meta_columns_is_read_under_meta(self):
+        config = {"meta": {"timestamp_column": "not_read"}}
+        self.assertEqual(column_config(config)("timestamp_column", "loaded_timestamp"), "loaded_timestamp")
+
+    def test_parsing_returns_the_default(self):
+        # dbt's parse-time config answers '' for every key.
+        parse_config = {"timestamp_column": "", "meta": ""}
+        self.assertEqual(column_config(parse_config, execute=False)("timestamp_column", "loaded_timestamp"), "loaded_timestamp")
+
     def test_other_keys_do_not_leak_into_the_requested_one(self):
         config = {"date_column": "day_date", "meta": {"columns": {"retailer_column": "organisation_id"}}}
         resolve = column_config(config)

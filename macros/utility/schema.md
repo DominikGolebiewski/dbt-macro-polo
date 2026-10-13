@@ -58,7 +58,7 @@ dbt deprecates custom top-level config keys; this lets models move the keys unde
 - `name`: the config key, for example `timestamp_column`
 - `default` (optional): returned when neither layout sets the key
 - `required` (optional, default `false`): raise a compiler error at execution time when
-  the key is missing. Parsing never raises.
+  the key is missing or empty. Parsing never raises.
 
 ## Resolution order
 
@@ -66,7 +66,10 @@ dbt deprecates custom top-level config keys; this lets models move the keys unde
 2. `config.meta.columns.<name>`
 3. `default`
 
-The top level wins when both are set, so existing models resolve exactly as before.
+A top-level key that is set, even to an empty value, wins and is returned as set, so
+existing models resolve exactly as before. Under `meta` only `meta.columns.<key>` is read,
+not `meta.<key>`. While parsing, dbt's config returns `''` for every key, so the macro
+returns `default`.
 
 ## Usage Example
 
