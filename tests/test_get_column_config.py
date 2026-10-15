@@ -226,5 +226,36 @@ class WarehouseOptimiserTimestampColumnTests(unittest.TestCase):
         self.assertEqual(self.probed_timestamp_column({}), ["loaded_timestamp"])
 
 
+class LoggingTests(unittest.TestCase):
+    """default__logging pads short messages with dots and clamps padding at 0 when > 80 chars."""
+
+    def render_log(self, **kwargs):
+        logged = []
+        macro = load_macro(
+            "logging/logging.sql",
+            "default__logging",
+            {
+                "execute": True,
+                "var": lambda name, default=None: default,
+                "log": lambda msg, info=False: logged.append(msg) or "",
+                "exceptions": SimpleNamespace(
+                    warn=lambda msg: logged.append(msg) or "",
+                    raise_compiler_error=raise_compiler_error,
+                ),
+            },
+        )
+        call(macro, **kwargs)
+        return logged
+
+    def test_message_over_80_chars_clamps_dot_padding_to_zero(self):
+        logged = self.render_log(
+            message="Allocated warehouse",
+            model_id="account_82166_staging.output_aia_fact_day_depot_sku",
+            status="DEVELOPER_XS",
+        )
+        self.assertEqual(len(logged), 1)
+        self.assertIn("account_82166_staging.output_aia_fact_day_depot_sku\x1b[0m [\x1b[34mDEVELOPER_XS\x1b[0m]", logged[0])
+
+
 if __name__ == "__main__":
     unittest.main()
