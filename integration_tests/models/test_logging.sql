@@ -43,6 +43,15 @@
         'model_id': none,
         'status': none,
         'expected': ''
+    },
+    {
+        'name': 'Message exceeding 80 characters does not multiply by negative count',
+        'message': 'Allocated warehouse',
+        'level': 'INFO',
+        'macro_name': none,
+        'model_id': 'account_82166_staging.output_aia_fact_day_depot_sku',
+        'status': 'DEVELOPER_XS',
+        'expected': ''
     }
 ] %}
 

@@ -14,20 +14,20 @@
             
             {# Simplified colour and status mapping #}
             {% set config = {
-                'DEBUG': {'color': '\033[90m', 'status': 'DEBUG', 'log_fn': 'log'},
-                'INFO': {'color': '\033[34m', 'status': 'SUCCESS', 'log_fn': 'log'},
-                'WARN': {'color': '\033[38;5;214m', 'status': 'WARNING', 'log_fn': 'warn'},
-                'ERROR': {'color': '\033[31m', 'status': 'ERROR', 'log_fn': 'error'}
+                'DEBUG': {'color': '\u001b[90m', 'status': 'DEBUG', 'log_fn': 'log'},
+                'INFO': {'color': '\u001b[34m', 'status': 'SUCCESS', 'log_fn': 'log'},
+                'WARN': {'color': '\u001b[38;5;214m', 'status': 'WARNING', 'log_fn': 'warn'},
+                'ERROR': {'color': '\u001b[31m', 'status': 'ERROR', 'log_fn': 'error'}
             } %}
             
-            {% set reset = '\033[0m' %}
+            {% set reset = '\u001b[0m' %}
             {% set level_config = config[level] %}
             {% set status = status if status is not none else level_config['status'] %}
             
             {# Simplified message construction #}
             {% set prefix = "Macro Polo: " %}
             {% set parts = [
-                level_config['color'] ~ prefix ~ reset if level != 'DEBUG' else '\033[90m' ~ prefix,
+                level_config['color'] ~ prefix ~ reset if level != 'DEBUG' else '\u001b[90m' ~ prefix,
                 macro_name ~ " • " if macro_name is not none else "",
                 message,
                 " • " ~ model_id if model_id is not none else "",
@@ -37,8 +37,8 @@
             
             {# Add status indicator for INFO and WARN levels #}
             {% if level in ['INFO', 'WARN'] %}
-                {% set message_length = (base_message | replace('\033[90m', '') | replace('\033[34m', '') | replace('\033[38;5;214m', '') | replace('\033[31m', '') | replace('\033[0m', '') | length) %}
-                {% set dots = "." * (80 - message_length) %}
+                {% set message_length = (base_message | replace('\u001b[90m', '') | replace('\u001b[34m', '') | replace('\u001b[38;5;214m', '') | replace('\u001b[31m', '') | replace('\u001b[0m', '') | length) %}
+                {% set dots = "." * ([80 - message_length, 0] | max) %}
                 {% set base_message = base_message ~ dots ~ " [" ~ level_config['color'] ~ status ~ reset ~ "]" %}
             {% endif %}
             
